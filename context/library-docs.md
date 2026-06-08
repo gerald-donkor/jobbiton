@@ -36,35 +36,20 @@ Two separate instances — never mix them:
 
 ```typescript
 // lib/insforge-client.ts — browser context only
-import { createBrowserClient } from "@insforge/ssr";
+import { createBrowserClient } from "@insforge/sdk/ssr";
 
-export const insforge = createBrowserClient(
-  process.env.NEXT_PUBLIC_INSFORGE_URL!,
-  process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
-);
+export const insforge = createBrowserClient();
 ```
 
 ```typescript
 // lib/insforge-server.ts — server context only
-import { createServerClient } from "@insforge/ssr";
+import { createServerClient } from "@insforge/sdk/ssr";
 import { cookies } from "next/headers";
 
 export const createInsforgeServer = async () => {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_INSFORGE_URL!,
-    process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
+  return createServerClient({
+    cookies: await cookies(),
+  });
 };
 ```
 
@@ -74,6 +59,17 @@ export const createInsforgeServer = async () => {
 - Server client — Server Components, API routes, Server Actions, agent functions
 - Never use browser client in server context
 - Never use server client in browser context
+
+### OAuth in This App
+
+OAuth is server-owned so protected Server Components and Proxy can read durable InsForge cookies.
+
+- `GET /api/auth/oauth/start?provider=google|github` starts OAuth and stores the PKCE verifier in an httpOnly cookie.
+- `GET /auth/callback` exchanges `insforge_code` with InsForge in server mode.
+- Callback must call `setAuthCookies(response.cookies, { accessToken, refreshToken })` when exchange succeeds.
+- Treat a missing `refreshToken` from server-mode OAuth exchange as an auth failure; access-token-only cookies are not durable enough for protected server-rendered routes.
+- Successful OAuth redirects to `/profile` for onboarding/profile setup.
+- Client components should navigate to `/api/auth/oauth/start?...`; do not call `signInWithOAuth()` directly for this app flow.
 
 ---
 
@@ -85,7 +81,7 @@ const insforge = await createInsforgeServer();
 const {
   data: { user },
   error,
-} = await insforge.auth.getUser();
+} = await insforge.auth.getCurrentUser();
 if (!user) redirect("/login");
 ```
 

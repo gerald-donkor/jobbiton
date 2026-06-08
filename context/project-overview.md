@@ -46,13 +46,13 @@ Full width layout on all pages. No sidebar.
 ### Homepage
 
 - Hero section
-- Logged in users → redirect to dashboard
+- Logged in users → redirect to profile setup until profile completion exists
 - Logged out users → redirect to login
 
 ### Onboarding
 
 - User signs up via InsForge auth (Google or GitHub OAuth)
-- On login → redirect to /dashboard
+- On login → redirect to /profile for onboarding/profile setup
 - Dashboard shows incomplete profile banner if profile not finished
 
 ### Profile Setup
@@ -163,7 +163,7 @@ Full width layout on all pages. No sidebar.
 - Homepage with hero, how it works, features, footer
 - Top navbar — Dashboard, Find Jobs, Profile
 - InsForge authentication (Google + GitHub OAuth)
-- Redirect to dashboard after login
+- Redirect to profile setup after login
 - Profile form with all standard resume fields
 - Resume PDF upload with optional profile auto-fill via GPT-4o
 - Resume PDF generation from profile data using GPT-4o

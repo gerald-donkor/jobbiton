@@ -24,7 +24,7 @@ Build the complete homepage UI.
 
 **Logic:**
 
-- Get Started and Start for free → /login if not authenticated, /dashboard if authenticated
+- Get Started and Start for free → /login if not authenticated, /profile if authenticated during onboarding
 
 ---
 
@@ -43,7 +43,7 @@ InsForge authentication — Google and GitHub OAuth.
 - OAuth callback handler
 - Session management
 - Middleware protecting /dashboard, /profile, /find-jobs, /find-jobs/[id]
-- After login → redirect to /dashboard
+- After login → redirect to /profile for onboarding/profile setup
 
 ---
 

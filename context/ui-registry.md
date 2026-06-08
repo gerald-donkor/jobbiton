@@ -95,17 +95,17 @@ Last updated: 2026-06-08
 | Property         | Class                                                       |
 | ---------------- | ----------------------------------------------------------- |
 | Background       | none                                                        |
-| Border           | `border-b border-border`, active `border-l-2 border-accent` |
+| Border           | `border-b border-border`, active `border-l-2 border-success` |
 | Border radius    | none                                                        |
 | Text — primary   | `text-text-slate text-[22px] font-semibold leading-8`       |
 | Text — secondary | `text-text-secondary text-[20px] font-normal leading-8`     |
 | Spacing          | `px-8 py-9 md:px-16 pl-8`                                   |
 | Hover state      | none                                                        |
 | Shadow           | none                                                        |
-| Accent usage     | `border-accent` for selected feature rail                   |
+| Accent usage     | `border-success` for selected feature rail                  |
 
 **Pattern notes:**
-Feature rows are full-width bordered rows, not cards. The active row uses a slim accent rail like the design reference.
+Feature rows are full-width bordered rows, not cards. The active row uses a slim success-green rail like the design reference.
 
 ### Homepage Product Feature Sections
 
@@ -209,3 +209,63 @@ Last updated: 2026-06-08
 
 **Pattern notes:**
 Use shared global button classes for every landing-page CTA instead of repeating raw utility strings. The correct landing-page button direction is compact 38px-tall charcoal primary buttons with white text, a slightly lighter indigo-charcoal hover, and compact bright-surface secondary buttons with subtle borders.
+
+### Auth Login Card
+
+File: components/auth/LoginForm.tsx
+Last updated: 2026-06-08
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | `bg-surface` shell, `soft-gradient-panel` left pane                   |
+| Border           | `border border-border`, pane divider `md:border-r`, error alert `border-error` |
+| Border radius    | `rounded-xl` shell, `rounded-md` controls                             |
+| Text — primary   | `text-text-slate text-[44px] md:text-[48px] font-bold leading-[0.98]`, right title `text-text-primary text-[24px] font-semibold leading-8` |
+| Text — secondary | `text-text-secondary text-[15px] leading-6`, captions `text-[12px] leading-5`, alert `text-error text-[13px] font-medium leading-5` |
+| Spacing          | shell `max-w-[760px]`, left `px-8 py-8 md:px-10`, right `px-8 py-10`, alert `px-4 py-3`, button stack `space-y-3` |
+| Hover state      | `hover:border-accent hover:text-text-primary`                         |
+| Shadow           | `shadow-[0_14px_30px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)]` |
+| Accent usage     | `text-accent` for security/provider icons and provider button hover   |
+
+**Pattern notes:**
+Auth entry uses a centered split panel beneath the normal navbar. The left pane carries the large sign-in headline on the shared token gradient; the right pane stays white and focused on provider selection. Provider buttons remain white, bordered, compact, and full width with restrained text sizing.
+
+### Auth Sign Out Button
+
+File: components/auth/SignOutButton.tsx
+Last updated: 2026-06-08
+
+| Property         | Class                                            |
+| ---------------- | ------------------------------------------------ |
+| Background       | `.button-secondary`                              |
+| Border           | `.button-secondary` token border                 |
+| Border radius    | `border-radius: var(--radius-md)`                |
+| Text — primary   | `.button-secondary { color: var(--color-text-slate) }` |
+| Text — secondary | none                                             |
+| Spacing          | `.button-primary-sm`                             |
+| Hover state      | `.button-secondary:hover`                        |
+| Shadow           | `.button-secondary` subtle surface shadow        |
+| Accent usage     | disabled uses `disabled:opacity-60`; focus/hover inherited from shared button styles |
+
+**Pattern notes:**
+Auth sign-out actions reuse the shared secondary button styling rather than introducing a separate destructive/auth-specific button pattern. Loading text stays inside the same fixed compact button shell.
+
+### Protected Auth Shell
+
+File: components/protected/ProtectedShell.tsx
+Last updated: 2026-06-08
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | `bg-background` content area, `bg-surface` panel                      |
+| Border           | `border-x border-border` page frame, `border border-border` panel     |
+| Border radius    | `rounded-md`                                                          |
+| Text — primary   | `text-text-primary text-[32px] font-semibold leading-10`              |
+| Text — secondary | `text-text-secondary text-[15px] leading-6`                           |
+| Spacing          | `px-6 py-16` page area, panel `px-6 py-7 sm:px-8`                     |
+| Hover state      | sign-out uses shared `.button-secondary`                              |
+| Shadow           | `shadow-[0_20px_50px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)]` |
+| Accent usage     | `text-accent` for authenticated eyebrow                               |
+
+**Pattern notes:**
+Temporary protected-route shells keep the existing navbar/footer frame and use one compact status panel. Future full dashboard/profile/jobs pages should replace the panel content while retaining the page-frame rhythm unless the page-specific design requires a denser operational layout.
