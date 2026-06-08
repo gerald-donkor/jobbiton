@@ -1,47 +1,60 @@
-# Memory — Homepage Landing Page
+# Memory — Foundation Auth Session
 
-Last updated: 2026-06-08 15:20 Africa/Accra
+Last updated: 2026-06-08 18:09 GMT
 
 ## What was built
 
-- Replaced the placeholder homepage with a full landing page in [app/page.tsx](/home/gdk26/Documents/nextjs/jobbiton/app/page.tsx) using dedicated layout and homepage components.
-- Added homepage UI components in `components/homepage/`: `Hero.tsx`, `ProductFeatures.tsx`, `FeatureText.tsx`, `Testimonial.tsx`, and `FinalCta.tsx`.
-- Added shared layout components in `components/layout/`: `Navbar.tsx` and `Footer.tsx`.
-- Updated [app/layout.tsx](/home/gdk26/Documents/nextjs/jobbiton/app/layout.tsx) metadata for JobPilot.
-- Extended [app/globals.css](/home/gdk26/Documents/nextjs/jobbiton/app/globals.css) with landing-page helper styles: `soft-gradient-panel`, `diagonal-band`, shared button styles, and shared supporting text tone.
-- Updated [context/ui-registry.md](/home/gdk26/Documents/nextjs/jobbiton/context/ui-registry.md) with the homepage component patterns and shared button/supporting-text patterns.
-- Updated [context/progress-tracker.md](/home/gdk26/Documents/nextjs/jobbiton/context/progress-tracker.md) to mark `01 Homepage` complete and document the homepage styling decisions and fixes.
+- Completed Phase 1 `02 Auth` with InsForge Google/GitHub OAuth.
+- Installed `@insforge/sdk` and created InsForge helpers in `lib/insforge-client.ts`, `lib/insforge-server.ts`, and `lib/auth.ts`.
+- Added server-owned OAuth routes:
+  - `app/api/auth/oauth/start/route.ts` starts Google/GitHub OAuth and stores the PKCE verifier in an httpOnly cookie.
+  - `app/auth/callback/route.ts` exchanges `insforge_code` in server mode and sets InsForge access + refresh cookies before redirecting to `/profile`.
+  - `app/api/auth/refresh/route.ts` exposes the InsForge refresh handler.
+  - `app/api/auth/session/route.ts` now only clears auth cookies on sign-out.
+- Added `/login` UI in `app/login/page.tsx` and `components/auth/LoginForm.tsx`, matching the supplied split-panel auth design.
+- Added protected placeholder pages for `/dashboard`, `/profile`, `/find-jobs`, and `/find-jobs/[id]` using `components/protected/ProtectedShell.tsx` and `components/auth/SignOutButton.tsx`.
+- Added Next 16 `proxy.ts` route protection for `/dashboard`, `/profile`, `/find-jobs`, and `/find-jobs/[id]`.
+- Updated homepage `components/homepage/FeatureText.tsx` so active feature rails use `border-success` green instead of accent blue/purple.
+- Updated `context/project-overview.md`, `context/build-plan.md`, `context/architecture.md`, `context/library-docs.md`, `context/progress-tracker.md`, and `context/ui-registry.md` to reflect auth behavior and UI patterns.
 
 ## Decisions made
 
-- Homepage is built as an App Router Server Component using `next/link` and `next/image`; no client component was needed.
-- Existing `public/` assets are the source of truth for the landing-page visual previews: logo, dashboard preview, jobs list, agent log, and avatar.
-- Landing-page CTA buttons are driven by shared global classes in `app/globals.css` instead of repeated inline utilities.
-- The correct landing-page primary button direction is compact charcoal with white text and a subtle indigo-charcoal hover, based on the reference screenshots.
-- Final CTA supporting copy and footer navigation share one global text tone class: `.supporting-text-tone`.
+- OAuth is server-owned for this app. Client components navigate to `/api/auth/oauth/start?provider=...`; they do not call `signInWithOAuth()` directly.
+- Successful auth redirects to `/profile` for onboarding/profile setup, not `/dashboard`.
+- The OAuth callback must set both InsForge access and refresh cookies. Missing `refreshToken` is treated as an auth failure because access-token-only sessions are not durable for protected server-rendered routes.
+- Next.js 16 route protection uses `proxy.ts`, not legacy `middleware.ts`.
+- `.env.local` should use:
+  - `NEXT_PUBLIC_INSFORGE_URL=https://c5g2jgr3.us-east.insforge.app`
+  - `NEXT_PUBLIC_INSFORGE_ANON_KEY=<anon JWT>`
+- Auth UI uses the split-panel login pattern recorded in `ui-registry.md`; temporary protected pages use the compact protected auth shell pattern.
 
 ## Problems solved
 
-- Fixed homepage CTA buttons that were rendering too dark and visually off from the design by replacing ad hoc classes with shared global button classes.
-- Corrected the primary button hover from a generic dark hover to a restrained indigo-charcoal hover that matches the screenshot reference.
-- Fixed footer/navigation text drift by making the final CTA supporting sentence and footer links share the same `.supporting-text-tone` class.
-- Resolved a stale/corrupted `.next/dev` Turbopack cache during preview verification by clearing generated dev artifacts only; source files were not affected.
-- Verified production build once with network approval when `next/font/google` needed to fetch Inter.
+- Fixed OAuth start failure caused by `NEXT_PUBLIC_INSFORGE_URL` being set to an API-key-shaped value instead of the InsForge backend URL.
+- Fixed post-login loop back to `/login` by moving OAuth callback/session persistence to server-owned routes that set SSR-readable InsForge cookies.
+- Fixed review findings:
+  - Docs now match `/profile` onboarding redirect.
+  - The custom browser-token-to-cookie bridge was replaced with server-side PKCE/code exchange.
+  - Login error messages now distinguish OAuth start, provider callback, and session persistence failures.
+- Removed stale `AuthCallback` UI/page references from the UI registry after replacing the callback screen with a route handler.
+- Corrected the active homepage feature rail color to success green and updated the registry.
 
 ## Current state
 
-- Homepage feature `01 Homepage` is complete.
+- `01 Homepage` and `02 Auth` are marked complete.
 - `npm run lint` passes.
-- Homepage component structure follows project rules, including the one-component-per-file rule.
-- `ui-registry.md` and `progress-tracker.md` are up to date with the current homepage patterns.
-- Build can still require network approval in this environment because `next/font/google` fetches Inter during `npm run build`.
+- `npm run build` passes when network access is approved for Google Fonts.
+- In restricted sandbox mode, `npm run build` still fails on `next/font/google` fetching Inter; this is an environment/network issue, not a source error.
+- The workspace is dirty with intentional feature changes plus pre-existing/untracked files including `.claude/` and `.mcp.json`.
+- Dev server should be restarted before testing auth because `.env.local` and route handlers changed.
 
 ## Next session starts with
 
-- Begin `02 Auth` from `context/build-plan.md`.
-- Before implementing, re-read the required context order from `AGENTS.md`, then inspect the current app structure and any installed skills relevant to auth/InsForge.
+- Begin Phase 1 `03 PostHog Initialization` from `context/build-plan.md`.
+- Before coding, re-read the required context files from `AGENTS.md`.
+- Add PostHog browser/server clients, initialize PostHog in the root app layout, and wire identify/reset around the completed auth flow.
 
 ## Open questions
 
-- None for the homepage itself.
-- Auth implementation has not started yet.
+- Confirm whether the product should permanently keep post-login onboarding at `/profile`, or later switch completed-profile users to `/dashboard`.
+- Confirm OAuth redirect URLs are configured in InsForge for the active dev port, especially `http://localhost:3000/auth/callback` or the actual port being used.
