@@ -104,3 +104,122 @@ select,
 textarea {
   font: inherit;
 }
+
+.soft-gradient-panel {
+  background:
+    radial-gradient(circle at 35% 15%, color-mix(in srgb, var(--color-accent-light) 68%, transparent) 0, transparent 34%),
+    radial-gradient(circle at 70% 10%, color-mix(in srgb, var(--color-info-light) 78%, transparent) 0, transparent 42%),
+    linear-gradient(115deg, var(--color-surface) 0%, var(--color-accent-muted) 42%, var(--color-info-lightest) 100%);
+}
+
+.diagonal-band {
+  background:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0,
+      transparent 5px,
+      color-mix(in srgb, var(--color-border) 36%, transparent) 5px,
+      color-mix(in srgb, var(--color-border) 36%, transparent) 6px
+    ),
+    var(--color-surface);
+}
+
+.supporting-text-tone {
+  color: var(--color-text-secondary);
+}
+
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--color-surface) 12%, var(--color-overlay) 88%);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-text-darker) 72%, var(--color-overlay) 28%) 0%,
+    var(--color-overlay) 100%
+  );
+  color: var(--color-surface);
+  box-shadow:
+    0px 8px 18px color-mix(in srgb, var(--color-overlay) 14%, transparent),
+    0px 1px 2px color-mix(in srgb, var(--color-overlay) 28%, transparent),
+    inset 0px 1px 0px color-mix(in srgb, var(--color-surface) 12%, transparent);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.button-primary:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 16%, var(--color-overlay-dark) 84%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent-dark) 12%, var(--color-text-primary) 88%) 0%,
+    color-mix(in srgb, var(--color-accent) 9%, var(--color-overlay-dark) 91%) 100%
+  );
+  color: var(--color-surface);
+  box-shadow:
+    0px 10px 24px color-mix(in srgb, var(--color-accent-dark) 10%, transparent),
+    inset 0px 1px 0px color-mix(in srgb, var(--color-surface) 12%, transparent);
+}
+
+.button-primary:focus-visible,
+.button-secondary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.button-primary-sm {
+  min-height: 38px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.button-primary-lg,
+.button-secondary-lg {
+  min-height: 38px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--color-border) 100%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  color: var(--color-text-slate);
+  box-shadow:
+    0px 4px 12px color-mix(in srgb, var(--color-overlay) 6%, transparent),
+    inset 0px 1px 0px color-mix(in srgb, var(--color-surface) 88%, transparent);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.button-secondary:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 22%, var(--color-border) 78%);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: 0px 8px 18px color-mix(in srgb, var(--color-overlay) 8%, transparent);
+}
+
+.button-caret {
+  color: var(--color-surface);
+  font-size: 10px;
+  line-height: 1;
+}
