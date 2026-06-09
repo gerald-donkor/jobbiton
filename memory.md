@@ -1,60 +1,47 @@
-# Memory — Foundation Auth Session
+# Memory — Foundation Review And Handoff
 
-Last updated: 2026-06-08 18:09 GMT
+Last updated: 2026-06-09 09:47 GMT
 
 ## What was built
 
-- Completed Phase 1 `02 Auth` with InsForge Google/GitHub OAuth.
-- Installed `@insforge/sdk` and created InsForge helpers in `lib/insforge-client.ts`, `lib/insforge-server.ts`, and `lib/auth.ts`.
-- Added server-owned OAuth routes:
-  - `app/api/auth/oauth/start/route.ts` starts Google/GitHub OAuth and stores the PKCE verifier in an httpOnly cookie.
-  - `app/auth/callback/route.ts` exchanges `insforge_code` in server mode and sets InsForge access + refresh cookies before redirecting to `/profile`.
-  - `app/api/auth/refresh/route.ts` exposes the InsForge refresh handler.
-  - `app/api/auth/session/route.ts` now only clears auth cookies on sign-out.
-- Added `/login` UI in `app/login/page.tsx` and `components/auth/LoginForm.tsx`, matching the supplied split-panel auth design.
-- Added protected placeholder pages for `/dashboard`, `/profile`, `/find-jobs`, and `/find-jobs/[id]` using `components/protected/ProtectedShell.tsx` and `components/auth/SignOutButton.tsx`.
-- Added Next 16 `proxy.ts` route protection for `/dashboard`, `/profile`, `/find-jobs`, and `/find-jobs/[id]`.
-- Updated homepage `components/homepage/FeatureText.tsx` so active feature rails use `border-success` green instead of accent blue/purple.
-- Updated `context/project-overview.md`, `context/build-plan.md`, `context/architecture.md`, `context/library-docs.md`, `context/progress-tracker.md`, and `context/ui-registry.md` to reflect auth behavior and UI patterns.
+- Homepage, auth, and protected placeholder shells are present.
+- InsForge OAuth flow exists with `/api/auth/oauth/start`, `/auth/callback`, `/api/auth/session`, `/api/auth/refresh`, and `proxy.ts` protection for `/dashboard`, `/profile`, and `/find-jobs`.
+- PostHog packages are installed and current code contains `instrumentation-client.ts`, `lib/posthog-client.ts`, `lib/posthog-server.ts`, `lib/posthog-events.ts`, and `components/auth/PostHogIdentify.tsx`.
+- JobPilot logo/wordmark links in `components/layout/Navbar.tsx` and `components/layout/Footer.tsx` point to `/`.
+- `proxy.ts` now allows `/` through even when authenticated, so the logo can land on the homepage URL instead of redirecting to `/profile`.
+- `context/progress-tracker.md` and `context/ui-registry.md` were updated for PostHog initialization and homepage logo navigation.
 
 ## Decisions made
 
-- OAuth is server-owned for this app. Client components navigate to `/api/auth/oauth/start?provider=...`; they do not call `signInWithOAuth()` directly.
-- Successful auth redirects to `/profile` for onboarding/profile setup, not `/dashboard`.
-- The OAuth callback must set both InsForge access and refresh cookies. Missing `refreshToken` is treated as an auth failure because access-token-only sessions are not durable for protected server-rendered routes.
-- Next.js 16 route protection uses `proxy.ts`, not legacy `middleware.ts`.
-- `.env.local` should use:
-  - `NEXT_PUBLIC_INSFORGE_URL=https://c5g2jgr3.us-east.insforge.app`
-  - `NEXT_PUBLIC_INSFORGE_ANON_KEY=<anon JWT>`
-- Auth UI uses the split-panel login pattern recorded in `ui-registry.md`; temporary protected pages use the compact protected auth shell pattern.
+- Project standards still define only four allowed PostHog product events: `job_search_started`, `job_found`, `profile_completed`, and `company_researched`.
+- Root homepage navigation should remain available to authenticated users; only `/login` redirects authenticated users to `/profile`.
+- Shared navbar/footer own the JobPilot logo behavior across pages.
 
 ## Problems solved
 
-- Fixed OAuth start failure caused by `NEXT_PUBLIC_INSFORGE_URL` being set to an API-key-shaped value instead of the InsForge backend URL.
-- Fixed post-login loop back to `/login` by moving OAuth callback/session persistence to server-owned routes that set SSR-readable InsForge cookies.
-- Fixed review findings:
-  - Docs now match `/profile` onboarding redirect.
-  - The custom browser-token-to-cookie bridge was replaced with server-side PKCE/code exchange.
-  - Login error messages now distinguish OAuth start, provider callback, and session persistence failures.
-- Removed stale `AuthCallback` UI/page references from the UI registry after replacing the callback screen with a route handler.
-- Corrected the active homepage feature rail color to success green and updated the registry.
+- Clicking the JobPilot logo did not reliably show the homepage because `proxy.ts` redirected authenticated users from `/` to `/profile`. That redirect has been narrowed to `/login`.
+- Turbopack `.next/dev` cache corruption previously caused dev-server 500s; clearing `.next/dev` and restarting fixed it.
+- `npm run build` is blocked in the sandbox because `next/font` needs network access to Google Fonts and unrestricted build escalation was rejected by the reviewer.
 
 ## Current state
 
-- `01 Homepage` and `02 Auth` are marked complete.
 - `npm run lint` passes.
-- `npm run build` passes when network access is approved for Google Fonts.
-- In restricted sandbox mode, `npm run build` still fails on `next/font/google` fetching Inter; this is an environment/network issue, not a source error.
-- The workspace is dirty with intentional feature changes plus pre-existing/untracked files including `.claude/` and `.mcp.json`.
-- Dev server should be restarted before testing auth because `.env.local` and route handlers changed.
+- `npx tsc --noEmit` passes.
+- Local route checks passed after starting dev server:
+  - `http://localhost:3000` returns `200 OK`.
+  - `http://localhost:3000` with an auth cookie returns `200 OK`, not `/profile`.
+  - `/login` with an auth cookie still redirects to `/profile`.
+- Review finding remains unresolved: the user said PostHog had already been initialized by the PostHog Wizard, but the current tree has the wizard's broader event captures removed/overridden and only project-approved typed events remain. Decide whether to restore wizard-generated tracking or keep the stricter project event list.
 
 ## Next session starts with
 
-- Begin Phase 1 `03 PostHog Initialization` from `context/build-plan.md`.
-- Before coding, re-read the required context files from `AGENTS.md`.
-- Add PostHog browser/server clients, initialize PostHog in the root app layout, and wire identify/reset around the completed auth flow.
+1. Decide the PostHog direction:
+   - Restore the wizard's generated auth/CTA events and config if the wizard setup is the desired source of truth.
+   - Or keep the current strict four-event project standard and do not restore wizard-only events.
+2. After that decision, reconcile `context/progress-tracker.md`, `context/ui-registry.md`, and `memory.md` if needed.
+3. Continue with Phase 1, item 04 Database Schema.
 
 ## Open questions
 
-- Confirm whether the product should permanently keep post-login onboarding at `/profile`, or later switch completed-profile users to `/dashboard`.
-- Confirm OAuth redirect URLs are configured in InsForge for the active dev port, especially `http://localhost:3000/auth/callback` or the actual port being used.
+- Should PostHog follow the wizard's generated event set, or the project standards that allow only `job_search_started`, `job_found`, `profile_completed`, and `company_researched`?
+- Should homepage access for authenticated users remain allowed permanently, even though the older project overview said logged-in homepage visits redirect during onboarding?

@@ -155,16 +155,17 @@ textarea {
 }
 
 .button-primary:hover {
-  border-color: color-mix(in srgb, var(--color-accent) 16%, var(--color-overlay-dark) 84%);
+  border-color: color-mix(in srgb, var(--color-info) 24%, var(--color-overlay-dark) 76%);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--color-accent-dark) 12%, var(--color-text-primary) 88%) 0%,
-    color-mix(in srgb, var(--color-accent) 9%, var(--color-overlay-dark) 91%) 100%
+    color-mix(in srgb, var(--color-info-light) 16%, var(--color-text-primary) 84%) 0%,
+    color-mix(in srgb, var(--color-info) 20%, var(--color-overlay-dark) 80%) 100%
   );
   color: var(--color-surface);
   box-shadow:
-    0px 10px 24px color-mix(in srgb, var(--color-accent-dark) 10%, transparent),
-    inset 0px 1px 0px color-mix(in srgb, var(--color-surface) 12%, transparent);
+    0px 10px 24px color-mix(in srgb, var(--color-info) 16%, transparent),
+    0px 0px 0px 1px color-mix(in srgb, var(--color-info-light) 16%, transparent),
+    inset 0px 1px 0px color-mix(in srgb, var(--color-surface) 15%, transparent);
 }
 
 .button-primary:focus-visible,

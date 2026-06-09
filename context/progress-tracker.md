@@ -7,8 +7,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 1 — Foundation
-**Last completed:** 02 Auth
-**Next:** 03 PostHog Initialization
+**Last completed:** 03 PostHog Initialization
+**Next:** 04 Database Schema
 
 ---
 
@@ -18,7 +18,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 - [x] 01 Homepage
 - [x] 02 Auth
-- [ ] 03 PostHog Initialization
+- [x] 03 PostHog Initialization
 - [ ] 04 Database Schema
 
 ### Phase 2 — Profile Page
@@ -72,3 +72,9 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-08 — Recovered OAuth start failure caused by `NEXT_PUBLIC_INSFORGE_URL` being set to an API-key-shaped value instead of the InsForge backend URL; verified Google and GitHub OAuth start return provider URLs.
 - 2026-06-08 — Recovered post-OAuth login loop with server-owned OAuth callback: `/api/auth/oauth/start` stores PKCE, `/auth/callback` exchanges the code and sets InsForge access + refresh cookies before routing to `/profile`.
 - 2026-06-08 — Homepage active feature rail corrected from accent blue/purple to success green to match the supplied reference image and re-imprinted in `ui-registry.md`.
+- 2026-06-08 — Shared charcoal primary button hover was retuned to show a more visible light-blue tint across navbar, hero, and final CTA buttons, and the updated hover pattern was re-imprinted in `ui-registry.md`.
+- 2026-06-08 — Shared charcoal primary button hover was refined again to be darker and only slightly bluish after the brighter hover overshot the reference feel; `ui-registry.md` now treats it as a restrained bluish-charcoal lift.
+- 2026-06-08 — Shared charcoal primary button hover was tuned one more step toward a darker blue-charcoal mix so the hover reads more bluish without becoming light.
+- 2026-06-09 — PostHog initialization completed with `lib/posthog-client.ts`, `lib/posthog-server.ts`, typed allowed-event definitions, client instrumentation, authenticated user identification, and logout reset. Unsupported wizard-added auth/CTA event names were removed to keep the project limited to `job_search_started`, `job_found`, `profile_completed`, and `company_researched`.
+- 2026-06-09 — Shared navbar brand link was made explicit across pages: the full JobPilot logo/wordmark anchor points to `/` and uses a stable inline-flex click target.
+- 2026-06-09 — Root homepage navigation was corrected by allowing `/` through `proxy.ts` even when authenticated; JobPilot logo/wordmark links in navbar and footer point to `/` so they land on the homescreen URL.

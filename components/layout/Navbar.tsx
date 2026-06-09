@@ -11,7 +11,11 @@ export function Navbar() {
   return (
     <header className="border-b border-border bg-surface">
       <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-6">
-        <Link href="/" aria-label="JobPilot home">
+        <Link
+          href="/"
+          aria-label="JobPilot home"
+          className="inline-flex items-center"
+        >
           <Image
             src="/logo.png"
             alt="JobPilot"
