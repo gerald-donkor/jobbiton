@@ -7,8 +7,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 2 — Profile Page
-**Last completed:** 05 Profile Page — Full UI
-**Next:** 06 Profile Save Logic
+**Last completed:** 06 Profile Save Logic
+**Next:** 07 AI Profile Extraction from Resume
 
 ---
 
@@ -24,7 +24,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 2 — Profile Page
 
 - [x] 05 Profile Page — Full UI
-- [ ] 06 Profile Save Logic
+- [x] 06 Profile Save Logic
 - [ ] 07 AI Profile Extraction from Resume
 - [ ] 08 Resume PDF Generation from Profile
 
@@ -83,3 +83,13 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-09 — Protected navbar can now receive `activeHref` and `showCta` props, allowing profile UI to match the active navigation state without changing homepage CTA behavior.
 - 2026-06-09 — Auth review fix completed: homepage CTAs now reflect logged-in state, `/profile` redirects logged-out users to `/login?next=/profile`, OAuth start preserves the safe protected `next` path, and callback redirects to that destination after setting InsForge auth cookies.
 - 2026-06-09 — Profile top viewport visually corrected to match `Screenshot_20260609_130730.png`: retained full navbar with CTA, narrowed profile column, orange attention state, purple completion ring, Connected Accounts card, and updated Resume upload copy/style.
+- 2026-06-09 — Profile Save Logic completed with a `saveProfile` server action, private `resumes` bucket PDF upload at `{user_id}/resume.pdf`, profile upsert, app-calculated completion state, `/profile` revalidation, prefilled return visits, and `profile_completed` PostHog capture on first completion.
+- 2026-06-09 — Profile empty-state correction completed: brand-new profiles no longer count auth email, default experience level, or default work authorization toward completion, so the attention banner starts at 0% and profile fields render empty until the user fills them.
+- 2026-06-09 — Profile save failure resolved: blank constrained dropdown values are stored as `null`, cover letter tone options now match the database constraint, save errors log useful SDK details, and failed submits return the submitted profile snapshot so typed data is preserved.
+- 2026-06-09 — Profile completion banner corrected: any 100% profile now renders the complete-state title and success styling instead of warning/attention language.
+- 2026-06-09 — Profile completion percentage now recalculates from the latest save-action profile snapshot inside `ProfileEditor`, so clearing previously completed fields and saving drops the banner percentage and restores missing-field tags.
+- 2026-06-09 — End-of-session verification: the profile save flow, data preservation after failed saves, 100% complete banner copy, and post-save completion percentage recalculation have all been linted and production-built successfully. `npm run build` still requires network access for `next/font` to fetch Inter.
+- 2026-06-09 — Resume section now shows `Resume uploaded successfully.` in success styling below the upload well whenever a resume is selected or already saved.
+- 2026-06-09 — Global interactive cursor rule added: anchors, enabled buttons, role buttons, file-input labels, and summary controls now receive Tailwind `cursor-pointer` from `app/globals.css`, and future custom controls should preserve the same hand cursor behavior.
+- 2026-06-09 — Resume upload visibility improved: selected PDFs now render an embedded preview immediately through a browser object URL, saved resumes reuse `resume_pdf_url`, and the resume card includes a `View full resume` link.
+- 2026-06-09 — Resume preview review issues resolved: selected PDFs now show pending-upload copy until Save Profile succeeds, saved resume previews use authenticated `/api/resume/current` storage download, and the raw private storage URL is no longer embedded in the UI.
