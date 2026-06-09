@@ -62,11 +62,19 @@ export function LoginForm() {
   const [pendingProvider, setPendingProvider] = useState<AuthProvider | null>(null);
   const callbackError = getAuthErrorMessage(searchParams.get("error"));
   const [errorMessage, setErrorMessage] = useState<string | null>(callbackError);
+  const nextPath = searchParams.get("next");
 
   function handleOAuth(provider: AuthProvider) {
     setPendingProvider(provider);
     setErrorMessage(null);
-    window.location.assign(`/api/auth/oauth/start?provider=${provider}`);
+    const oauthUrl = new URL("/api/auth/oauth/start", window.location.origin);
+    oauthUrl.searchParams.set("provider", provider);
+
+    if (nextPath) {
+      oauthUrl.searchParams.set("next", nextPath);
+    }
+
+    window.location.assign(oauthUrl.toString());
   }
 
   return (

@@ -14,7 +14,7 @@ export function ProtectedShell({ title, userId, userEmail, userName }: Protected
   return (
     <div className="min-h-screen bg-surface">
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
-      <Navbar />
+      <Navbar activeHref={`/${title.toLowerCase().replaceAll(" ", "-")}`} />
       <main className="mx-auto flex min-h-[calc(100vh-224px)] w-full max-w-[1440px] items-center justify-center border-x border-border bg-background px-6 py-16 text-text-primary">
         <section className="w-full max-w-[560px] rounded-md border border-border bg-surface px-6 py-7 shadow-[0_20px_50px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)] sm:px-8">
           <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">Authenticated</p>
