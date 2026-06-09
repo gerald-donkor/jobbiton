@@ -1,7 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export function Hero() {
+type HeroProps = {
+  primaryHref?: string;
+  primaryLabel?: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+};
+
+export function Hero({
+  primaryHref = "/login",
+  primaryLabel = "Get Started",
+  secondaryHref = "/find-jobs",
+  secondaryLabel = "Find Your First Match",
+}: HeroProps) {
   return (
     <section className="px-6 pt-16 md:px-16 md:pt-20">
       <div className="soft-gradient-panel border border-border px-6 pb-0 pt-16 text-center md:px-16 md:pt-20">
@@ -17,16 +29,16 @@ export function Hero() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row">
             <Link
-              href="/login"
+              href={primaryHref}
               className="button-primary button-primary-lg"
             >
-              Get Started <span className="button-caret">▶</span>
+              {primaryLabel} <span className="button-caret">▶</span>
             </Link>
             <Link
-              href="/find-jobs"
+              href={secondaryHref}
               className="button-secondary button-secondary-lg"
             >
-              Find Your First Match
+              {secondaryLabel}
             </Link>
           </div>
         </div>

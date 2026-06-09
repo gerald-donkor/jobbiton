@@ -1,6 +1,18 @@
 import Link from "next/link";
 
-export function FinalCta() {
+type FinalCtaProps = {
+  primaryHref?: string;
+  primaryLabel?: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+};
+
+export function FinalCta({
+  primaryHref = "/login",
+  primaryLabel = "Get Started",
+  secondaryHref = "/find-jobs",
+  secondaryLabel = "Find Your First Match",
+}: FinalCtaProps) {
   return (
     <section>
       <div className="diagonal-band h-24 border-y border-border" aria-hidden="true" />
@@ -14,16 +26,16 @@ export function FinalCta() {
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
-            href="/login"
+            href={primaryHref}
             className="button-primary button-primary-lg"
           >
-            Get Started <span className="button-caret">▶</span>
+            {primaryLabel} <span className="button-caret">▶</span>
           </Link>
           <Link
-            href="/find-jobs"
+            href={secondaryHref}
             className="button-secondary button-secondary-lg"
           >
-            Find Your First Match
+            {secondaryLabel}
           </Link>
         </div>
       </div>

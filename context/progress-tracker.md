@@ -6,9 +6,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** Phase 1 — Foundation
-**Last completed:** 04 Database Schema
-**Next:** 05 Profile Page — Full UI
+**Phase:** Phase 2 — Profile Page
+**Last completed:** 05 Profile Page — Full UI
+**Next:** 06 Profile Save Logic
 
 ---
 
@@ -23,7 +23,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ### Phase 2 — Profile Page
 
-- [ ] 05 Profile Page — Full UI
+- [x] 05 Profile Page — Full UI
 - [ ] 06 Profile Save Logic
 - [ ] 07 AI Profile Extraction from Resume
 - [ ] 08 Resume PDF Generation from Profile
@@ -79,3 +79,7 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-09 — Shared navbar brand link was made explicit across pages: the full JobPilot logo/wordmark anchor points to `/` and uses a stable inline-flex click target.
 - 2026-06-09 — Root homepage navigation was corrected by allowing `/` through `proxy.ts` even when authenticated; JobPilot logo/wordmark links in navbar and footer point to `/` so they land on the homescreen URL.
 - 2026-06-09 — Database schema foundation completed in InsForge with `profiles`, `agent_runs`, `jobs`, and `agent_logs` tables, own-row RLS policies, constraints, indexes, and a private `resumes` storage bucket.
+- 2026-06-09 — Profile Page Full UI completed with mock data only, matching `context/designs/profile.png`; `/profile` now renders the attention banner, resume panel, and complete profile form while leaving save/upload/extract logic for later features.
+- 2026-06-09 — Protected navbar can now receive `activeHref` and `showCta` props, allowing profile UI to match the active navigation state without changing homepage CTA behavior.
+- 2026-06-09 — Auth review fix completed: homepage CTAs now reflect logged-in state, `/profile` redirects logged-out users to `/login?next=/profile`, OAuth start preserves the safe protected `next` path, and callback redirects to that destination after setting InsForge auth cookies.
+- 2026-06-09 — Profile top viewport visually corrected to match `Screenshot_20260609_130730.png`: retained full navbar with CTA, narrowed profile column, orange attention state, purple completion ring, Connected Accounts card, and updated Resume upload copy/style.

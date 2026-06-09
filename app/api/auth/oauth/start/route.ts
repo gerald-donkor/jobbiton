@@ -2,7 +2,9 @@ import { createServerClient } from "@insforge/sdk/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 const pkceCookieName = "jobpilot_pkce_verifier";
+const nextCookieName = "jobpilot_auth_next";
 const providers = ["google", "github"] as const;
+const allowedNextRoutes = ["/dashboard", "/profile", "/find-jobs"];
 
 type AuthProvider = (typeof providers)[number];
 
@@ -16,6 +18,18 @@ function getLoginUrl(request: NextRequest, error: string): URL {
   return loginUrl;
 }
 
+function getSafeNextPath(value: string | null): string {
+  if (!value) {
+    return "/profile";
+  }
+
+  if (allowedNextRoutes.some((route) => value === route || value.startsWith(`${route}/`))) {
+    return value;
+  }
+
+  return "/profile";
+}
+
 export async function GET(request: NextRequest) {
   try {
     const provider = request.nextUrl.searchParams.get("provider");
@@ -24,6 +38,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(getLoginUrl(request, "oauth_provider"));
     }
 
+    const nextPath = getSafeNextPath(request.nextUrl.searchParams.get("next"));
     const insforge = createServerClient();
     const { data, error } = await insforge.auth.signInWithOAuth(provider, {
       redirectTo: new URL("/auth/callback", request.url).toString(),
@@ -44,10 +59,16 @@ export async function GET(request: NextRequest) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
+    response.cookies.set(nextCookieName, nextPath, {
+      httpOnly: true,
+      maxAge: 10 * 60,
+      path: "/auth/callback",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
     return response;
   } catch (error) {
     console.error("[auth/oauth/start]", error);
     return NextResponse.redirect(getLoginUrl(request, "oauth_start"));
   }
 }
-

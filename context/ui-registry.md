@@ -18,6 +18,126 @@ After building any component — update this file with the component name, file 
 
 ## Components
 
+### Profile Page Layout
+
+File: components/profile/ProfilePageContent.tsx
+Last updated: 2026-06-09
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | page `bg-background`, main `bg-background`                          |
+| Border           | main `border-x border-border`                                       |
+| Border radius    | none                                                                |
+| Text — primary   | main `text-text-primary`                                            |
+| Text — secondary | inherited by child cards                                            |
+| Spacing          | main `px-6 py-8`, profile column `gap-6`                            |
+| Hover state      | none                                                                |
+| Shadow           | none                                                                |
+| Accent usage     | none at layout level                                                |
+
+**Pattern notes:**
+Screenshot-matched profile pages keep the full shared navbar visible, use the app background behind a centered profile column, and place profile cards in a `max-w-[692px]` column with `gap-6`. Keep page-level styling unframed; individual profile sections provide the white card shells and shadows.
+
+### Protected Navbar Active State
+
+File: components/layout/Navbar.tsx
+Last updated: 2026-06-09
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | `bg-surface`                                                          |
+| Border           | `border-b border-border`                                              |
+| Border radius    | none                                                                  |
+| Text — primary   | active `text-accent`, inactive `text-text-dark text-[14px] font-medium leading-5` |
+| Text — secondary | none                                                                  |
+| Spacing          | `h-16 px-6 gap-12`, nav links `inline-flex h-16 items-center gap-2`   |
+| Hover state      | inactive `hover:text-accent`                                          |
+| Shadow           | none                                                                  |
+| Accent usage     | active link text and bottom rule `absolute inset-x-0 bottom-0 h-0.5 bg-accent` |
+
+**Pattern notes:**
+Protected pages can pass `activeHref` to the shared navbar to render the active nav item with a token-purple text state and a 2px bottom rule. Nav icons are hidden by default; pass `showNavIcons` only for a design that explicitly includes them. The screenshot-matched profile page uses the plain navbar with the visible `Start for free` CTA.
+
+### Profile Attention Banner
+
+File: components/profile/ProfileAttentionBanner.tsx
+Last updated: 2026-06-09
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | `bg-surface`                                                          |
+| Border           | `border border-border`                                                |
+| Border radius    | `rounded-xl`                                                          |
+| Text — primary   | `text-text-primary text-[14px] font-semibold leading-5`               |
+| Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`               |
+| Spacing          | `px-6 py-6 gap-6`, missing tags `px-2 py-0.5`                         |
+| Hover state      | none                                                                  |
+| Shadow           | `shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
+| Accent usage     | `bg-warning text-warning-foreground` for alert/tags, `.profile-progress-ring` uses accent purple |
+
+**Pattern notes:**
+Profile status banners are white cards with default borders, compact 14px text, orange warning tags, and a purple token CSS progress ring. Do not use colored card fills.
+
+### Profile Connected Accounts Section
+
+File: components/profile/ConnectedAccountsSection.tsx
+Last updated: 2026-06-09
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | `bg-surface`, account row `bg-surface`                                |
+| Border           | card `border border-border`, account row `border border-border`       |
+| Border radius    | `rounded-xl`, LinkedIn icon shell `rounded-md`                        |
+| Text — primary   | `text-text-primary text-[16px] font-semibold leading-6`, row title `text-[14px] font-medium leading-5` |
+| Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`, caption `text-text-muted text-[12px] font-normal leading-4` |
+| Spacing          | card `px-6 py-6`, row `px-4 py-4`, header gap `mt-1`, row gap `mt-4`  |
+| Hover state      | connect button `hover:bg-info-dark`                                   |
+| Shadow           | `shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
+| Accent usage     | `bg-linkedin text-linkedin-foreground`, icon shell `bg-info-lightest` |
+
+**Pattern notes:**
+Connected account cards use the same white profile card shell as Resume and Attention, with a bordered inner row. LinkedIn actions use the project LinkedIn token rather than generic blue.
+
+### Profile Resume Section
+
+File: components/profile/ResumeSection.tsx
+Last updated: 2026-06-09
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | `bg-surface`, upload area `bg-surface-secondary`                      |
+| Border           | card `border border-border`, upload area `border border-dashed border-border-muted` |
+| Border radius    | `rounded-xl`, buttons `rounded-md`                                    |
+| Text — primary   | `text-text-primary text-[16px] font-semibold leading-6`, upload title `text-[14px] font-semibold leading-5` |
+| Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`, upload note `text-text-muted text-[12px] font-normal leading-4` |
+| Spacing          | card `px-6 py-6`, upload `px-6 py-10`, upload gap `mt-4`, footer `border-t border-border pt-6` |
+| Hover state      | select button `hover:border-accent`, generate button `hover:bg-accent-dark` |
+| Shadow           | card shared profile shadow, upload icon/select button subtle token shadows |
+| Accent usage     | upload glyph uses text-secondary, generate button `bg-accent text-accent-foreground` |
+
+**Pattern notes:**
+Resume management UI is a white card with a soft secondary upload well, centered neutral upload icon stack, and screenshot copy that says `PDF format only. Maximum file size 2MB.` The lower generate action remains available below the visible screenshot fold.
+
+### Profile Information Form
+
+File: components/profile/ProfileInformationForm.tsx
+Last updated: 2026-06-09
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | `bg-surface`, work role subpanel `bg-surface-secondary`               |
+| Border           | card `border border-border`, section separators `border-t border-border` |
+| Border radius    | card `rounded-xl`, inputs via `.profile-field` use `var(--radius-md)` |
+| Text — primary   | title `text-text-primary text-[22px] font-semibold leading-8`, section `text-[16px] font-semibold leading-6` |
+| Text — secondary | intro `text-text-secondary text-[13px] font-medium leading-5`, labels `.profile-field` 11px uppercase |
+| Spacing          | card `px-8 py-8`, form `space-y-12`, sections `pt-10`, fields `grid gap-5 md:grid-cols-2` |
+| Hover state      | `.profile-add-button:hover`, save/generate `hover:bg-accent-dark`     |
+| Shadow           | card shared profile shadow                                            |
+| Accent usage     | focused fields use accent border/ring, add role text `text-accent`, save button `bg-accent` |
+
+**Pattern notes:**
+Profile forms use compact uppercase labels, 42px token-bordered controls, 2-column desktop grids, full-width rows for long fields, and simple token dividers between sections. Mock-data Feature 5 controls are inert; save/upload/extract logic belongs to later features.
+
 ## Non-Visual Integrations
 
 ### InsForge Database Schema
@@ -57,7 +177,7 @@ Last updated: 2026-06-09
 `.button-primary .button-primary-sm`
 
 **Pattern notes:**
-Top navigation uses a full-width white surface with a constrained 1440px inner row. The full JobPilot logo/wordmark brand link points to `/`, and `proxy.ts` allows `/` through even when authenticated so it lands on the homescreen URL (`localhost:3000` in local dev) from every page that renders the shared navbar. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a darker bluish-charcoal hover.
+Top navigation uses a full-width white surface with a constrained 1440px inner row. The full JobPilot logo/wordmark brand link points to `/`, and `proxy.ts` allows `/` through even when authenticated so it lands on the homescreen URL (`localhost:3000` in local dev) from every page that renders the shared navbar. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a darker bluish-charcoal hover. On the homepage, `app/page.tsx` passes auth-aware CTA props: logged-out users see `Start for free` to `/login`, logged-in users see `Go to Profile` to `/profile`.
 
 ### Homepage Footer
 
@@ -82,7 +202,7 @@ Footer mirrors the navbar logo treatment and keeps links on the same restrained 
 ### Homepage Hero
 
 File: components/homepage/Hero.tsx
-Last updated: 2026-06-08
+Last updated: 2026-06-09
 
 | Property         | Class                                                                                          |
 | ---------------- | ---------------------------------------------------------------------------------------------- |
@@ -103,7 +223,7 @@ Last updated: 2026-06-08
 `.button-secondary .button-secondary-lg`
 
 **Pattern notes:**
-Landing-page hero sections use the global `soft-gradient-panel` helper with compact dark charcoal primary buttons, white text, and soft bordered secondary buttons. Both CTAs use the same 38px height and 14px type seen in the reference screenshot, and the primary hover shifts into a darker blue-charcoal without getting washed out.
+Landing-page hero sections use the global `soft-gradient-panel` helper with compact dark charcoal primary buttons, white text, and soft bordered secondary buttons. Both CTAs use the same 38px height and 14px type seen in the reference screenshot, and the primary hover shifts into a darker blue-charcoal without getting washed out. The hero accepts CTA href/label props so the homepage can render logged-out `Get Started` to `/login` and logged-in `Go to Profile` to `/profile`.
 
 ### Homepage Feature Text
 
@@ -168,7 +288,7 @@ Testimonials are centered, text-led sections with compact identity rows and no c
 ### Homepage Final CTA
 
 File: components/homepage/FinalCta.tsx
-Last updated: 2026-06-08
+Last updated: 2026-06-09
 
 | Property         | Class                                                                                          |
 | ---------------- | ---------------------------------------------------------------------------------------------- |
@@ -186,7 +306,7 @@ Last updated: 2026-06-08
 Same as Hero section — `.button-primary.button-primary-lg` and `.button-secondary.button-secondary-lg`.
 
 **Pattern notes:**
-Final CTA reuses the same button styling and gradient treatment as the hero section for consistency. Supporting copy uses the shared `supporting-text-tone` class from the reference image. Diagonal bands are global token-based helpers used only as visual separators between sections.
+Final CTA reuses the same button styling and gradient treatment as the hero section for consistency. Supporting copy uses the shared `supporting-text-tone` class from the reference image. Diagonal bands are global token-based helpers used only as visual separators between sections. Like the hero, this component accepts CTA href/label props so logged-in homepage users are sent directly to `/profile`.
 
 ### Shared Supporting Text
 
