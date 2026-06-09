@@ -11,7 +11,11 @@ export function Footer() {
   return (
     <footer className="bg-surface">
       <div className="mx-auto flex min-h-40 w-full max-w-[1440px] flex-col items-start justify-between gap-8 border-x border-border px-6 py-12 md:flex-row md:items-center md:px-16">
-        <Link href="/" aria-label="JobPilot home">
+        <Link
+          href="/"
+          aria-label="JobPilot home"
+          className="inline-flex items-center"
+        >
           <Image
             src="/logo.png"
             alt="JobPilot"

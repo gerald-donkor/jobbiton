@@ -2,7 +2,7 @@ import { updateSession, type CookieOptions, type CookieStore } from "@insforge/s
 import { NextResponse, type NextRequest } from "next/server";
 
 const protectedRoutes = ["/dashboard", "/profile", "/find-jobs"];
-const publicRoutes = ["/", "/login"];
+const authRedirectRoutes = ["/login"];
 const authCookieName = "insforge_access_token";
 
 export async function proxy(request: NextRequest) {
@@ -48,7 +48,7 @@ export async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const isProtectedRoute = protectedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const isAuthRedirectRoute = authRedirectRoutes.includes(pathname);
   const hasSession = Boolean(session.accessToken || request.cookies.get(authCookieName)?.value);
 
   if (isProtectedRoute && !hasSession) {
@@ -57,7 +57,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isPublicRoute && hasSession) {
+  if (isAuthRedirectRoute && hasSession) {
     return NextResponse.redirect(new URL("/profile", request.url));
   }
 
