@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { insforge } from "@/lib/insforge-client";
+import { posthog } from "@/lib/posthog-client";
 
 export function SignOutButton() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export function SignOutButton() {
       console.error("[SignOutButton] Session cookie clear failed", await sessionResponse.text());
     }
 
+    posthog.reset();
     router.replace("/login");
     router.refresh();
   }

@@ -18,10 +18,20 @@ After building any component — update this file with the component name, file 
 
 ## Components
 
+## Non-Visual Integrations
+
+### PostHog Initialization
+
+Files: instrumentation-client.ts, lib/posthog-client.ts, lib/posthog-server.ts, lib/posthog-events.ts, components/auth/PostHogIdentify.tsx
+Last updated: 2026-06-09
+
+**Pattern notes:**
+PostHog is initialized through the root `instrumentation-client.ts` file and kept out of visual component styling. Authenticated pages identify users through `PostHogIdentify`, logout resets the browser identity, and event capture is restricted to the typed event names in `lib/posthog-events.ts`.
+
 ### Homepage Navbar
 
 File: components/layout/Navbar.tsx
-Last updated: 2026-06-08
+Last updated: 2026-06-09
 
 | Property         | Class                                                                                          |
 | ---------------- | ---------------------------------------------------------------------------------------------- |
@@ -30,8 +40,8 @@ Last updated: 2026-06-08
 | Border radius    | none                                                                                           |
 | Text — primary   | `text-text-dark text-[14px] font-medium leading-5`                                             |
 | Text — secondary | none                                                                                           |
-| Spacing          | `h-16 px-6 gap-12`                                                                             |
-| Hover state      | `hover:text-accent`, primary CTA via `.button-primary:hover` with subtle indigo-charcoal lift  |
+| Spacing          | `h-16 px-6 gap-12`, brand link `inline-flex items-center`                                      |
+| Hover state      | `hover:text-accent`, primary CTA via `.button-primary:hover` with a darker bluish-charcoal lift |
 | Shadow           | primary CTA uses `.button-primary` layered shadow                                              |
 | Accent usage     | `text-accent` for link hover; focus ring uses `outline: 2px solid var(--color-accent)`        |
 
@@ -39,7 +49,7 @@ Last updated: 2026-06-08
 `.button-primary .button-primary-sm`
 
 **Pattern notes:**
-Top navigation uses a full-width white surface with a constrained 1440px inner row. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a slightly lighter indigo-charcoal hover.
+Top navigation uses a full-width white surface with a constrained 1440px inner row. The full JobPilot logo/wordmark brand link points to `/`, and `proxy.ts` allows `/` through even when authenticated so it lands on the homescreen URL (`localhost:3000` in local dev) from every page that renders the shared navbar. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a darker bluish-charcoal hover.
 
 ### Homepage Footer
 
@@ -53,13 +63,13 @@ Last updated: 2026-06-08
 | Border radius    | none                                               |
 | Text — primary   | `supporting-text-tone text-[16px] font-normal leading-6` |
 | Text — secondary | none                                               |
-| Spacing          | `px-6 py-12 gap-8 md:px-16`                        |
+| Spacing          | `px-6 py-12 gap-8 md:px-16`, brand link `inline-flex items-center` |
 | Hover state      | none                                               |
 | Shadow           | none                                               |
 | Accent usage     | none                                               |
 
 **Pattern notes:**
-Footer mirrors the navbar logo treatment and keeps links on the same restrained white surface used throughout the landing page. Footer nav text uses the exact same shared `supporting-text-tone` class as the final CTA supporting copy, including on hover.
+Footer mirrors the navbar logo treatment and keeps links on the same restrained white surface used throughout the landing page. The footer logo/wordmark also points to `/` and relies on the same root-route proxy behavior. Footer nav text uses the exact same shared `supporting-text-tone` class as the final CTA supporting copy, including on hover.
 
 ### Homepage Hero
 
@@ -74,7 +84,7 @@ Last updated: 2026-06-08
 | Text — primary   | `text-text-primary text-[48px] md:text-[64px] font-bold`                                       |
 | Text — secondary | `supporting-text-tone text-[20px] font-normal leading-8`                                       |
 | Spacing          | `px-6 pt-16 md:px-16 md:pt-20`                                                                 |
-| Hover state      | primary via `.button-primary:hover` with subtle indigo-charcoal lift, secondary via `.button-secondary:hover` |
+| Hover state      | primary via `.button-primary:hover` with a darker bluish-charcoal lift, secondary via `.button-secondary:hover` |
 | Shadow           | shared button classes provide the CTA shadows                                                  |
 | Accent usage     | `text-accent`, `border-accent`, focus ring via shared button classes                           |
 
@@ -85,7 +95,7 @@ Last updated: 2026-06-08
 `.button-secondary .button-secondary-lg`
 
 **Pattern notes:**
-Landing-page hero sections use the global `soft-gradient-panel` helper with compact dark charcoal primary buttons, white text, and soft bordered secondary buttons. Both CTAs use the same 38px height and 14px type seen in the reference screenshot, and the primary hover shifts only slightly toward indigo-charcoal.
+Landing-page hero sections use the global `soft-gradient-panel` helper with compact dark charcoal primary buttons, white text, and soft bordered secondary buttons. Both CTAs use the same 38px height and 14px type seen in the reference screenshot, and the primary hover shifts into a darker blue-charcoal without getting washed out.
 
 ### Homepage Feature Text
 
@@ -160,7 +170,7 @@ Last updated: 2026-06-08
 | Text — primary   | `text-text-primary text-[48px] md:text-[64px] font-bold`                                       |
 | Text — secondary | `text-text-secondary text-[20px] font-normal leading-8`                                        |
 | Spacing          | `px-6 py-20 md:px-16 md:py-28`                                                                 |
-| Hover state      | primary via `.button-primary:hover` with subtle indigo-charcoal lift, secondary via `.button-secondary:hover` |
+| Hover state      | primary via `.button-primary:hover` with a darker bluish-charcoal lift, secondary via `.button-secondary:hover` |
 | Shadow           | shared button classes provide the CTA shadows                                                  |
 | Accent usage     | focus ring uses accent; secondary hover border softly picks up accent                          |
 
@@ -203,12 +213,12 @@ Last updated: 2026-06-08
 | Text — primary   | `.button-primary { color: var(--color-surface) }`                     |
 | Text — secondary | `.button-secondary { color: var(--color-text-slate) }`                |
 | Spacing          | `.button-primary-sm`, `.button-primary-lg`, `.button-secondary-lg`    |
-| Hover state      | `.button-primary:hover`, `.button-secondary:hover`                    |
+| Hover state      | `.button-primary:hover` adds a darker bluish-charcoal tint, `.button-secondary:hover` remains neutral |
 | Shadow           | layered CTA shadows in `.button-primary` and `.button-secondary`      |
 | Accent usage     | focus rings and secondary hover border pick up `--color-accent`       |
 
 **Pattern notes:**
-Use shared global button classes for every landing-page CTA instead of repeating raw utility strings. The correct landing-page button direction is compact 38px-tall charcoal primary buttons with white text, a slightly lighter indigo-charcoal hover, and compact bright-surface secondary buttons with subtle borders.
+Use shared global button classes for every landing-page CTA instead of repeating raw utility strings. The correct landing-page button direction is compact 38px-tall charcoal primary buttons with white text, a darker bluish-charcoal hover, and compact bright-surface secondary buttons with subtle borders.
 
 ### Auth Login Card
 
