@@ -126,6 +126,8 @@ border-radius: 8px
 padding: 8px 16px
 ```
 
+All clickable buttons, links, role buttons, file-input labels, and summary controls must show a hand cursor on hover. The global stylesheet applies Tailwind's `cursor-pointer` utility to semantic interactive elements; future custom controls must use semantic elements or add `cursor-pointer` explicitly.
+
 ---
 
 ## Form Inputs

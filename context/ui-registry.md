@@ -18,6 +18,26 @@ After building any component — update this file with the component name, file 
 
 ## Components
 
+### Global Interactive Cursor
+
+File: app/globals.css
+Last updated: 2026-06-09
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | none                                                                           |
+| Border           | none                                                                           |
+| Border radius    | none                                                                           |
+| Text — primary   | inherited                                                                      |
+| Text — secondary | inherited                                                                      |
+| Spacing          | none                                                                           |
+| Hover state      | `cursor-pointer` via `a[href]`, `button:not(:disabled)`, `[role="button"]`, `label[for]`, `summary` |
+| Shadow           | none                                                                           |
+| Accent usage     | none                                                                           |
+
+**Pattern notes:**
+All semantic interactive elements should expose the hand cursor without each component repeating the class. Use real anchors/buttons/labels for clickable UI whenever possible. If a future custom interactive element cannot use a semantic control, add `role="button"` and keyboard handling or add `cursor-pointer` directly with the required accessibility behavior.
+
 ### Profile Page Layout
 
 File: components/profile/ProfilePageContent.tsx
@@ -30,13 +50,13 @@ Last updated: 2026-06-09
 | Border radius    | none                                                                |
 | Text — primary   | main `text-text-primary`                                            |
 | Text — secondary | inherited by child cards                                            |
-| Spacing          | main `px-6 py-8`, profile column `gap-6`                            |
+| Spacing          | main `px-6 py-8`, profile column `max-w-[940px] gap-6`              |
 | Hover state      | none                                                                |
 | Shadow           | none                                                                |
 | Accent usage     | none at layout level                                                |
 
 **Pattern notes:**
-Screenshot-matched profile pages keep the full shared navbar visible, use the app background behind a centered profile column, and place profile cards in a `max-w-[692px]` column with `gap-6`. Keep page-level styling unframed; individual profile sections provide the white card shells and shadows.
+Screenshot-matched profile pages keep the full shared navbar visible, use the app background behind a centered profile column, and place profile cards in a `max-w-[940px]` column with `gap-6`. Attention, Connected Accounts, Resume, and Profile Information cards should all share this same column width so the page reads as one streamlined vertical stack. Keep page-level styling unframed; individual profile sections provide the white card shells and shadows.
 
 ### Protected Navbar Active State
 
@@ -70,13 +90,13 @@ Last updated: 2026-06-09
 | Border radius    | `rounded-xl`                                                          |
 | Text — primary   | `text-text-primary text-[14px] font-semibold leading-5`               |
 | Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`               |
-| Spacing          | `px-6 py-6 gap-6`, missing tags `px-2 py-0.5`                         |
+| Spacing          | `px-6 py-6 gap-6`, missing tags `flex-wrap gap-2 lg:flex-nowrap lg:gap-1.5` |
 | Hover state      | none                                                                  |
 | Shadow           | `shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
-| Accent usage     | `bg-warning text-warning-foreground` for alert/tags, `.profile-progress-ring` uses accent purple |
+| Accent usage     | `bg-warning text-warning-foreground` for incomplete alert/tags, `bg-success` / `bg-success-lightest` for complete state, progress ring uses neutral track at 0% and accent purple once progress exists |
 
 **Pattern notes:**
-Profile status banners are white cards with default borders, compact 14px text, orange warning tags, and a purple token CSS progress ring. Do not use colored card fills.
+Profile status banners are white cards with default borders, compact 14px text, orange warning tags, and a token CSS progress ring. Missing-field tags should render as a single compact horizontal strip on desktop (`lg:flex-nowrap`) and wrap only on smaller screens. Desktop tags use tighter spacing (`lg:gap-1.5`, `lg:px-1.5`, `lg:text-[11px]`) so they fit in one line like the reference. The banner is data-driven from app-calculated completion state; a brand-new unsaved profile must render at 0% with an unfilled neutral gray ring, and must not count auth email or dropdown defaults as completed fields. Positive progress states use the purple accent fill. At 100%, the banner must switch completely out of warning language: title `Profile complete`, success-styled icon/tag, and no `Profile needs attention` copy even if a stale `isComplete` flag disagrees with the percentage. Use the same card shell for incomplete and complete states and avoid colored card fills.
 
 ### Profile Connected Accounts Section
 
@@ -106,17 +126,17 @@ Last updated: 2026-06-09
 | Property         | Class                                                                 |
 | ---------------- | --------------------------------------------------------------------- |
 | Background       | `bg-surface`, upload area `bg-surface-secondary`                      |
-| Border           | card `border border-border`, upload area `border border-dashed border-border-muted` |
+| Border           | card `border border-border`, upload area `border border-dashed border-border-muted`, preview `border border-border` |
 | Border radius    | `rounded-xl`, buttons `rounded-md`                                    |
 | Text — primary   | `text-text-primary text-[16px] font-semibold leading-6`, upload title `text-[14px] font-semibold leading-5` |
 | Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`, upload note `text-text-muted text-[12px] font-normal leading-4` |
-| Spacing          | card `px-6 py-6`, upload `px-6 py-10`, upload gap `mt-4`, footer `border-t border-border pt-6` |
-| Hover state      | select button `hover:border-accent`, generate button `hover:bg-accent-dark` |
+| Spacing          | card `px-6 py-6`, upload `px-6 py-10`, upload gap `mt-4`, preview header `px-4 py-3`, footer `border-t border-border pt-6` |
+| Hover state      | select button `hover:border-accent`, preview link `hover:border-accent hover:text-accent`, generate button `hover:bg-accent-dark` |
 | Shadow           | card shared profile shadow, upload icon/select button subtle token shadows |
-| Accent usage     | upload glyph uses text-secondary, generate button `bg-accent text-accent-foreground` |
+| Accent usage     | upload glyph uses text-secondary, success message uses `text-success`, generate button `bg-accent text-accent-foreground` |
 
 **Pattern notes:**
-Resume management UI is a white card with a soft secondary upload well, centered neutral upload icon stack, and screenshot copy that says `PDF format only. Maximum file size 2MB.` The lower generate action remains available below the visible screenshot fold.
+Resume management UI is a white card with a soft secondary upload well, centered neutral upload icon stack, and screenshot copy that says `PDF format only. Maximum file size 2MB.` The visible select control is a label styled as the existing button and opens a hidden PDF input. Show the selected or already saved resume name as a muted 12px caption under the button. Newly selected local files render an immediate bordered PDF preview through an object URL and use secondary copy `Resume selected. Save profile to upload it.` Saved resumes show `Resume uploaded successfully.` in success green, then render the same preview through the authenticated `/api/resume/current` route rather than the raw storage URL. Include a compact preview header and `View full resume` link. The lower generate action remains available below the preview.
 
 ### Profile Information Form
 
@@ -131,12 +151,32 @@ Last updated: 2026-06-09
 | Text — primary   | title `text-text-primary text-[22px] font-semibold leading-8`, section `text-[16px] font-semibold leading-6` |
 | Text — secondary | intro `text-text-secondary text-[13px] font-medium leading-5`, labels `.profile-field` 11px uppercase |
 | Spacing          | card `px-8 py-8`, form `space-y-12`, sections `pt-10`, fields `grid gap-5 md:grid-cols-2` |
-| Hover state      | `.profile-add-button:hover`, save/generate `hover:bg-accent-dark`     |
+| Hover state      | `.profile-add-button:hover`, tags removable via `.profile-tag`, save/generate `hover:bg-accent-dark` |
 | Shadow           | card shared profile shadow                                            |
-| Accent usage     | focused fields use accent border/ring, add role text `text-accent`, save button `bg-accent` |
+| Accent usage     | focused fields use accent border/ring, work checkbox uses `.profile-checkbox` accent, add role text `text-accent`, save button `bg-accent` |
 
 **Pattern notes:**
-Profile forms use compact uppercase labels, 42px token-bordered controls, 2-column desktop grids, full-width rows for long fields, and simple token dividers between sections. Mock-data Feature 5 controls are inert; save/upload/extract logic belongs to later features.
+Profile forms use compact uppercase labels, 42px token-bordered controls, 2-column desktop grids, full-width rows for long fields, and simple token dividers between sections. Generic `.profile-field` text-input rules must exclude `input[type="checkbox"]`; checkbox controls inside profile fields use `.profile-checkbox` so they stay 13px square and never inherit the 42px text-input sizing. Brand-new profiles should show empty text inputs and blank dropdowns until the user explicitly enters values. Feature 06 makes these fields server-action backed; keep save feedback as centered 13px secondary text above the full-width accent submit button. Dropdown values must match the InsForge `profiles` constraints exactly; blank constrained dropdowns are submitted as blank UI state and stored as `null` by the server action.
+
+### Profile Editor Wrapper
+
+File: components/profile/ProfileEditor.tsx
+Last updated: 2026-06-09
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | none            |
+| Border           | none            |
+| Border radius    | none            |
+| Text — primary   | inherited       |
+| Text — secondary | inherited       |
+| Spacing          | `contents`      |
+| Hover state      | delegated       |
+| Shadow           | none            |
+| Accent usage     | delegated       |
+
+**Pattern notes:**
+Profile editor is a non-visual client wrapper around the attention banner, connected accounts card, resume card, and information card. Keep it `className="contents"` so it does not add another card, spacing layer, or nested visual shell around the profile sections. Failed server-action saves return the submitted profile snapshot; the editor keys/remounts the uncontrolled form fields from that snapshot so user-entered data is preserved instead of falling back to the last saved backend row. The attention banner must calculate completion from the editor's active profile snapshot, not a stale server-only prop, so clearing saved fields and saving immediately lowers the displayed percentage and missing-field tags.
 
 ## Non-Visual Integrations
 
