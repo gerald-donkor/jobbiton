@@ -20,6 +20,14 @@ After building any component — update this file with the component name, file 
 
 ## Non-Visual Integrations
 
+### InsForge Database Schema
+
+Files: InsForge backend tables and storage bucket
+Last updated: 2026-06-09
+
+**Pattern notes:**
+The backend foundation lives in InsForge, not app-side UI files. Feature 4 created `profiles`, `agent_runs`, `jobs`, and `agent_logs` with own-row RLS policies, practical constraints, query indexes, and the private `resumes` bucket. No visual components or reusable classes were introduced.
+
 ### PostHog Initialization
 
 Files: instrumentation-client.ts, lib/posthog-client.ts, lib/posthog-server.ts, lib/posthog-events.ts, components/auth/PostHogIdentify.tsx

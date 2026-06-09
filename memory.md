@@ -1,47 +1,42 @@
-# Memory — Foundation Review And Handoff
+# Memory — Database Schema Foundation
 
-Last updated: 2026-06-09 09:47 GMT
+Last updated: 2026-06-09 10:50 GMT
 
 ## What was built
 
-- Homepage, auth, and protected placeholder shells are present.
-- InsForge OAuth flow exists with `/api/auth/oauth/start`, `/auth/callback`, `/api/auth/session`, `/api/auth/refresh`, and `proxy.ts` protection for `/dashboard`, `/profile`, and `/find-jobs`.
-- PostHog packages are installed and current code contains `instrumentation-client.ts`, `lib/posthog-client.ts`, `lib/posthog-server.ts`, `lib/posthog-events.ts`, and `components/auth/PostHogIdentify.tsx`.
-- JobPilot logo/wordmark links in `components/layout/Navbar.tsx` and `components/layout/Footer.tsx` point to `/`.
-- `proxy.ts` now allows `/` through even when authenticated, so the logo can land on the homepage URL instead of redirecting to `/profile`.
-- `context/progress-tracker.md` and `context/ui-registry.md` were updated for PostHog initialization and homepage logo navigation.
+- Feature 4 Database Schema was completed in InsForge.
+- Created `profiles`, `agent_runs`, `jobs`, and `agent_logs` tables with the columns from `context/architecture.md`.
+- Added practical defaults, check constraints, foreign keys, and indexes for upcoming profile, job search, job details, and agent logging flows.
+- Enabled RLS on all four tables and added own-row select/insert/update/delete policies using `auth.uid()`.
+- Created private `resumes` storage bucket.
+- Updated `context/progress-tracker.md` to mark Feature 4 complete and set the next feature to `05 Profile Page — Full UI`.
+- Updated `context/ui-registry.md` with a non-visual InsForge Database Schema entry.
 
 ## Decisions made
 
-- Project standards still define only four allowed PostHog product events: `job_search_started`, `job_found`, `profile_completed`, and `company_researched`.
-- Root homepage navigation should remain available to authenticated users; only `/login` redirects authenticated users to `/profile`.
-- Shared navbar/footer own the JobPilot logo behavior across pages.
+- InsForge MCP tools are the source of truth for infrastructure changes: raw SQL for schema and MCP storage tools for buckets.
+- `profiles.id` is the authenticated user UUID and other app-owned tables use `user_id` references to `profiles(id)`.
+- `jobs.source` is constrained to `search | url` even though URL import is currently out of scope, because the schema is already planned for that shape.
+- The `resumes` bucket is private, not public; future app logic should store uploaded/generated resume references on `profiles.resume_pdf_url`.
+- The project remains on the strict four-event PostHog standard for now: `job_search_started`, `job_found`, `profile_completed`, and `company_researched`.
 
 ## Problems solved
 
-- Clicking the JobPilot logo did not reliably show the homepage because `proxy.ts` redirected authenticated users from `/` to `/profile`. That redirect has been narrowed to `/login`.
-- Turbopack `.next/dev` cache corruption previously caused dev-server 500s; clearing `.next/dev` and restarting fixed it.
-- `npm run build` is blocked in the sandbox because `next/font` needs network access to Google Fonts and unrestricted build escalation was rejected by the reviewer.
+- The backend had no app tables or storage buckets; Feature 4 created the full schema foundation from a clean InsForge project.
+- Verified via InsForge schema tools that all four tables exist, RLS is enabled, policies are present, indexes exist, and the `resumes` bucket is private.
 
 ## Current state
 
+- Phase 1 Foundation is complete.
 - `npm run lint` passes.
 - `npx tsc --noEmit` passes.
-- Local route checks passed after starting dev server:
-  - `http://localhost:3000` returns `200 OK`.
-  - `http://localhost:3000` with an auth cookie returns `200 OK`, not `/profile`.
-  - `/login` with an auth cookie still redirects to `/profile`.
-- Review finding remains unresolved: the user said PostHog had already been initialized by the PostHog Wizard, but the current tree has the wizard's broader event captures removed/overridden and only project-approved typed events remain. Decide whether to restore wizard-generated tracking or keep the stricter project event list.
+- InsForge backend now has the app schema and private resume storage bucket.
+- Only repo files changed this session are `context/progress-tracker.md`, `context/ui-registry.md`, and `memory.md`; the table and bucket changes live in InsForge backend state.
 
 ## Next session starts with
 
-1. Decide the PostHog direction:
-   - Restore the wizard's generated auth/CTA events and config if the wizard setup is the desired source of truth.
-   - Or keep the current strict four-event project standard and do not restore wizard-only events.
-2. After that decision, reconcile `context/progress-tracker.md`, `context/ui-registry.md`, and `memory.md` if needed.
-3. Continue with Phase 1, item 04 Database Schema.
+Start Phase 2, Feature 5: build the complete Profile Page UI with mock data only. Before implementation, use `/architect` because it is a full page feature, then follow the UI tokens/rules and update `ui-registry.md` and `progress-tracker.md` after completion.
 
 ## Open questions
 
-- Should PostHog follow the wizard's generated event set, or the project standards that allow only `job_search_started`, `job_found`, `profile_completed`, and `company_researched`?
 - Should homepage access for authenticated users remain allowed permanently, even though the older project overview said logged-in homepage visits redirect during onboarding?
