@@ -7,8 +7,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 1 — Foundation
-**Last completed:** 03 PostHog Initialization
-**Next:** 04 Database Schema
+**Last completed:** 04 Database Schema
+**Next:** 05 Profile Page — Full UI
 
 ---
 
@@ -19,7 +19,7 @@ Update this file after every completed feature. Any AI agent reading this should
 - [x] 01 Homepage
 - [x] 02 Auth
 - [x] 03 PostHog Initialization
-- [ ] 04 Database Schema
+- [x] 04 Database Schema
 
 ### Phase 2 — Profile Page
 
@@ -78,3 +78,4 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-09 — PostHog initialization completed with `lib/posthog-client.ts`, `lib/posthog-server.ts`, typed allowed-event definitions, client instrumentation, authenticated user identification, and logout reset. Unsupported wizard-added auth/CTA event names were removed to keep the project limited to `job_search_started`, `job_found`, `profile_completed`, and `company_researched`.
 - 2026-06-09 — Shared navbar brand link was made explicit across pages: the full JobPilot logo/wordmark anchor points to `/` and uses a stable inline-flex click target.
 - 2026-06-09 — Root homepage navigation was corrected by allowing `/` through `proxy.ts` even when authenticated; JobPilot logo/wordmark links in navbar and footer point to `/` so they land on the homescreen URL.
+- 2026-06-09 — Database schema foundation completed in InsForge with `profiles`, `agent_runs`, `jobs`, and `agent_logs` tables, own-row RLS policies, constraints, indexes, and a private `resumes` storage bucket.
