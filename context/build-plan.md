@@ -117,7 +117,7 @@ Wire profile form to InsForge DB.
 
 ### 07 AI Profile Extraction from Resume
 
-Extract from Resume button — GPT-4o reads uploaded PDF and auto-fills profile form fields.
+Extract from Resume button — Gemini reads uploaded PDF text and auto-fills profile form fields.
 
 **UI:**
 
@@ -128,9 +128,9 @@ Extract from Resume button — GPT-4o reads uploaded PDF and auto-fills profile 
 
 **Logic:**
 
-- pdf-parse extracts raw text from uploaded PDF buffer
+- pdf2json extracts raw text from uploaded PDF buffers server-side
 - If extracted text is empty or too short — return error: "Could not extract text from this PDF. Please try a different file."
-- GPT-4o reads extracted text and returns structured JSON matching all profile field names
+- Gemini reads extracted text and returns structured JSON matching all profile field names
 - Form fields populated with extracted data
 - User saves manually after reviewing
 

@@ -1,13 +1,25 @@
 "use client";
 
 import type { ChangeEvent } from "react";
+import { RESUME_ACCEPT } from "@/lib/resume-files";
 
 type ResumeSectionProps = {
   resumePdfUrl: string;
   resumeName: string;
   resumePreviewUrl: string;
   isResumeSaved: boolean;
+  isResumeUploading: boolean;
+  resumeUploadMessage: string;
+  isResumeUploadSuccess: boolean;
+  canEmbedResume: boolean;
+  resumePreviewText: string;
+  isResumePreviewLoading: boolean;
+  resumePreviewMessage: string;
+  canExtractResume: boolean;
+  isExtracting: boolean;
+  extractMessage: string;
   onResumeChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onExtractResume: () => void;
 };
 
 export function ResumeSection({
@@ -15,12 +27,26 @@ export function ResumeSection({
   resumeName,
   resumePreviewUrl,
   isResumeSaved,
+  isResumeUploading,
+  resumeUploadMessage,
+  isResumeUploadSuccess,
+  canEmbedResume,
+  resumePreviewText,
+  isResumePreviewLoading,
+  resumePreviewMessage,
+  canExtractResume,
+  isExtracting,
+  extractMessage,
   onResumeChange,
+  onExtractResume,
 }: ResumeSectionProps) {
   const resumeLabel = resumeName || (resumePdfUrl ? "Existing resume saved" : "");
   const hasResume = Boolean(resumeLabel);
   const savedResumeUrl = resumePdfUrl ? "/api/resume/current" : "";
   const visibleResumeUrl = resumePreviewUrl || savedResumeUrl;
+  const isExtractMessageSuccess =
+    extractMessage === "Resume extracted. Review the fields below before saving.";
+  const isResumeStatusSuccess = isResumeUploading || isResumeUploadSuccess;
 
   return (
     <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
@@ -40,19 +66,32 @@ export function ResumeSection({
             id="resume"
             name="resume"
             type="file"
-            accept="application/pdf"
+            accept={RESUME_ACCEPT}
             className="sr-only"
             onChange={onResumeChange}
           />
           <div className="flex size-10 items-center justify-center rounded-full border border-border bg-surface shadow-[0_2px_8px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)]">
             <span className="upload-cloud" aria-hidden="true" />
           </div>
-          <p className="mt-5 text-[14px] font-semibold leading-5 text-text-primary">
-            Click to upload or drag and drop
-          </p>
-          <p className="mt-1 text-[12px] font-normal leading-4 text-text-muted">
-            PDF format only. Maximum file size 2MB.
-          </p>
+          {hasResume ? (
+            <a
+              href={visibleResumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 text-[14px] font-semibold leading-5 text-text-primary transition-colors hover:text-accent"
+            >
+              View current resume
+            </a>
+          ) : (
+            <p className="mt-5 text-[14px] font-semibold leading-5 text-text-primary">
+              Click to upload or drag and drop
+            </p>
+          )}
+          {hasResume ? null : (
+            <p className="mt-1 text-[12px] font-normal leading-4 text-text-muted">
+              PDF, DOC, DOCX, TXT, or RTF. Maximum file size 2MB.
+            </p>
+          )}
           <label
             htmlFor="resume"
             className="mt-4 inline-flex h-[38px] items-center justify-center rounded-md border border-border bg-surface px-5 text-[16px] font-normal leading-6 text-text-primary shadow-[0_2px_8px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)] transition-colors hover:border-accent"
@@ -70,12 +109,46 @@ export function ResumeSection({
       {hasResume ? (
         <p
           className={`mt-3 text-[14px] font-semibold leading-5 ${
-            isResumeSaved ? "text-success" : "text-text-secondary"
+            isResumeStatusSuccess ? "text-success" : "text-error"
           }`}
         >
-          {isResumeSaved
-            ? "Resume uploaded successfully."
-            : "Resume selected. Save profile to upload it."}
+          {resumeUploadMessage ||
+            (isResumeUploading
+              ? "Uploading resume..."
+              : isResumeSaved
+                ? "Resume uploaded successfully."
+                : "Resume selected. Uploading now...")}
+        </p>
+      ) : null}
+
+      {canExtractResume ? (
+        <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-surface px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[14px] font-semibold leading-5 text-text-primary">
+              Fill profile from resume
+            </p>
+            <p className="mt-1 text-[12px] font-normal leading-4 text-text-secondary">
+              Review the extracted details before saving your profile.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={isExtracting}
+            className="inline-flex h-[38px] shrink-0 items-center justify-center rounded-md bg-accent px-4 text-[13px] font-semibold leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-text-muted disabled:shadow-none"
+            onClick={onExtractResume}
+          >
+            {isExtracting ? "Extracting..." : "Extract from Resume"}
+          </button>
+        </div>
+      ) : null}
+
+      {extractMessage ? (
+        <p
+          className={`mt-3 text-[13px] font-semibold leading-5 ${
+            isExtractMessageSuccess ? "text-success" : "text-error"
+          }`}
+        >
+          {extractMessage}
         </p>
       ) : null}
 
@@ -94,11 +167,48 @@ export function ResumeSection({
               View full resume
             </a>
           </div>
-          <iframe
-            src={visibleResumeUrl}
-            title="Resume preview"
-            className="h-[360px] w-full bg-surface-secondary"
-          />
+          {canEmbedResume ? (
+            <iframe
+              src={visibleResumeUrl}
+              title="Resume preview"
+              className="h-[360px] w-full bg-surface-secondary"
+            />
+          ) : resumePreviewText || isResumePreviewLoading || resumePreviewMessage ? (
+            <div className="bg-surface-secondary px-6 py-6">
+              {isResumePreviewLoading ? (
+                <p className="text-center text-[13px] font-semibold leading-5 text-text-secondary">
+                  Loading resume preview...
+                </p>
+              ) : null}
+              {resumePreviewMessage ? (
+                <p className="text-center text-[13px] font-semibold leading-5 text-text-secondary">
+                  {resumePreviewMessage}
+                </p>
+              ) : null}
+              {resumePreviewText ? (
+                <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-surface p-5 text-left text-[13px] font-normal leading-6 text-text-primary">
+                  {resumePreviewText}
+                </pre>
+              ) : null}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center bg-surface-secondary px-6 py-12 text-center">
+              <p className="text-[14px] font-semibold leading-5 text-text-primary">
+                Preview unavailable for this file type
+              </p>
+              <p className="mt-1 max-w-[420px] text-[12px] font-normal leading-4 text-text-secondary">
+                Open the resume in a new tab to view or download it with the right app.
+              </p>
+              <a
+                href={visibleResumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex h-[38px] items-center justify-center rounded-md border border-border bg-surface px-4 text-[13px] font-semibold leading-5 text-text-primary transition-colors hover:border-accent hover:text-accent"
+              >
+                Open resume
+              </a>
+            </div>
+          )}
         </div>
       ) : null}
 

@@ -7,8 +7,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 2 — Profile Page
-**Last completed:** 06 Profile Save Logic
-**Next:** 07 AI Profile Extraction from Resume
+**Last completed:** 07 AI Profile Extraction from Resume
+**Next:** 08 Resume PDF Generation from Profile
 
 ---
 
@@ -25,7 +25,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 - [x] 05 Profile Page — Full UI
 - [x] 06 Profile Save Logic
-- [ ] 07 AI Profile Extraction from Resume
+- [x] 07 AI Profile Extraction from Resume
 - [ ] 08 Resume PDF Generation from Profile
 
 ### Phase 3 — Find Jobs Page
@@ -88,8 +88,30 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-09 — Profile save failure resolved: blank constrained dropdown values are stored as `null`, cover letter tone options now match the database constraint, save errors log useful SDK details, and failed submits return the submitted profile snapshot so typed data is preserved.
 - 2026-06-09 — Profile completion banner corrected: any 100% profile now renders the complete-state title and success styling instead of warning/attention language.
 - 2026-06-09 — Profile completion percentage now recalculates from the latest save-action profile snapshot inside `ProfileEditor`, so clearing previously completed fields and saving drops the banner percentage and restores missing-field tags.
+- 2026-06-09 — Profile completion banner behavior updated: completed 100% profiles no longer render the banner at all; incomplete profiles still show the warning card and missing-field tags.
 - 2026-06-09 — End-of-session verification: the profile save flow, data preservation after failed saves, 100% complete banner copy, and post-save completion percentage recalculation have all been linted and production-built successfully. `npm run build` still requires network access for `next/font` to fetch Inter.
 - 2026-06-09 — Resume section now shows `Resume uploaded successfully.` in success styling below the upload well whenever a resume is selected or already saved.
 - 2026-06-09 — Global interactive cursor rule added: anchors, enabled buttons, role buttons, file-input labels, and summary controls now receive Tailwind `cursor-pointer` from `app/globals.css`, and future custom controls should preserve the same hand cursor behavior.
 - 2026-06-09 — Resume upload visibility improved: selected PDFs now render an embedded preview immediately through a browser object URL, saved resumes reuse `resume_pdf_url`, and the resume card includes a `View full resume` link.
 - 2026-06-09 — Resume preview review issues resolved: selected PDFs now show pending-upload copy until Save Profile succeeds, saved resume previews use authenticated `/api/resume/current` storage download, and the raw private storage URL is no longer embedded in the UI.
+- 2026-06-09 — AI Profile Extraction from Resume completed with `/api/resume/extract`, `lib/resume-extraction.ts`, server-side PDF text extraction, Gemini JSON extraction, Zod validation, and client-side draft population in `ProfileEditor`.
+- 2026-06-09 — Resume extraction supports both currently selected unsaved PDFs and previously saved private resumes; extraction never writes to the database, preserves existing draft values when the resume has no value for a field, and requires the user to click Save Profile to persist changes.
+- 2026-06-09 — Global cursor rule corrected: all semantic buttons and `a[href]` links now receive Tailwind `cursor-pointer` from `app/globals.css`, with disabled buttons globally overridden to `cursor-not-allowed`.
+- 2026-06-09 — Resume upload format support expanded from PDF-only to PDF, DOC, DOCX, TXT, and RTF; saved/current downloads now resolve the stored resume path and content type from `profiles.resume_pdf_url`.
+- 2026-06-09 — Resume upload well copy corrected: once any resume file is selected or saved, the circled upload copy is replaced by the single line `View current resume`; empty state keeps the upload prompt and supported-format note.
+- 2026-06-09 — Resume multi-format preview corrected: PDF/TXT keep embedded previews, DOC/DOCX/RTF show an open/download panel instead of a broken iframe, and extraction controls only appear for PDF/TXT.
+- 2026-06-09 — Resume DOCX preview implemented through `mammoth` raw-text extraction in `/api/resume/preview`; PDF stays iframe-based, TXT/DOCX show readable text previews, and DOC/RTF remain open/download only.
+- 2026-06-10 — Resume extraction worker failure resolved: `/api/resume/extract` now uses `pdf2json` server-side buffer parsing instead of the `pdf-parse` PDF.js worker path, protected resume preview/extract fetches include same-origin credentials, and lint/build/parser smoke checks pass.
+- 2026-06-10 — Resume extraction OpenAI quota handling resolved: OpenAI SDK `APIError`s are now translated into safe provider-specific responses, including a clear 429 quota message when the configured key has no available quota instead of the generic resume extraction failure.
+- 2026-06-10 — Root layout hydration warning resolved for Grammarly/body extension attributes by adding `suppressHydrationWarning` to the root `<body>` in `app/layout.tsx`; lint, diff check, and production build pass.
+- 2026-06-10 — Resume extraction provider switched from OpenAI to Gemini REST using server-side `GEMINI_API_KEY`, `gemini-3.5-flash`, structured JSON response formatting, and the existing Zod profile validation; the unused `openai` dependency was removed.
+- 2026-06-10 — Gemini resume extraction payload corrected: REST JSON mode now sends `generationConfig.responseMimeType = "application/json"` instead of the rejected nested `responseFormat.text.mimeType` shape; local Gemini docs were corrected and lint/build pass.
+- 2026-06-10 — Gemini resume extraction model corrected to `gemini-2.5-flash` after live smoke tests showed `gemini-3.5-flash` returning unusable one-letter text and `gemini-2.5-flash` returning valid JSON with the same API key.
+- 2026-06-11 — Gemini resume extraction truncation/invalid JSON resolved: output budget increased to 4096 tokens, the route now validates Gemini text before accepting it, falls back from `gemini-2.5-flash` to `gemini-2.5-flash-lite` on provider/JSON failures, and a sample resume smoke test returned complete parseable JSON.
+- 2026-06-11 — Resume section status colors polished: selected/uploaded/extracted success messages now use `text-success`, failed extraction messages use `text-error`, and the Extract from Resume button uses the same accent-purple filled style as primary resume actions; `ui-registry.md` was imprinted with the updated pattern.
+- 2026-06-11 — Resume extraction session expiry resolved: `proxy.ts` now refreshes InsForge sessions for `/api/resume/*` before route handlers run, preventing stale access tokens from producing `Please sign in again before extracting your resume.` after idle time.
+- 2026-06-11 — Resume extraction now fills Years of Experience more reliably by requesting digits-only output, normalizing values like `5 years` to `5`, and estimating from extracted work dates when Gemini leaves the field blank.
+- 2026-06-11 — Resume extraction now fills Key Responsibilities more reliably by prompting Gemini to preserve role bullets/duties and by recovering likely responsibility lines from the raw resume text when a matched work role comes back with blank responsibilities.
+- 2026-06-11 — Resume selection now uploads immediately through a dedicated server action, saves the resulting InsForge storage URL to `profiles.resume_pdf_url`, and keeps the resume available after refresh without requiring Save Profile.
+- 2026-06-11 — Resume extraction now normalizes LinkedIn and Portfolio/GitHub values into absolute `https://` URLs before filling profile URL inputs, preventing browser URL validation from blocking Save Profile.
+- 2026-06-11 — Feature 07 resume upload/extraction flow user-verified: extracted profile fields save successfully, uploaded resumes persist after refresh, and extracted Portfolio/GitHub URLs no longer block browser URL validation.

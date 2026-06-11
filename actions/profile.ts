@@ -13,15 +13,30 @@ import {
   type ProfileValues,
   type WorkExperienceEntry,
 } from "@/lib/profile";
-
-const MAX_RESUME_SIZE = 2 * 1024 * 1024;
-const RESUME_BUCKET = "resumes";
+import {
+  getResumeFileFormat,
+  getResumeStoragePath,
+  getUserResumeStoragePaths,
+  MAX_RESUME_SIZE,
+  RESUME_BUCKET,
+} from "@/lib/resume-files";
 
 export type SaveProfileState = {
   success: boolean;
   message: string;
   profile?: ProfileValues;
 };
+
+export type UploadResumeState =
+  | {
+      success: true;
+      resumePdfUrl: string;
+      message: string;
+    }
+  | {
+      success: false;
+      message: string;
+    };
 
 function getString(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -135,6 +150,43 @@ function getResumeFile(formData: FormData): File | null {
   return file;
 }
 
+async function uploadUserResume({
+  file,
+  insforge,
+  userId,
+}: {
+  file: File;
+  insforge: Awaited<ReturnType<typeof createInsforgeServer>>;
+  userId: string;
+}): Promise<{ resumePdfUrl: string } | { error: string }> {
+  const resumeFormat = getResumeFileFormat(file);
+
+  if (!resumeFormat) {
+    return { error: "Please upload a PDF, DOC, DOCX, TXT, or RTF resume." };
+  }
+
+  if (file.size > MAX_RESUME_SIZE) {
+    return { error: "Resume files must be 2MB or smaller." };
+  }
+
+  const resumePath = getResumeStoragePath(userId, resumeFormat.extension);
+  await Promise.all(
+    getUserResumeStoragePaths(userId).map((path) =>
+      insforge.storage.from(RESUME_BUCKET).remove(path),
+    ),
+  );
+  const { data: uploadedResume, error: uploadError } = await insforge.storage
+    .from(RESUME_BUCKET)
+    .upload(resumePath, file);
+
+  if (uploadError || !uploadedResume?.url) {
+    console.error("[uploadUserResume] Resume upload failed", describeError(uploadError));
+    return { error: "We could not upload your resume. Please try again." };
+  }
+
+  return { resumePdfUrl: uploadedResume.url };
+}
+
 function readProfileValues(
   userId: string,
   formData: FormData,
@@ -164,6 +216,72 @@ function readProfileValues(
     resumePdfUrl,
     isComplete: false,
   };
+}
+
+export async function uploadResume(formData: FormData): Promise<UploadResumeState> {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Please sign in again before uploading your resume.",
+      };
+    }
+
+    const resumeFile = getResumeFile(formData);
+
+    if (!resumeFile) {
+      return {
+        success: false,
+        message: "Please select a resume to upload.",
+      };
+    }
+
+    const insforge = await createInsforgeServer();
+    const uploadResult = await uploadUserResume({
+      file: resumeFile,
+      insforge,
+      userId: user.id,
+    });
+
+    if ("error" in uploadResult) {
+      return {
+        success: false,
+        message: uploadResult.error,
+      };
+    }
+
+    const { error: saveError } = await insforge.database.from("profiles").upsert([
+      {
+        id: user.id,
+        resume_pdf_url: uploadResult.resumePdfUrl,
+        updated_at: new Date().toISOString(),
+      },
+    ]);
+
+    if (saveError) {
+      console.error("[uploadResume] Profile resume URL save failed", describeError(saveError));
+      return {
+        success: false,
+        message: "We uploaded your resume but could not save it to your profile. Please try again.",
+      };
+    }
+
+    revalidatePath("/profile");
+
+    return {
+      success: true,
+      resumePdfUrl: uploadResult.resumePdfUrl,
+      message: "Resume uploaded successfully.",
+    };
+  } catch (error) {
+    console.error("[uploadResume] Unexpected failure", describeError(error));
+    return {
+      success: false,
+      message: "We could not upload your resume. Please try again.",
+    };
+  }
 }
 
 export async function saveProfile(
@@ -204,38 +322,21 @@ export async function saveProfile(
     const resumeFile = getResumeFile(formData);
 
     if (resumeFile) {
-      if (resumeFile.type !== "application/pdf") {
+      const uploadResult = await uploadUserResume({
+        file: resumeFile,
+        insforge,
+        userId: user.id,
+      });
+
+      if ("error" in uploadResult) {
         return {
           success: false,
-          message: "Please upload a PDF resume.",
+          message: uploadResult.error,
           profile,
         };
       }
 
-      if (resumeFile.size > MAX_RESUME_SIZE) {
-        return {
-          success: false,
-          message: "Resume files must be 2MB or smaller.",
-          profile,
-        };
-      }
-
-      const resumePath = `${user.id}/resume.pdf`;
-      await insforge.storage.from(RESUME_BUCKET).remove(resumePath);
-      const { data: uploadedResume, error: uploadError } = await insforge.storage
-        .from(RESUME_BUCKET)
-        .upload(resumePath, resumeFile);
-
-      if (uploadError || !uploadedResume?.url) {
-        console.error("[saveProfile] Resume upload failed", describeError(uploadError));
-        return {
-          success: false,
-          message: "We could not upload your resume. Please try again.",
-          profile,
-        };
-      }
-
-      resumePdfUrl = uploadedResume.url;
+      resumePdfUrl = uploadResult.resumePdfUrl;
       profile = readProfileValues(user.id, formData, resumePdfUrl);
     }
 
