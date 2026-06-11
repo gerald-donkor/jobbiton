@@ -31,12 +31,12 @@ Last updated: 2026-06-09
 | Text — primary   | inherited                                                                      |
 | Text — secondary | inherited                                                                      |
 | Spacing          | none                                                                           |
-| Hover state      | `cursor-pointer` via `a[href]`, `button:not(:disabled)`, `[role="button"]`, `label[for]`, `summary` |
+| Hover state      | `cursor-pointer` via `a[href]`, `button`, `[role="button"]`, `label[for]`, `summary`; disabled buttons use `cursor-not-allowed` |
 | Shadow           | none                                                                           |
 | Accent usage     | none                                                                           |
 
 **Pattern notes:**
-All semantic interactive elements should expose the hand cursor without each component repeating the class. Use real anchors/buttons/labels for clickable UI whenever possible. If a future custom interactive element cannot use a semantic control, add `role="button"` and keyboard handling or add `cursor-pointer` directly with the required accessibility behavior.
+All semantic interactive elements should expose the hand cursor without each component repeating the class. Buttons and `a[href]` links receive Tailwind's `cursor-pointer` globally; disabled buttons are overridden to `cursor-not-allowed`. Use real anchors/buttons/labels for clickable UI whenever possible. If a future custom interactive element cannot use a semantic control, add `role="button"` and keyboard handling or add `cursor-pointer` directly with the required accessibility behavior.
 
 ### Profile Page Layout
 
@@ -93,10 +93,10 @@ Last updated: 2026-06-09
 | Spacing          | `px-6 py-6 gap-6`, missing tags `flex-wrap gap-2 lg:flex-nowrap lg:gap-1.5` |
 | Hover state      | none                                                                  |
 | Shadow           | `shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
-| Accent usage     | `bg-warning text-warning-foreground` for incomplete alert/tags, `bg-success` / `bg-success-lightest` for complete state, progress ring uses neutral track at 0% and accent purple once progress exists |
+| Accent usage     | `bg-warning text-warning-foreground` for incomplete alert/tags, progress ring uses neutral track at 0% and accent purple once progress exists |
 
 **Pattern notes:**
-Profile status banners are white cards with default borders, compact 14px text, orange warning tags, and a token CSS progress ring. Missing-field tags should render as a single compact horizontal strip on desktop (`lg:flex-nowrap`) and wrap only on smaller screens. Desktop tags use tighter spacing (`lg:gap-1.5`, `lg:px-1.5`, `lg:text-[11px]`) so they fit in one line like the reference. The banner is data-driven from app-calculated completion state; a brand-new unsaved profile must render at 0% with an unfilled neutral gray ring, and must not count auth email or dropdown defaults as completed fields. Positive progress states use the purple accent fill. At 100%, the banner must switch completely out of warning language: title `Profile complete`, success-styled icon/tag, and no `Profile needs attention` copy even if a stale `isComplete` flag disagrees with the percentage. Use the same card shell for incomplete and complete states and avoid colored card fills.
+Profile status banners are white cards with default borders, compact 14px text, orange warning tags, and a token CSS progress ring. Missing-field tags should render as a single compact horizontal strip on desktop (`lg:flex-nowrap`) and wrap only on smaller screens. Desktop tags use tighter spacing (`lg:gap-1.5`, `lg:px-1.5`, `lg:text-[11px]`) so they fit in one line like the reference. The banner is data-driven from app-calculated completion state; a brand-new unsaved profile must render at 0% with an unfilled neutral gray ring, and must not count auth email or dropdown defaults as completed fields. Positive progress states use the purple accent fill. At 100%, the banner is not rendered at all; complete profiles should move straight into the Connected Accounts and Resume sections without a success card.
 
 ### Profile Connected Accounts Section
 
@@ -121,22 +121,22 @@ Connected account cards use the same white profile card shell as Resume and Atte
 ### Profile Resume Section
 
 File: components/profile/ResumeSection.tsx
-Last updated: 2026-06-09
+Last updated: 2026-06-11
 
 | Property         | Class                                                                 |
 | ---------------- | --------------------------------------------------------------------- |
-| Background       | `bg-surface`, upload area `bg-surface-secondary`                      |
-| Border           | card `border border-border`, upload area `border border-dashed border-border-muted`, preview `border border-border` |
+| Background       | `bg-surface`, upload area `bg-surface-secondary`, extraction panel `bg-surface`, text preview `bg-surface` inside `bg-surface-secondary` |
+| Border           | card `border border-border`, upload area `border border-dashed border-border-muted`, preview/extraction/unavailable panel `border border-border` |
 | Border radius    | `rounded-xl`, buttons `rounded-md`                                    |
-| Text — primary   | `text-text-primary text-[16px] font-semibold leading-6`, upload title `text-[14px] font-semibold leading-5` |
-| Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`, upload note `text-text-muted text-[12px] font-normal leading-4` |
-| Spacing          | card `px-6 py-6`, upload `px-6 py-10`, upload gap `mt-4`, preview header `px-4 py-3`, footer `border-t border-border pt-6` |
-| Hover state      | select button `hover:border-accent`, preview link `hover:border-accent hover:text-accent`, generate button `hover:bg-accent-dark` |
+| Text — primary   | `text-text-primary text-[16px] font-semibold leading-6`, upload/extraction title `text-[14px] font-semibold leading-5` |
+| Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`, upload/extraction note `text-[12px] font-normal leading-4`, preview text `text-[13px] leading-6` |
+| Spacing          | card `px-6 py-6`, upload `px-6 py-10`, extraction panel `px-4 py-4 gap-3`, text preview wrapper `px-6 py-6`, preview unavailable panel `px-6 py-12`, upload gap `mt-4`, preview header `px-4 py-3`, footer `border-t border-border pt-6` |
+| Hover state      | select/preview/open buttons `hover:border-accent hover:text-accent`, extract/generate buttons `hover:bg-accent-dark` |
 | Shadow           | card shared profile shadow, upload icon/select button subtle token shadows |
-| Accent usage     | upload glyph uses text-secondary, success message uses `text-success`, generate button `bg-accent text-accent-foreground` |
+| Accent usage     | upload glyph uses text-secondary, success messages use `text-success`, failed extraction/status messages use `text-error`, extract/generate buttons use `bg-accent text-accent-foreground` |
 
 **Pattern notes:**
-Resume management UI is a white card with a soft secondary upload well, centered neutral upload icon stack, and screenshot copy that says `PDF format only. Maximum file size 2MB.` The visible select control is a label styled as the existing button and opens a hidden PDF input. Show the selected or already saved resume name as a muted 12px caption under the button. Newly selected local files render an immediate bordered PDF preview through an object URL and use secondary copy `Resume selected. Save profile to upload it.` Saved resumes show `Resume uploaded successfully.` in success green, then render the same preview through the authenticated `/api/resume/current` route rather than the raw storage URL. Include a compact preview header and `View full resume` link. The lower generate action remains available below the preview.
+Resume management UI is a white card with a soft secondary upload well and centered neutral upload icon stack. Empty upload wells use the title `Click to upload or drag and drop` plus format copy `PDF, DOC, DOCX, TXT, or RTF. Maximum file size 2MB.` Once a resume file is selected or a saved resume exists, the whole upload-well copy block collapses to a single `View current resume` link; do not keep the format note in that state. That link opens the selected file object URL or the authenticated `/api/resume/current` saved-resume route in a new tab. The visible select control is a label styled as the existing button and opens a hidden resume document input. Selecting a resume starts an immediate upload to InsForge storage and saves the resulting URL to the profile row so refreshes keep the document; do not require Save Profile just to persist the file. Show the selected or already saved resume name as a muted 12px caption under the button. PDF resumes render an embedded bordered preview. TXT and DOCX resumes render readable text previews through `/api/resume/preview`; DOCX uses Mammoth raw-text extraction rather than injected HTML. DOC and RTF must not be embedded in an iframe because browsers do not preview them reliably, and should show a centered `Preview unavailable for this file type` panel with an `Open resume` link. Saved/uploading resumes show success-green status copy such as `Uploading resume...` or `Resume uploaded successfully.`, and successful AI extraction shows `Resume extracted. Review the fields below before saving.` in success green. Failed upload/extraction/status messages use error red. Show the compact extraction panel only for formats that can be parsed for extraction, currently PDF and TXT. Its extract action is an accent-purple filled button matching other primary resume actions. Include a compact preview header and `View full resume` link. The lower generate action remains available below the preview.
 
 ### Profile Information Form
 

@@ -85,6 +85,11 @@ const {
 if (!user) redirect("/login");
 ```
 
+**Resume API session refresh:**
+
+- `proxy.ts` must include `/api/resume/:path*` so InsForge `updateSession()` refreshes expired access tokens before authenticated resume API routes run.
+- Do not redirect resume API requests from proxy; let route handlers return JSON errors so the client can show inline feedback.
+
 ---
 
 ### DB Queries
@@ -148,6 +153,7 @@ const url = data.publicUrl;
 - Always use `upsert: true` for base resume uploads — overwrites existing file
 - Always save the public URL back to the DB after upload
 - Never write files to disk — always upload buffer directly to storage
+- Resume selection in the profile UI uploads immediately and saves `profiles.resume_pdf_url`; Save Profile should not be required just to persist the selected document across refreshes
 
 ---
 
@@ -486,56 +492,64 @@ const response = await openai.chat.completions.create({
 - If browser research returns empty — still run synthesis with job + profile only
 - yourEdge, gapsToAddress, and smartQuestions are the most valuable fields — never skip them
 
-## OpenAI GPT-4o
+## Gemini API
 
-**Check first:** Check AGENTS.md for an installed OpenAI skill. The skill will have the latest API patterns and model capabilities.
+**Check first:** Check official Google AI Gemini docs before changing request or response shapes.
 
-### Structured JSON Response
+### Resume Extraction Structured JSON
 
 ```typescript
-import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-
-const response = await openai.chat.completions.create({
-  model: "gpt-4o",
-  response_format: { type: "json_object" },
-  temperature: 0.3,
-  messages: [
-    {
-      role: "system",
-      content: "You are a job matching assistant. Return only valid JSON.",
+const response = await fetch(
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": process.env.GEMINI_API_KEY!,
     },
-    {
-      role: "user",
-      content: `Your prompt here`,
-    },
-  ],
-});
-
-const result = JSON.parse(response.choices[0].message.content!);
+    body: JSON.stringify({
+      system_instruction: {
+        parts: [{ text: "Return only valid JSON." }],
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: "Your prompt here" }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 4096,
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            fullName: { type: "string" },
+            email: { type: "string" },
+          },
+          required: ["fullName", "email"],
+        },
+      },
+    }),
+  },
+);
 ```
-
-**Temperature settings:**
-
-- `0.3` — matching, scoring, extraction, research synthesis — deterministic results
-- `0.7` — resume generation — natural variation
-
-**Max tokens:**
-
-- Job matching + scoring: `300`
-- Company research synthesis: `800`
-- Resume generation: `1000`
-- Profile extraction from resume: `800`
 
 **Rules:**
 
-- Model string is always `'gpt-4o'` — never use other model names
-- Always use `response_format: { type: 'json_object' }` for structured data
-- Always parse `response.choices[0].message.content` as string — even with json_object it returns a string
-- Always validate parsed JSON before using — wrap in try/catch
-- Match threshold is always `MATCH_THRESHOLD` from `lib/utils.ts` — never hardcode 70
-- Company research synthesis must always return a complete dossier — never return empty even if browser research failed
+- Use server-side `GEMINI_API_KEY`; never expose it with a `NEXT_PUBLIC_` prefix
+- Use the REST API from server code for resume extraction; no client-side Gemini calls
+- Try `gemini-2.5-flash` first and fall back to `gemini-2.5-flash-lite` if Gemini returns an error or non-JSON content
+- Do not use `gemini-3.5-flash` for resume extraction; it returned unusable one-letter text responses in local smoke tests
+- Send the API key in the `x-goog-api-key` header
+- Use `generationConfig.responseMimeType = "application/json"` for structured resume extraction
+- Pair JSON mode with `generationConfig.responseJsonSchema` so Gemini is constrained to the expected object shape
+- Always validate parsed JSON with Zod before using it
+- Ask for `yearsExperience` as digits only; normalize values like `5 years` to `5`
+- If Gemini leaves `yearsExperience` blank but work dates are present, estimate it in app code from extracted work dates before filling the form
+- Ask Gemini to put role bullets, achievements, duties, and summaries into `workExperience[].responsibilities`
+- If Gemini leaves a role's `responsibilities` blank, recover likely responsibility lines from the raw resume text around the matched company/job-title block before filling the form
+- Normalize extracted `linkedinUrl` and `portfolioUrl` to absolute `https://` URLs before they reach profile `type="url"` inputs; discard non-URL placeholder text instead of blocking Save Profile
+- Provider quota/auth failures must be converted into safe user-facing `ResumeExtractionProviderError` messages
 
 ---
 
@@ -654,32 +668,40 @@ Only use these — others are silently ignored:
 
 ---
 
-## pdf-parse
+## pdf2json
 
-**Check first:** Check AGENTS.md for an installed pdf-parse skill.
+**Check first:** Check AGENTS.md for an installed pdf2json skill.
 
 ### Extract Text from Uploaded Resume
 
 ```typescript
-import pdf from "pdf-parse";
+import PDFParser from "pdf2json";
 
-// In API route handling resume upload
-export async function POST(req: NextRequest) {
-  const formData = await req.formData();
-  const file = formData.get("resume") as File;
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+function extractTextFromPdf(pdfBuffer: Uint8Array): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const parser = new PDFParser(null, true);
 
-  const pdfData = await pdf(buffer);
-  const extractedText = pdfData.text; // raw text content
+    parser.on("pdfParser_dataError", (errData) => {
+      parser.destroy();
+      reject(errData instanceof Error ? errData : errData.parserError);
+    });
 
-  // Send to GPT-4o for structured extraction
+    parser.on("pdfParser_dataReady", () => {
+      const extractedText = parser.getRawTextContent();
+      parser.destroy();
+      resolve(extractedText);
+    });
+
+    parser.parseBuffer(Buffer.from(pdfBuffer), 0);
+  });
 }
 ```
 
 **Rules:**
 
 - Server-side only — never import in client components
-- `pdfData.text` is raw unformatted text — GPT-4o handles the structure extraction
+- `getRawTextContent()` is raw unformatted text — Gemini handles the structure extraction
+- Use `parseBuffer()` for uploaded files and private storage downloads; never write resume files to disk for parsing
+- Destroy parser instances after success or failure
 - Always handle parse errors — some PDFs are image-based and return empty text
-- If `pdfData.text` is empty or very short — return error to user: "Could not extract text from this PDF. Please try a different file."
+- If extracted text is empty or very short — return error to user: "Could not extract text from this PDF. Please try a different file."
