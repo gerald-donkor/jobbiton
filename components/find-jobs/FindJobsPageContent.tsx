@@ -18,7 +18,7 @@ export function FindJobsPageContent({
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
       <Navbar />
       <main className="mx-auto w-full max-w-[1440px] bg-background px-6 py-8 text-text-primary">
-        <div className="mx-auto flex w-full max-w-[866px] flex-col gap-6">
+        <div className="mx-auto flex w-full max-w-[1192px] flex-col gap-6">
           <FindJobsClient />
         </div>
       </main>

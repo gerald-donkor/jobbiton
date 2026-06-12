@@ -4,15 +4,20 @@ import { getScoreColor } from "@/lib/adzuna";
 
 type JobsTableProps = {
   jobs: FindJobsJobSummary[];
+  emptyMessage?: string;
 };
 
-export function JobsTable({ jobs }: JobsTableProps) {
+export function JobsTable({
+  jobs,
+  emptyMessage = "Search for jobs to see your saved matches here.",
+}: JobsTableProps) {
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
       <div className="overflow-x-auto">
-        <div className="min-w-[820px]">
-          <div className="grid grid-cols-[16%_24%_20%_16%_10%_14%] border-b border-border bg-surface text-left">
-            <span className="px-6 py-4 text-[12px] font-semibold leading-4 text-text-secondary">
+        <div className="min-w-[1110px]">
+          <div className="grid grid-cols-[64px_1.7fr_1fr_176px_132px_96px_110px] border-b border-border bg-surface text-left">
+            <span className="border-r border-border px-3 py-4" />
+            <span className="px-4 py-4 text-[12px] font-semibold leading-4 text-text-secondary">
               COMPANY
             </span>
             <span className="px-4 py-4 text-[12px] font-semibold leading-4 text-text-secondary">
@@ -34,7 +39,7 @@ export function JobsTable({ jobs }: JobsTableProps) {
           <div>
             {jobs.length === 0 ? (
               <div className="px-6 py-16 text-center text-[14px] font-normal leading-5 text-text-muted">
-                Search for jobs to see your saved matches here.
+                {emptyMessage}
               </div>
             ) : (
               jobs.map((job) => (
@@ -42,17 +47,17 @@ export function JobsTable({ jobs }: JobsTableProps) {
                   key={job.id}
                   href={`/find-jobs/${job.id}`}
                   aria-label={`View ${job.title} at ${job.company}`}
-                  className="grid grid-cols-[16%_24%_20%_16%_10%_14%] border-b border-border transition-colors last:border-b-0 hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
+                  className="grid grid-cols-[64px_1.7fr_1fr_176px_132px_96px_110px] border-b border-border transition-colors last:border-b-0 hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
                 >
-                  <span className="px-6 py-4">
-                    <span className="flex items-center gap-3">
-                      <span
-                        aria-hidden="true"
-                        className="find-jobs-company-icon shrink-0"
-                      />
-                      <span className="text-[14px] font-semibold leading-5 text-text-primary">
-                        {job.company}
-                      </span>
+                  <span className="flex items-center justify-center border-r border-border bg-surface-secondary/35 px-3 py-4">
+                    <span
+                      aria-hidden="true"
+                      className="find-jobs-company-icon shrink-0"
+                    />
+                  </span>
+                  <span className="px-4 py-4 pr-6">
+                    <span className="text-[14px] font-semibold leading-5 text-text-primary">
+                      {job.company}
                     </span>
                   </span>
                   <span className="px-4 py-4 text-[14px] font-normal leading-5 text-text-primary">
