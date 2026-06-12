@@ -22,6 +22,7 @@ const jobMatchSchema = z.object({
 
 const KNOWN_SKILLS = [
   "react",
+  "react.js",
   "next.js",
   "nextjs",
   "typescript",
@@ -29,11 +30,14 @@ const KNOWN_SKILLS = [
   "node.js",
   "node",
   "tailwind",
+  "tailwind css",
   "css",
   "html",
   "graphql",
   "rest",
+  "rest api",
   "postgresql",
+  "postgres",
   "sql",
   "mongodb",
   "redis",
@@ -64,8 +68,45 @@ const KNOWN_SKILLS = [
   "api design",
 ] as const;
 
+const SKILL_ALIASES: Record<string, string[]> = {
+  "api design": ["api design", "api development", "api architecture"],
+  "ci/cd": ["ci/cd", "ci cd", "continuous integration", "deployment pipeline"],
+  css: ["css", "css3"],
+  docker: ["docker", "containerization", "containers"],
+  git: ["git", "github", "gitlab"],
+  graphql: ["graphql", "graph ql"],
+  html: ["html", "html5"],
+  javascript: ["javascript", "js", "ecmascript"],
+  mongodb: ["mongodb", "mongo"],
+  "next.js": ["next.js", "nextjs", "next js"],
+  "node.js": ["node.js", "nodejs", "node js", "node"],
+  playwright: ["playwright"],
+  postgresql: ["postgresql", "postgres", "postgres sql"],
+  react: ["react", "react.js", "reactjs", "react js"],
+  "react native": ["react native"],
+  redis: ["redis"],
+  rest: ["rest", "rest api", "restful", "restful api"],
+  sql: ["sql"],
+  tailwind: ["tailwind", "tailwind css"],
+  testing: ["testing", "test automation", "unit tests", "integration tests"],
+  typescript: ["typescript", "ts"],
+};
+
+const TITLE_STOP_WORDS = new Set([
+  "and",
+  "developer",
+  "engineer",
+  "ii",
+  "iii",
+  "lead",
+  "mid",
+  "senior",
+  "software",
+  "staff",
+]);
+
 function normalizeSkill(value: string): string {
-  return value.trim().toLowerCase();
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function uniqueSkills(values: string[]): string[] {
@@ -78,12 +119,92 @@ function uniqueSkills(values: string[]): string[] {
   );
 }
 
+function titleCaseSkill(value: string): string {
+  if (value === "next.js") {
+    return "Next.js";
+  }
+
+  if (value === "node.js") {
+    return "Node.js";
+  }
+
+  if (value === "ci/cd") {
+    return "CI/CD";
+  }
+
+  return value.replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function phraseMatches(text: string, phrase: string): boolean {
+  const normalizedPhrase = normalizeSkill(phrase);
+
+  if (!normalizedPhrase) {
+    return false;
+  }
+
+  const pattern = new RegExp(
+    `(^|[^a-z0-9+#])${escapeRegex(normalizedPhrase)}([^a-z0-9+#]|$)`,
+    "i",
+  );
+
+  return pattern.test(text);
+}
+
+function getSkillAliases(skill: string): string[] {
+  const normalizedSkill = normalizeSkill(skill);
+  return SKILL_ALIASES[normalizedSkill] ?? [normalizedSkill];
+}
+
+function skillAppearsInText(text: string, skill: string): boolean {
+  return getSkillAliases(skill).some((alias) => phraseMatches(text, alias));
+}
+
+function canonicalSkill(value: string): string {
+  const normalizedValue = normalizeSkill(value);
+
+  for (const [canonical, aliases] of Object.entries(SKILL_ALIASES)) {
+    if (
+      canonical === normalizedValue ||
+      aliases.some((alias) => normalizeSkill(alias) === normalizedValue)
+    ) {
+      return canonical;
+    }
+  }
+
+  return normalizedValue;
+}
+
 function extractKnownSkills(text: string): string[] {
   const normalizedText = text.toLowerCase();
 
-  return KNOWN_SKILLS.filter((skill) => normalizedText.includes(skill)).map((skill) =>
-    skill === "nextjs" ? "Next.js" : skill.replace(/\b\w/g, (letter) => letter.toUpperCase()),
+  return uniqueSkills(
+    KNOWN_SKILLS.filter((skill) => skillAppearsInText(normalizedText, skill)).map(
+      (skill) => titleCaseSkill(canonicalSkill(skill)),
+    ),
   );
+}
+
+function getTitleTokens(value: string): string[] {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9+#]+/g, " ")
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 3 && !TITLE_STOP_WORDS.has(token));
+}
+
+function titleOverlapsJob(jobText: string, title: string): boolean {
+  const tokens = getTitleTokens(title);
+
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  return tokens.some((token) => phraseMatches(jobText, token));
 }
 
 function buildHeuristicReason({
@@ -115,43 +236,50 @@ function createHeuristicMatch(
   profile: FindJobsProfile,
 ): JobMatchResult {
   const profileSkills = uniqueSkills(profile.skills);
-  const profileSkillSet = new Set(profileSkills.map(normalizeSkill));
+  const profileSkillSet = new Set(profileSkills.map(canonicalSkill));
   const jobText = `${job.title} ${job.description}`.toLowerCase();
   const detectedJobSkills = extractKnownSkills(jobText);
   const matchedSkills = profileSkills.filter((skill) =>
-    jobText.includes(normalizeSkill(skill)),
+    skillAppearsInText(jobText, skill),
   );
   const missingSkills = detectedJobSkills.filter(
-    (skill) => !profileSkillSet.has(normalizeSkill(skill)),
+    (skill) => !profileSkillSet.has(canonicalSkill(skill)),
   );
+  const detectedSkillCount = detectedJobSkills.length;
+  const skillCoverage =
+    detectedSkillCount === 0 ? 0 : matchedSkills.length / detectedSkillCount;
+  const desiredTitleMatch = profile.job_titles_seeking.some((title) =>
+    title ? titleOverlapsJob(jobText, title) : false,
+  );
+  const currentTitleMatch = profile.current_title
+    ? titleOverlapsJob(jobText, profile.current_title)
+    : false;
 
-  let score = 32;
+  let score = 24;
 
-  score += matchedSkills.length * 11;
+  score += Math.round(skillCoverage * 42);
+  score += Math.min(matchedSkills.length * 6, 24);
 
-  if (
-    profile.current_title &&
-    jobText.includes(profile.current_title.trim().toLowerCase())
-  ) {
-    score += 10;
+  if (currentTitleMatch) {
+    score += 8;
   }
 
-  if (
-    profile.job_titles_seeking.some((title) =>
-      title ? jobText.includes(title.trim().toLowerCase()) : false,
-    )
-  ) {
-    score += 8;
+  if (desiredTitleMatch) {
+    score += 14;
   }
 
   if (profile.remote_preference === "remote" && jobText.includes("remote")) {
     score += 6;
   }
 
-  score -= missingSkills.length * 4;
+  if (matchedSkills.length === 0 && !desiredTitleMatch && !currentTitleMatch) {
+    score -= 14;
+  }
+
+  score -= Math.min(missingSkills.length * 3, 18);
 
   return {
-    matchScore: clampNumber(score, 18, 96),
+    matchScore: clampNumber(score, 5, 96),
     matchReason: buildHeuristicReason({
       matchedSkills,
       missingSkills,

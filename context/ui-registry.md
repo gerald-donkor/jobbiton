@@ -176,7 +176,7 @@ Last updated: 2026-06-12
 | Accent usage     | pagination active page `bg-accent text-accent-foreground`           |
 
 **Pattern notes:**
-Find Jobs uses a centered wide work area on the standard app background, with the post-search state opening up to roughly a 1192px content width so the search card, filter row, and jobs table can breathe like the supplied reference image. The shared navbar stays in its homepage-like state with the `Start for free` CTA visible and no active icon/underline treatment. Pagination sits outside the table card, not in the card footer. A non-visual client wrapper now owns the live search state and reuses the same visual card/table patterns instead of introducing a second page shell.
+Find Jobs uses a centered wide work area on the standard app background, with the post-search state opening up to roughly a 1192px content width so the search card, filter row, and jobs table can breathe like the supplied reference image. The shared navbar stays in its homepage-like state with the `Start for free` CTA visible and no active icon/underline treatment. Pagination sits outside the table card, not in the card footer. A non-visual client wrapper now owns live search feedback and URL control state while the saved jobs list itself is loaded server-side from InsForge. Key the client wrapper by query/filter/sort/page so URL-driven changes remount cleanly without effect-based state syncing.
 
 ### Find Jobs Search Card
 
@@ -209,14 +209,14 @@ Last updated: 2026-06-12
 | Border           | search/selects `border border-border`                                 |
 | Border radius    | controls `rounded-md`                                                 |
 | Text — primary   | selects `text-text-primary text-[14px] font-normal leading-5`         |
-| Text — secondary | filter input `text-text-secondary`, placeholder `placeholder:text-text-muted` |
+| Text — secondary | filter input `text-text-secondary`, placeholder `placeholder:text-text-muted`, query error banner `text-error` |
 | Spacing          | controls `px-3`, grid `gap-3`                                         |
 | Hover state      | selects `hover:border-accent focus:border-accent focus:ring-1 focus:ring-accent` |
 | Shadow           | each control uses subtle token shadow                                 |
 | Accent usage     | focus border/ring only                                                |
 
 **Pattern notes:**
-The filter controls are three separate 40px white controls, not one combined toolbar card: wide filter input, All Matches select, and Match Score select. Use native `select` controls with `appearance-none`, enough column width, and a custom caret overlay so labels stay on one line and the control rolls down an option list. The Match Score control needs extra width/padding so the label does not crowd the caret or focus ring. The selects are static mock controls for Feature 09 and should wire to real filters in Feature 11.
+The filter controls are three separate 40px white controls, not one combined toolbar card: wide filter input, All Matches select, and Match Score select. Use native `select` controls with `appearance-none`, enough column width, and a custom caret overlay so labels stay on one line and the control rolls down an option list. The Match Score control needs extra width/padding so the label does not crowd the caret or focus ring. Feature 11 wires all three controls to URL search params (`q`, `match`, `sort`) and resets pagination to page 1 whenever a filter or sort changes. Filter and sort value types live in `components/find-jobs/types.ts`, along with parser helpers that avoid unchecked type assertions in select handlers. Temporary latest-search rows must also be filtered/sorted in the client using the active controls, so selected states like `High Match` + `Oldest` always match the visible rows after a live search. Successful searches add a `run` URL param from the created `agent_runs.id`; filter, sort, pagination, and refresh behavior must preserve that run param so the table remains scoped to the current search instead of mixing rows from older searches.
 
 ### Find Jobs Table
 
@@ -236,7 +236,7 @@ Last updated: 2026-06-12
 | Accent usage     | source badges `bg-accent-light text-accent`, score fills/text use `bg-success text-success`, `bg-info text-info`, or `bg-warning text-warning` |
 
 **Pattern notes:**
-The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 10 swaps the six mock rows for live saved search results, keeps match scores color-coded by range, and uses a centered muted empty state inside the card before the first search or when no results are returned. Filter/sort/pagination controls are still visual-only until Feature 11.
+The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 11 renders the server-provided saved jobs page by default, scoped to the active search run when one exists, shows a centered muted empty state when filters return no rows, and keeps pagination/count controls outside the table shell. The pagination uses compact text Previous/Next buttons with chevrons, circular page buttons, and the active page as `bg-accent text-accent-foreground`. Avoid broad all-user saved-job queries in this table unless a separate saved-jobs archive mode is explicitly designed.
 
 ## Non-Visual Integrations
 
@@ -262,7 +262,15 @@ Files: app/api/agent/find/route.ts, agent/adzuna.ts, agent/matcher.ts, lib/adzun
 Last updated: 2026-06-12
 
 **Pattern notes:**
-Feature 10 keeps the Adzuna and matching flow entirely server-side. The client submits JSON to `POST /api/agent/find`; the route validates input, captures `job_search_started`, and calls the agent orchestration module. The agent creates an `agent_runs` row, searches Adzuna with `category=it-jobs`, scores each result against the saved profile, inserts saved `jobs` rows, records warnings/errors in `agent_logs`, and emits one `job_found` event per saved job. Matching prefers OpenRouter `openai/gpt-4o` when `OPENROUTER_API_KEY` exists, but falls back to a deterministic heuristic scorer so local development still returns usable results. `proxy.ts` includes `/api/agent/:path*` so stale InsForge sessions refresh before authenticated search requests run.
+Feature 10 keeps the Adzuna and matching flow entirely server-side. The client submits JSON to `POST /api/agent/find`; the route validates input, captures `job_search_started`, and calls the agent orchestration module. The agent creates an `agent_runs` row, searches Adzuna with `category=it-jobs`, scores each result against the saved profile, inserts saved `jobs` rows, records warnings/errors in `agent_logs`, and emits one `job_found` event per saved job. Matching prefers OpenRouter `openai/gpt-4o` when `OPENROUTER_API_KEY` exists, but falls back to a deterministic heuristic scorer so local development still returns usable results. The fallback matcher must use skill aliases, word/phrase boundaries, title-token overlap, and skill coverage rather than raw substring matching so relevant jobs can cross the 70-point High Match threshold while weak matches remain low. `proxy.ts` includes `/api/agent/:path*` so stale InsForge sessions refresh before authenticated search requests run.
+
+### Saved Jobs Filtering and Pagination
+
+Files: app/find-jobs/page.tsx, components/find-jobs/FindJobsClient.tsx, components/find-jobs/JobFilterBar.tsx, components/find-jobs/types.ts
+Last updated: 2026-06-12
+
+**Pattern notes:**
+Feature 11 loads saved jobs from InsForge in the `/find-jobs` Server Component, not in the client component. The route module owns the single-use user-scoped query shape: exact count plus paginated rows, active `run` scoping by `agent_runs.id`, `q` search across `company` or `title`, `match_score >= 70` for High Match, `match_score < 70` for Low Match, score/newest/oldest ordering, and 20 rows per page. Text search is tokenized before building the InsForge OR filter so punctuation-heavy user input does not produce malformed query syntax. Query failures return a safe `We could not load your saved jobs right now.` message and the client renders it as a bordered token error banner above the table. The client wrapper uses `router.replace(..., { scroll: false })` to update URL params and resets to page 1 for filter/sort changes while preserving the active `run` param. A successful Adzuna search still renders the returned jobs immediately as a temporary latest-search view, navigates to `/find-jobs?run={runId}`, and that temporary view applies the active filter query, match filter, and sort selection before rendering; changing filter, sort, or page clears that temporary view and returns to the DB-backed saved jobs list for the same run.
 
 ### Homepage Navbar
 

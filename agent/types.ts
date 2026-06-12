@@ -42,6 +42,7 @@ export type FindJobsSearchResponse =
   | {
       success: true;
       data: {
+        runId: string;
         jobs: FindJobsJobSummary[];
         totalFound: number;
         strongMatchCount: number;

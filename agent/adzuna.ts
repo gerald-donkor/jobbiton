@@ -16,6 +16,7 @@ import type {
 type DiscoverJobsResult =
   | {
       success: true;
+      runId: string;
       jobs: FindJobsJobSummary[];
       totalFound: number;
       strongMatchCount: number;
@@ -212,6 +213,7 @@ export async function discoverJobsForUser({
 
       return {
         success: true,
+        runId,
         jobs: [],
         totalFound: 0,
         strongMatchCount: 0,
@@ -367,6 +369,7 @@ export async function discoverJobsForUser({
 
     return {
       success: true,
+      runId,
       jobs,
       totalFound: adzunaJobs.length,
       strongMatchCount: jobs.filter((job) => job.matchScore >= MATCH_THRESHOLD)

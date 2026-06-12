@@ -1,5 +1,9 @@
-type MatchFilterValue = "all" | "high" | "low";
-type SortValue = "score" | "newest" | "oldest";
+import {
+  parseMatchFilterValue,
+  parseSortValue,
+  type MatchFilterValue,
+  type SortValue,
+} from "@/components/find-jobs/types";
 
 type JobFilterBarProps = {
   filterQuery: string;
@@ -39,7 +43,7 @@ export function JobFilterBar({
         <select
           value={matchFilter}
           onChange={(event) =>
-            onMatchFilterChange(event.target.value as MatchFilterValue)
+            onMatchFilterChange(parseMatchFilterValue(event.target.value))
           }
           className="h-10 w-full appearance-none rounded-md border border-border bg-surface px-3 pr-8 text-[14px] font-normal leading-5 text-text-primary shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)] outline-none transition-colors hover:border-accent focus:border-accent focus:ring-1 focus:ring-accent"
         >
@@ -56,7 +60,7 @@ export function JobFilterBar({
         <span className="sr-only">Sort jobs</span>
         <select
           value={sortBy}
-          onChange={(event) => onSortByChange(event.target.value as SortValue)}
+          onChange={(event) => onSortByChange(parseSortValue(event.target.value))}
           className="h-10 w-full appearance-none rounded-md border border-border bg-surface px-3 pr-9 text-[14px] font-normal leading-5 text-text-primary shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)] outline-none transition-colors hover:border-accent focus:border-accent focus:ring-1 focus:ring-accent"
         >
           <option value="score">Match Score</option>
@@ -71,5 +75,3 @@ export function JobFilterBar({
     </section>
   );
 }
-
-export type { MatchFilterValue, SortValue };
