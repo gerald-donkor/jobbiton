@@ -56,7 +56,7 @@ Last updated: 2026-06-09
 | Accent usage     | none at layout level                                                |
 
 **Pattern notes:**
-Screenshot-matched profile pages keep the full shared navbar visible, use the app background behind a centered profile column, and place profile cards in a `max-w-[940px]` column with `gap-6`. Attention, Connected Accounts, Resume, and Profile Information cards should all share this same column width so the page reads as one streamlined vertical stack. Keep page-level styling unframed; individual profile sections provide the white card shells and shadows.
+Screenshot-matched profile pages keep the full shared navbar visible, use the app background behind a centered profile column, and place profile cards in a `max-w-[940px]` column with `gap-6`. Attention, Resume, and Profile Information cards should all share this same column width so the page reads as one streamlined vertical stack. Keep page-level styling unframed; individual profile sections provide the white card shells and shadows.
 
 ### Protected Navbar Active State
 
@@ -98,30 +98,10 @@ Last updated: 2026-06-09
 **Pattern notes:**
 Profile status banners are white cards with default borders, compact 14px text, orange warning tags, and a token CSS progress ring. Missing-field tags should render as a single compact horizontal strip on desktop (`lg:flex-nowrap`) and wrap only on smaller screens. Desktop tags use tighter spacing (`lg:gap-1.5`, `lg:px-1.5`, `lg:text-[11px]`) so they fit in one line like the reference. The banner is data-driven from app-calculated completion state; a brand-new unsaved profile must render at 0% with an unfilled neutral gray ring, and must not count auth email or dropdown defaults as completed fields. Positive progress states use the purple accent fill. At 100%, the banner is not rendered at all; complete profiles should move straight into the Connected Accounts and Resume sections without a success card.
 
-### Profile Connected Accounts Section
-
-File: components/profile/ConnectedAccountsSection.tsx
-Last updated: 2026-06-09
-
-| Property         | Class                                                                 |
-| ---------------- | --------------------------------------------------------------------- |
-| Background       | `bg-surface`, account row `bg-surface`                                |
-| Border           | card `border border-border`, account row `border border-border`       |
-| Border radius    | `rounded-xl`, LinkedIn icon shell `rounded-md`                        |
-| Text — primary   | `text-text-primary text-[16px] font-semibold leading-6`, row title `text-[14px] font-medium leading-5` |
-| Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`, caption `text-text-muted text-[12px] font-normal leading-4` |
-| Spacing          | card `px-6 py-6`, row `px-4 py-4`, header gap `mt-1`, row gap `mt-4`  |
-| Hover state      | connect button `hover:bg-info-dark`                                   |
-| Shadow           | `shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
-| Accent usage     | `bg-linkedin text-linkedin-foreground`, icon shell `bg-info-lightest` |
-
-**Pattern notes:**
-Connected account cards use the same white profile card shell as Resume and Attention, with a bordered inner row. LinkedIn actions use the project LinkedIn token rather than generic blue.
-
 ### Profile Resume Section
 
 File: components/profile/ResumeSection.tsx
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 
 | Property         | Class                                                                 |
 | ---------------- | --------------------------------------------------------------------- |
@@ -131,12 +111,12 @@ Last updated: 2026-06-11
 | Text — primary   | `text-text-primary text-[16px] font-semibold leading-6`, upload/extraction title `text-[14px] font-semibold leading-5` |
 | Text — secondary | `text-text-secondary text-[14px] font-normal leading-5`, upload/extraction note `text-[12px] font-normal leading-4`, preview text `text-[13px] leading-6` |
 | Spacing          | card `px-6 py-6`, upload `px-6 py-10`, extraction panel `px-4 py-4 gap-3`, text preview wrapper `px-6 py-6`, preview unavailable panel `px-6 py-12`, upload gap `mt-4`, preview header `px-4 py-3`, footer `border-t border-border pt-6` |
-| Hover state      | select/preview/open buttons `hover:border-accent hover:text-accent`, extract/generate buttons `hover:bg-accent-dark` |
+| Hover state      | select/preview/open buttons `hover:border-accent hover:text-accent`, remove button `hover:border-error`, extract/generate buttons `hover:bg-accent-dark` |
 | Shadow           | card shared profile shadow, upload icon/select button subtle token shadows |
-| Accent usage     | upload glyph uses text-secondary, success messages use `text-success`, failed extraction/status messages use `text-error`, extract/generate buttons use `bg-accent text-accent-foreground` |
+| Accent usage     | upload glyph uses text-secondary, success messages use `text-success`, failed extraction/status messages use `text-error`, remove button uses `text-error`, extract/generate buttons use `bg-accent text-accent-foreground` |
 
 **Pattern notes:**
-Resume management UI is a white card with a soft secondary upload well and centered neutral upload icon stack. Empty upload wells use the title `Click to upload or drag and drop` plus format copy `PDF, DOC, DOCX, TXT, or RTF. Maximum file size 2MB.` Once a resume file is selected or a saved resume exists, the whole upload-well copy block collapses to a single `View current resume` link; do not keep the format note in that state. That link opens the selected file object URL or the authenticated `/api/resume/current` saved-resume route in a new tab. The visible select control is a label styled as the existing button and opens a hidden resume document input. Selecting a resume starts an immediate upload to InsForge storage and saves the resulting URL to the profile row so refreshes keep the document; do not require Save Profile just to persist the file. Show the selected or already saved resume name as a muted 12px caption under the button. PDF resumes render an embedded bordered preview. TXT and DOCX resumes render readable text previews through `/api/resume/preview`; DOCX uses Mammoth raw-text extraction rather than injected HTML. DOC and RTF must not be embedded in an iframe because browsers do not preview them reliably, and should show a centered `Preview unavailable for this file type` panel with an `Open resume` link. Saved/uploading resumes show success-green status copy such as `Uploading resume...` or `Resume uploaded successfully.`, and successful AI extraction shows `Resume extracted. Review the fields below before saving.` in success green. Failed upload/extraction/status messages use error red. Show the compact extraction panel only for formats that can be parsed for extraction, currently PDF and TXT. Its extract action is an accent-purple filled button matching other primary resume actions. Include a compact preview header and `View full resume` link. The lower generate action remains available below the preview.
+Resume management UI is a white card with a soft secondary upload well and centered neutral upload icon stack. Empty upload wells use the title `Click to upload or drag and drop` plus format copy `PDF, DOC, DOCX, TXT, or RTF. Maximum file size 2MB.` Once a resume file is selected or a saved resume exists, the whole upload-well copy block collapses to a single `View current resume` link; do not keep the format note in that state. That link opens the selected file object URL or the authenticated `/api/resume/current` saved-resume route in a new tab. The visible select control is a label styled as the existing button and opens a hidden resume document input. Selecting a resume starts an immediate upload to InsForge storage and saves the resulting URL to the profile row so refreshes keep the document; do not require Save Profile just to persist the file. When a resume exists, show a bordered `Remove resume` button beside `Select Resume`; it uses error-red text on a white secondary surface, changes to `Removing...` while pending, clears the preview and saved resume URL on success, and leaves the generate action available. Show the selected or already saved resume name as a muted 12px caption under the button row. PDF resumes render an embedded bordered preview. TXT and DOCX resumes render readable text previews through `/api/resume/preview`; DOCX uses Mammoth raw-text extraction rather than injected HTML. DOC and RTF must not be embedded in an iframe because browsers do not preview them reliably, and should show a centered `Preview unavailable for this file type` panel with an `Open resume` link. Saved/uploading/generated/removed resumes show success-green status copy such as `Uploading resume...`, `Resume uploaded successfully.`, `Resume generated successfully.`, or `Resume removed.`, and successful AI extraction shows `Resume extracted. Review the fields below before saving.` in success green. Failed upload/extraction/generation/removal/status messages use error red. Show the compact extraction panel only for formats that can be parsed for extraction, currently PDF and TXT. Its extract action is an accent-purple filled button matching other primary resume actions. Include a compact preview header and `View full resume` link. The lower generate action stays below the preview, uses the same accent-purple filled button treatment, changes to `Generating...` while pending, disables with the same muted disabled state as extract, and writes its status message below the footer row.
 
 ### Profile Information Form
 

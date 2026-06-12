@@ -15,11 +15,13 @@ import {
 } from "@/lib/profile";
 import {
   getResumeFileFormat,
-  getResumeStoragePath,
-  getUserResumeStoragePaths,
   MAX_RESUME_SIZE,
-  RESUME_BUCKET,
 } from "@/lib/resume-files";
+import {
+  describeError,
+  removeUserResume,
+  replaceUserResume,
+} from "@/lib/resume-storage";
 
 export type SaveProfileState = {
   success: boolean;
@@ -31,6 +33,16 @@ export type UploadResumeState =
   | {
       success: true;
       resumePdfUrl: string;
+      message: string;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
+export type RemoveResumeState =
+  | {
+      success: true;
       message: string;
     }
   | {
@@ -56,44 +68,6 @@ function getOptionalNumber(value: string): number | null {
 
 function getOptionalString(value: string): string | null {
   return value ? value : null;
-}
-
-function readErrorProperty(error: unknown, key: string): unknown {
-  if (!error || typeof error !== "object" || !(key in error)) {
-    return undefined;
-  }
-
-  return Reflect.get(error, key);
-}
-
-function describeError(error: unknown): Record<string, unknown> {
-  if (error instanceof Error) {
-    return {
-      name: error.name,
-      message: error.message,
-      cause: error.cause,
-      status: readErrorProperty(error, "status"),
-      statusCode: readErrorProperty(error, "statusCode"),
-      code: readErrorProperty(error, "code"),
-      details: readErrorProperty(error, "details"),
-      hint: readErrorProperty(error, "hint"),
-      error: readErrorProperty(error, "error"),
-    };
-  }
-
-  if (error && typeof error === "object") {
-    return {
-      message: readErrorProperty(error, "message"),
-      status: readErrorProperty(error, "status"),
-      statusCode: readErrorProperty(error, "statusCode"),
-      code: readErrorProperty(error, "code"),
-      details: readErrorProperty(error, "details"),
-      hint: readErrorProperty(error, "hint"),
-      error: readErrorProperty(error, "error"),
-    };
-  }
-
-  return { error };
 }
 
 function readJsonList(value: string): string[] {
@@ -169,22 +143,17 @@ async function uploadUserResume({
     return { error: "Resume files must be 2MB or smaller." };
   }
 
-  const resumePath = getResumeStoragePath(userId, resumeFormat.extension);
-  await Promise.all(
-    getUserResumeStoragePaths(userId).map((path) =>
-      insforge.storage.from(RESUME_BUCKET).remove(path),
-    ),
-  );
-  const { data: uploadedResume, error: uploadError } = await insforge.storage
-    .from(RESUME_BUCKET)
-    .upload(resumePath, file);
+  const uploadResult = await replaceUserResume({
+    file,
+    extension: resumeFormat.extension,
+    insforge,
+    logPrefix: "[uploadUserResume]",
+    userId,
+  });
 
-  if (uploadError || !uploadedResume?.url) {
-    console.error("[uploadUserResume] Resume upload failed", describeError(uploadError));
-    return { error: "We could not upload your resume. Please try again." };
-  }
-
-  return { resumePdfUrl: uploadedResume.url };
+  return uploadResult.success
+    ? { resumePdfUrl: uploadResult.resumePdfUrl }
+    : { error: uploadResult.error };
 }
 
 function readProfileValues(
@@ -280,6 +249,62 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeStat
     return {
       success: false,
       message: "We could not upload your resume. Please try again.",
+    };
+  }
+}
+
+export async function removeResume(): Promise<RemoveResumeState> {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Please sign in again before removing your resume.",
+      };
+    }
+
+    const insforge = await createInsforgeServer();
+    const removeResult = await removeUserResume({
+      insforge,
+      logPrefix: "[removeResume]",
+      userId: user.id,
+    });
+
+    if (!removeResult.success) {
+      return {
+        success: false,
+        message: removeResult.error,
+      };
+    }
+
+    const { error: saveError } = await insforge.database.from("profiles").upsert([
+      {
+        id: user.id,
+        resume_pdf_url: null,
+        updated_at: new Date().toISOString(),
+      },
+    ]);
+
+    if (saveError) {
+      console.error("[removeResume] Profile resume URL clear failed", describeError(saveError));
+      return {
+        success: false,
+        message: "We removed your resume but could not update your profile. Please try again.",
+      };
+    }
+
+    revalidatePath("/profile");
+
+    return {
+      success: true,
+      message: "Resume removed.",
+    };
+  } catch (error) {
+    console.error("[removeResume] Unexpected failure", describeError(error));
+    return {
+      success: false,
+      message: "We could not remove your resume. Please try again.",
     };
   }
 }

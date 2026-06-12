@@ -6,9 +6,15 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
+<<<<<<< HEAD
 **Phase:** Phase 3 — Find Jobs Page
 **Last completed:** 10 Adzuna Job Discovery
 **Next:** 11 Filter + Sort + Pagination
+=======
+**Phase:** Phase 2 — Profile Page
+**Last completed:** 08 Resume PDF Generation from Profile
+**Next:** 09 Find Jobs Page — Full UI
+>>>>>>> origin/main
 
 ---
 
@@ -26,7 +32,7 @@ Update this file after every completed feature. Any AI agent reading this should
 - [x] 05 Profile Page — Full UI
 - [x] 06 Profile Save Logic
 - [x] 07 AI Profile Extraction from Resume
-- [ ] 08 Resume PDF Generation from Profile
+- [x] 08 Resume PDF Generation from Profile
 
 ### Phase 3 — Find Jobs Page
 
@@ -115,6 +121,7 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-11 — Resume selection now uploads immediately through a dedicated server action, saves the resulting InsForge storage URL to `profiles.resume_pdf_url`, and keeps the resume available after refresh without requiring Save Profile.
 - 2026-06-11 — Resume extraction now normalizes LinkedIn and Portfolio/GitHub values into absolute `https://` URLs before filling profile URL inputs, preventing browser URL validation from blocking Save Profile.
 - 2026-06-11 — Feature 07 resume upload/extraction flow user-verified: extracted profile fields save successfully, uploaded resumes persist after refresh, and extracted Portfolio/GitHub URLs no longer block browser URL validation.
+<<<<<<< HEAD
 - 2026-06-12 — Feature 09 Find Jobs Page Full UI completed with screenshot-matched mock search controls, success message, filter/sort bar, jobs table, match score bars, and pagination. `/find-jobs` now renders the full mock UI using protected auth and active icon navbar state. Feature 08 Resume PDF Generation remains outstanding because Feature 09 was built out of sequence by request.
 - 2026-06-12 — Feature 09 verification: `npm run lint` passes and `npm run build` passes after retrying the known network-dependent Inter font fetch; the build still shows the existing Node `module.register()` deprecation warning.
 - 2026-06-12 — Feature 09 visual correction completed against `Screenshot_20260612_160043.png`: search fields now use placeholders instead of filled test values, the layout is centered/narrowed, navbar CTA is visible, the success banner is removed, filter controls are separate, the jobs table includes a `SOURCE` badge column, and pagination/count sit outside the table card.
@@ -124,3 +131,13 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-12 — Feature 10 follows the project Adzuna and InsForge patterns: `category=it-jobs` search, `agent_runs` + `jobs` writes scoped to `user_id`, `agent_logs` warning/error logging, `job_search_started` + `job_found` PostHog events, and `proxy.ts` session refresh for `/api/agent/*`.
 - 2026-06-12 — Feature 10 matching prefers OpenRouter `openai/gpt-4o` when `OPENROUTER_API_KEY` is configured and falls back to a local heuristic scorer when that key is absent or the provider call fails, so local searches still return usable scores instead of hard failing.
 - 2026-06-12 — Feature 10 verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+=======
+- 2026-06-11 — Resume PDF Generation from Profile completed with `POST /api/resume/generate`, AI-polished resume content from the saved profile row, server-side `@react-pdf/renderer` PDF rendering via `renderToBuffer`, shared active-resume storage replacement, `profiles.resume_pdf_url` update, and immediate Resume card state refresh.
+- 2026-06-11 — Resume generation prefers `OPENROUTER_API_KEY` through OpenRouter model `openai/gpt-4o`; local development can fall back to the already configured Gemini REST path when OpenRouter is absent.
+- 2026-06-12 — Resume removal control added to the Resume card: users can click `Remove resume` to delete known active resume objects from InsForge storage, clear `profiles.resume_pdf_url`, reset local preview/input state, and return to the empty upload state before uploading another resume or generating a fresh one.
+- 2026-06-12 — Generated resume PDF layout polished to match a conventional resume structure more closely: left-aligned header, clearer name/title separation, calmer contact lines, title-case sections, improved experience hierarchy, and removal of app-style preference content from the PDF output.
+- 2026-06-12 — Generated resume header spacing hardened with an explicit identity block and line-height separation so the title no longer collides with the candidate name, and Gemini resume generation now falls back from `gemini-2.5-flash` to `gemini-2.5-flash-lite` on temporary `503 UNAVAILABLE` provider spikes.
+- 2026-06-12 — Connected Accounts now supports a real layered LinkedIn flow instead of a static button: `/api/linkedin/connect` and `/api/linkedin/callback` perform a verified OAuth round-trip when `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET` are configured, the profile card can fall back to a saved LinkedIn URL through a server action, disconnect is supported, and `/profile` now surfaces honest `Not connected` / `Using saved profile URL` / `OAuth connected` states.
+- 2026-06-12 — LinkedIn OAuth connect flow hardened after live testing: the connect/callback routes now use the cookie-aware InsForge server client, default requested LinkedIn scopes were reduced from `openid profile email` to `openid profile`, provider scope/configuration failures are surfaced as dedicated profile states instead of a misleading cancellation message, and `LINKEDIN_OAUTH_SCOPES` can override the requested scope set for app-specific LinkedIn products.
+- 2026-06-12 — Connected Accounts section removed from the top of `/profile` per product direction; the Personal Info LinkedIn URL field remains in place and no other profile page sections were changed.
+>>>>>>> origin/main

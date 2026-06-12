@@ -53,7 +53,11 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+<<<<<<< HEAD
     "/api/agent/:path*",
+=======
+    "/api/linkedin/:path*",
+>>>>>>> origin/main
     "/api/resume/:path*",
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
