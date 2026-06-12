@@ -149,6 +149,7 @@ Generate a clean professional PDF resume from current profile data using GPT-4o.
   - Polished work experience bullet points
   - Clean professional language throughout
 - @react-pdf/renderer renders GPT-4o output into clean single-page PDF using renderToBuffer()
+-renderToBuffer() used - never write to disk
 - Buffer uploaded to InsForge Storage at resumes/{user_id}/resume.pdf with upsert: true
 - resume_pdf_url updated in profiles table
 

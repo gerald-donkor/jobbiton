@@ -645,13 +645,22 @@ const ResumePDF = ({ profile }: { profile: Profile }) => (
 // Generate buffer
 const buffer = await renderToBuffer(<ResumePDF profile={profile} />)
 
-// Upload directly to InsForge Storage
-await insforge.storage
+// Upload directly to InsForge Storage.
+// The current SDK auto-renames existing objects, so delete known active-resume
+// paths first and then upload the generated PDF to the canonical path.
+await Promise.all(
+  getUserResumeStoragePaths(userId).map((path) =>
+    insforge.storage.from('resumes').remove(path),
+  ),
+)
+
+const pdfBlob = new Blob([new Uint8Array(buffer)], {
+  type: 'application/pdf',
+})
+
+const { data, error } = await insforge.storage
   .from('resumes')
-  .upload(`${userId}/resume.pdf`, buffer, {
-    contentType: 'application/pdf',
-    upsert: true
-  })
+  .upload(`${userId}/resume.pdf`, pdfBlob)
 ```
 
 **Supported CSS properties:**
@@ -665,6 +674,15 @@ Only use these — others are silently ignored:
 - PDF generation only in `app/api/resume/` routes
 - Generated buffer uploaded directly to InsForge Storage — never written to disk
 - Always save public URL to DB after upload
+- Use the shared `replaceUserResume()` storage helper so generated resumes and uploaded resumes follow the same one-active-resume rule
+- Use the shared `removeUserResume()` storage helper for explicit resume removal, then clear `profiles.resume_pdf_url`
+- Generate polished resume content from the saved profile row before rendering the PDF
+- Keep generated PDFs resume-like rather than app-like: clean header, contact split across readable lines, summary, skills, experience, and education only
+- Do not render job preferences, remote preference, salary expectation, cover letter tone, or work authorization in generated resumes
+- Prompt resume generation to avoid invented metrics, revenue, user counts, performance numbers, or business impact unless those facts are present in the saved profile
+- Prefer `OPENROUTER_API_KEY` with OpenRouter model `openai/gpt-4o`; if that key is absent in local development, the existing Gemini REST path may be used as a fallback
+- When using Gemini for resume generation, try `gemini-2.5-flash` first and fall back to `gemini-2.5-flash-lite` on provider or temporary availability failures such as `503 UNAVAILABLE`
+- The generated PDF replaces the active `profiles.resume_pdf_url`; it does not mutate any other profile fields
 
 ---
 
