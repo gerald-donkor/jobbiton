@@ -247,7 +247,12 @@ All environment variables defined in `.env.local` for development. Never hardcod
 | `NEXT_PUBLIC_INSFORGE_ANON_KEY` | lib/insforge-client.ts |
 | `BROWSERBASE_API_KEY`           | lib/browserbase.ts     |
 | `BROWSERBASE_PROJECT_ID`        | lib/browserbase.ts     |
-| `GEMINI_API_KEY`                | resume extraction      |
+| `OPENROUTER_API_KEY`            | resume generation preferred AI provider |
+| `GEMINI_API_KEY`                | resume extraction, resume generation fallback |
+| `LINKEDIN_CLIENT_ID`            | Connected Accounts LinkedIn OAuth start |
+| `LINKEDIN_CLIENT_SECRET`        | Connected Accounts LinkedIn OAuth callback token exchange |
+| `LINKEDIN_REDIRECT_URI`         | Optional explicit LinkedIn OAuth callback URL override |
+| `LINKEDIN_OAUTH_SCOPES`         | Optional LinkedIn scope override; defaults to `openid profile` |
 | `ADZUNA_APP_ID`                 | lib/adzuna.ts          |
 | `ADZUNA_APP_KEY`                | lib/adzuna.ts          |
 | `NEXT_PUBLIC_POSTHOG_KEY`       | lib/posthog-client.ts  |

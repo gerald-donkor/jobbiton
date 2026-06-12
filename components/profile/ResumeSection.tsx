@@ -5,6 +5,7 @@ import { RESUME_ACCEPT } from "@/lib/resume-files";
 
 type ResumeSectionProps = {
   resumePdfUrl: string;
+  resumeInputKey: number;
   resumeName: string;
   resumePreviewUrl: string;
   isResumeSaved: boolean;
@@ -18,12 +19,21 @@ type ResumeSectionProps = {
   canExtractResume: boolean;
   isExtracting: boolean;
   extractMessage: string;
+  isGenerating: boolean;
+  generateMessage: string;
+  isGenerateSuccess: boolean;
+  isRemoving: boolean;
+  removeMessage: string;
+  isRemoveSuccess: boolean;
   onResumeChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onExtractResume: () => void;
+  onGenerateResume: () => void;
+  onRemoveResume: () => void;
 };
 
 export function ResumeSection({
   resumePdfUrl,
+  resumeInputKey,
   resumeName,
   resumePreviewUrl,
   isResumeSaved,
@@ -37,8 +47,16 @@ export function ResumeSection({
   canExtractResume,
   isExtracting,
   extractMessage,
+  isGenerating,
+  generateMessage,
+  isGenerateSuccess,
+  isRemoving,
+  removeMessage,
+  isRemoveSuccess,
   onResumeChange,
   onExtractResume,
+  onGenerateResume,
+  onRemoveResume,
 }: ResumeSectionProps) {
   const resumeLabel = resumeName || (resumePdfUrl ? "Existing resume saved" : "");
   const hasResume = Boolean(resumeLabel);
@@ -63,6 +81,7 @@ export function ResumeSection({
       <div className="mt-4 rounded-xl border border-dashed border-border-muted bg-surface-secondary px-6 py-10">
         <div className="mx-auto flex max-w-[360px] flex-col items-center text-center">
           <input
+            key={resumeInputKey}
             id="resume"
             name="resume"
             type="file"
@@ -92,12 +111,24 @@ export function ResumeSection({
               PDF, DOC, DOCX, TXT, or RTF. Maximum file size 2MB.
             </p>
           )}
-          <label
-            htmlFor="resume"
-            className="mt-4 inline-flex h-[38px] items-center justify-center rounded-md border border-border bg-surface px-5 text-[16px] font-normal leading-6 text-text-primary shadow-[0_2px_8px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)] transition-colors hover:border-accent"
-          >
-            Select Resume
-          </label>
+          <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
+            <label
+              htmlFor="resume"
+              className="inline-flex h-[38px] items-center justify-center rounded-md border border-border bg-surface px-5 text-[16px] font-normal leading-6 text-text-primary shadow-[0_2px_8px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)] transition-colors hover:border-accent"
+            >
+              Select Resume
+            </label>
+            {hasResume ? (
+              <button
+                type="button"
+                disabled={isRemoving || isResumeUploading}
+                className="inline-flex h-[38px] items-center justify-center rounded-md border border-border bg-surface px-5 text-[13px] font-semibold leading-5 text-error transition-colors hover:border-error disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-text-muted"
+                onClick={onRemoveResume}
+              >
+                {isRemoving ? "Removing..." : "Remove resume"}
+              </button>
+            ) : null}
+          </div>
           {hasResume ? (
             <p className="mt-3 max-w-full truncate text-[12px] font-medium leading-4 text-text-secondary">
               {resumeLabel}
@@ -118,6 +149,16 @@ export function ResumeSection({
               : isResumeSaved
                 ? "Resume uploaded successfully."
                 : "Resume selected. Uploading now...")}
+        </p>
+      ) : null}
+
+      {removeMessage ? (
+        <p
+          className={`mt-3 text-[13px] font-semibold leading-5 ${
+            isRemoveSuccess ? "text-success" : "text-error"
+          }`}
+        >
+          {removeMessage}
         </p>
       ) : null}
 
@@ -218,12 +259,23 @@ export function ResumeSection({
         </p>
         <button
           type="button"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-accent px-5 text-[13px] font-semibold leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] transition-colors hover:bg-accent-dark"
+          disabled={isGenerating}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-accent px-5 text-[13px] font-semibold leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-text-muted disabled:shadow-none"
+          onClick={onGenerateResume}
         >
           <span className="document-icon" aria-hidden="true" />
-          Generate Resume from Profile
+          {isGenerating ? "Generating..." : "Generate Resume from Profile"}
         </button>
       </div>
+      {generateMessage ? (
+        <p
+          className={`mt-3 text-[13px] font-semibold leading-5 ${
+            isGenerateSuccess ? "text-success" : "text-error"
+          }`}
+        >
+          {generateMessage}
+        </p>
+      ) : null}
     </section>
   );
 }

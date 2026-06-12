@@ -2,11 +2,11 @@
 
 import { useActionState, useEffect, useState, type ChangeEvent } from "react";
 import {
+  removeResume,
   saveProfile,
   uploadResume,
   type SaveProfileState,
 } from "@/actions/profile";
-import { ConnectedAccountsSection } from "@/components/profile/ConnectedAccountsSection";
 import { ProfileInformationForm } from "@/components/profile/ProfileInformationForm";
 import { ProfileAttentionBanner } from "@/components/profile/ProfileAttentionBanner";
 import { ResumeSection } from "@/components/profile/ResumeSection";
@@ -54,6 +54,18 @@ type ResumePreviewResponse =
       success: true;
       data: {
         text: string;
+      };
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+type ResumeGenerateResponse =
+  | {
+      success: true;
+      data: {
+        resumePdfUrl: string;
       };
     }
   | {
@@ -181,6 +193,14 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
   const [resumePreviewText, setResumePreviewText] = useState("");
   const [isResumePreviewLoading, setIsResumePreviewLoading] = useState(false);
   const [resumePreviewMessage, setResumePreviewMessage] = useState("");
+  const [isGeneratingResume, setIsGeneratingResume] = useState(false);
+  const [generateResumeMessage, setGenerateResumeMessage] = useState("");
+  const [isGenerateResumeSuccess, setIsGenerateResumeSuccess] = useState(false);
+  const [isRemovingResume, setIsRemovingResume] = useState(false);
+  const [removeResumeMessage, setRemoveResumeMessage] = useState("");
+  const [isRemoveResumeSuccess, setIsRemoveResumeSuccess] = useState(false);
+  const [resumeInputKey, setResumeInputKey] = useState(0);
+
   async function handleSaveProfile(
     previousState: SaveProfileState,
     formData: FormData,
@@ -213,7 +233,7 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
   );
   const baseProfile = state.profile ?? extractedProfile ?? profile;
   const activeProfile =
-    persistedResumeUrl && persistedResumeUrl !== baseProfile.resumePdfUrl
+    persistedResumeUrl !== baseProfile.resumePdfUrl
       ? { ...baseProfile, resumePdfUrl: persistedResumeUrl }
       : baseProfile;
   const formSnapshotKey = state.profile
@@ -398,8 +418,11 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
     setResumeName(selectedResume?.name ?? "");
     setSelectedResumeFile(selectedResume);
     setExtractMessage("");
+    setGenerateResumeMessage("");
+    setRemoveResumeMessage("");
     setResumeUploadMessage("");
     setIsResumeUploadSuccess(false);
+    setIsRemoveResumeSuccess(false);
     setResumePreviewUrl((currentUrl) => {
       if (currentUrl) {
         URL.revokeObjectURL(currentUrl);
@@ -435,12 +458,96 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
     }
   }
 
+  async function generateResume() {
+    setIsGeneratingResume(true);
+    setGenerateResumeMessage("");
+    setIsGenerateResumeSuccess(false);
+    setRemoveResumeMessage("");
+    setIsRemoveResumeSuccess(false);
+    setExtractMessage("");
+
+    try {
+      const response = await fetch("/api/resume/generate", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      const result = (await response.json()) as ResumeGenerateResponse;
+
+      if (!result.success) {
+        setGenerateResumeMessage(result.error);
+        return;
+      }
+
+      setPersistedResumeUrl(result.data.resumePdfUrl);
+      setSelectedResumeFile(null);
+      setResumeName("Generated resume.pdf");
+      setResumeUploadMessage("Resume generated successfully.");
+      setIsResumeUploadSuccess(true);
+      setGenerateResumeMessage("Resume generated successfully.");
+      setIsGenerateResumeSuccess(true);
+      setResumePreviewUrl((currentUrl) => {
+        if (currentUrl) {
+          URL.revokeObjectURL(currentUrl);
+        }
+
+        return "";
+      });
+    } catch (error) {
+      console.error("[ProfileEditor] Resume generation failed", error);
+      setGenerateResumeMessage("We could not generate your resume. Please try again.");
+    } finally {
+      setIsGeneratingResume(false);
+    }
+  }
+
+  async function handleRemoveResume() {
+    setIsRemovingResume(true);
+    setRemoveResumeMessage("");
+    setIsRemoveResumeSuccess(false);
+    setExtractMessage("");
+    setGenerateResumeMessage("");
+    setResumeUploadMessage("");
+
+    try {
+      const result = await removeResume();
+
+      setRemoveResumeMessage(result.message);
+      setIsRemoveResumeSuccess(result.success);
+
+      if (!result.success) {
+        return;
+      }
+
+      setPersistedResumeUrl("");
+      setSelectedResumeFile(null);
+      setResumeName("");
+      setIsResumeUploadSuccess(false);
+      setIsGenerateResumeSuccess(false);
+      setResumePreviewText("");
+      setResumePreviewMessage("");
+      setResumeInputKey((currentKey) => currentKey + 1);
+      setResumePreviewUrl((currentUrl) => {
+        if (currentUrl) {
+          URL.revokeObjectURL(currentUrl);
+        }
+
+        return "";
+      });
+    } catch (error) {
+      console.error("[ProfileEditor] Resume removal failed", error);
+      setRemoveResumeMessage("We could not remove your resume. Please try again.");
+      setIsRemoveResumeSuccess(false);
+    } finally {
+      setIsRemovingResume(false);
+    }
+  }
+
   return (
     <form action={formAction} className="contents">
       <ProfileAttentionBanner completion={calculateProfileCompletion(activeProfile)} />
-      <ConnectedAccountsSection />
       <ResumeSection
         resumePdfUrl={activeProfile.resumePdfUrl}
+        resumeInputKey={resumeInputKey}
         resumeName={resumeName}
         resumePreviewUrl={resumePreviewUrl}
         isResumeSaved={Boolean(activeProfile.resumePdfUrl)}
@@ -454,8 +561,16 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
         canExtractResume={canExtractResumeFormat(activeResumeFormat)}
         isExtracting={isExtracting}
         extractMessage={extractMessage}
+        isGenerating={isGeneratingResume}
+        generateMessage={generateResumeMessage}
+        isGenerateSuccess={isGenerateResumeSuccess}
+        isRemoving={isRemovingResume}
+        removeMessage={removeResumeMessage}
+        isRemoveSuccess={isRemoveResumeSuccess}
         onResumeChange={handleResumeChange}
         onExtractResume={extractResume}
+        onGenerateResume={generateResume}
+        onRemoveResume={handleRemoveResume}
       />
       <ProfileInformationForm
         key={formSnapshotKey}
