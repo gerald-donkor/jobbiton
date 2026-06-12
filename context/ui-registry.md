@@ -170,13 +170,13 @@ Last updated: 2026-06-12
 | Border radius    | none                                                                |
 | Text — primary   | main `text-text-primary`                                            |
 | Text — secondary | inherited by child sections                                         |
-| Spacing          | main `px-6 py-8`, centered content stack `max-w-[866px] gap-6`      |
+| Spacing          | main `px-6 py-8`, centered content stack `max-w-[1192px] gap-6`     |
 | Hover state      | none                                                                |
 | Shadow           | none                                                                |
 | Accent usage     | pagination active page `bg-accent text-accent-foreground`           |
 
 **Pattern notes:**
-Find Jobs uses a centered 866px work area on the standard app background, matching the supplied browser screenshot. The shared navbar stays in its homepage-like state with the `Start for free` CTA visible and no active icon/underline treatment. Pagination sits outside the table card, not in the card footer. A non-visual client wrapper now owns the live search state and reuses the same visual card/table patterns instead of introducing a second page shell.
+Find Jobs uses a centered wide work area on the standard app background, with the post-search state opening up to roughly a 1192px content width so the search card, filter row, and jobs table can breathe like the supplied reference image. The shared navbar stays in its homepage-like state with the `Start for free` CTA visible and no active icon/underline treatment. Pagination sits outside the table card, not in the card footer. A non-visual client wrapper now owns the live search state and reuses the same visual card/table patterns instead of introducing a second page shell.
 
 ### Find Jobs Search Card
 
@@ -189,14 +189,14 @@ Last updated: 2026-06-12
 | Border           | card `border border-border`, inputs `border border-border`            |
 | Border radius    | card `rounded-xl`, inputs/buttons `rounded-md`                        |
 | Text — primary   | input values `text-text-primary text-[14px] font-normal leading-5`, button `whitespace-nowrap text-accent-foreground text-[14px] font-medium leading-5` |
-| Text — secondary | labels `text-text-secondary text-[12px] font-semibold leading-4`, placeholders `placeholder:text-text-muted` |
+| Text — secondary | labels `text-text-secondary text-[12px] font-semibold leading-4`, placeholders `placeholder:text-text-muted`, success banner `text-success-foreground` |
 | Spacing          | card `px-6 py-6`, control gap `gap-4`                                 |
-| Hover state      | primary action `hover:bg-accent-dark`, inputs `focus-within:border-accent focus-within:ring-1 focus-within:ring-accent` |
+| Hover state      | primary action `hover:bg-accent-dark`, inputs `focus-within:border-accent focus-within:ring-1 focus-within:ring-accent`, disabled button `disabled:opacity-70` |
 | Shadow           | shared card shadow, inputs subtle token shadow                        |
-| Accent usage     | primary button `bg-accent`                                            |
+| Accent usage     | primary button `bg-accent`, success banner icon `text-warning`        |
 
 **Pattern notes:**
-Search controls match the supplied pre-search screenshot with uppercase 12px labels, 40px bordered input shells, placeholder-only example values, and a compact accent-purple action button. Do not use `defaultValue` for the example text; the fields should be controlled and empty with placeholders. Keep the Find Jobs action wide enough and `whitespace-nowrap` so the icon and label stay together inside one button. Live search states reuse this same shell: button copy changes to `Searching...`, and result feedback sits directly below the controls as a single 14px line using `text-success` or `text-error`.
+Search controls match the supplied pre-search screenshot with uppercase 12px labels, 40px bordered input shells, placeholder-only example values, and a compact accent-purple action button. Do not use `defaultValue` for the example text; the fields should be controlled and empty with placeholders. Keep the Find Jobs action wide enough and `whitespace-nowrap` so the icon and label stay together inside one button. Post-search success state should look like the supplied reference image: the same shell stays in place, the submitted values remain in the inputs, and feedback becomes a full-width soft success banner directly under the controls using `border-success-light bg-success-lightest text-success-foreground` instead of plain inline text. Error feedback reuses the same banner structure with `border-error bg-surface text-error`.
 
 ### Find Jobs Filter Bar
 
@@ -227,16 +227,16 @@ Last updated: 2026-06-12
 | ---------------- | --------------------------------------------------------------------- |
 | Background       | card/header `bg-surface`, row hover `hover:bg-surface-secondary`      |
 | Border           | card `border border-border`, rows/header `border-border`              |
-| Border radius    | card `rounded-xl`, company icon `rounded-md`, source `rounded-full`, score bars `rounded-full` |
+| Border radius    | card `rounded-xl`, company icon `rounded-full`, source `rounded-full`, score bars `rounded-full` |
 | Text — primary   | company `text-text-primary text-[14px] font-semibold leading-5`, role/salary `text-text-primary text-[14px] font-normal leading-5` |
 | Text — secondary | headers `text-text-secondary text-[12px] font-semibold leading-4`, dates `text-text-muted text-[14px] font-normal leading-5` |
-| Spacing          | headers `px-6/px-4 py-4`, rows `px-6/px-4 py-4`                      |
+| Spacing          | headers `px-6/px-4 py-4`, rows `px-3/px-2/px-4 py-4`                 |
 | Hover state      | linked rows `hover:bg-surface-secondary focus-visible:outline-accent` |
 | Shadow           | shared card shadow                                                    |
 | Accent usage     | source badges `bg-accent-light text-accent`, score fills/text use `bg-success text-success`, `bg-info text-info`, or `bg-warning text-warning` |
 
 **Pattern notes:**
-The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, compact company placeholder icons, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 10 swaps the six mock rows for live saved search results, keeps match scores color-coded by range, and uses a centered muted empty state inside the card before the first search or when no results are returned. Filter/sort/pagination controls are still visual-only until Feature 11.
+The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 10 swaps the six mock rows for live saved search results, keeps match scores color-coded by range, and uses a centered muted empty state inside the card before the first search or when no results are returned. Filter/sort/pagination controls are still visual-only until Feature 11.
 
 ## Non-Visual Integrations
 

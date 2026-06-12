@@ -73,7 +73,7 @@ export function JobSearchCard({
             void onSearch();
           }}
           disabled={isSearching}
-          className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-accent px-4 text-[14px] font-medium leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_24%,transparent)] transition-colors hover:bg-accent-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-accent px-4 text-[14px] font-medium leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_24%,transparent)] transition-colors hover:bg-accent-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span
             aria-hidden="true"
@@ -83,13 +83,25 @@ export function JobSearchCard({
         </button>
       </div>
       {feedback ? (
-        <p
-          className={`mt-4 text-[14px] font-medium leading-5 ${
-            feedback.tone === "success" ? "text-success" : "text-error"
+        <div
+          className={`mt-4 flex min-h-10 items-center gap-2 rounded-md border px-4 py-3 text-[14px] font-medium leading-5 ${
+            feedback.tone === "success"
+              ? "border-success-light bg-success-lightest text-success-foreground"
+              : "border-error bg-surface text-error"
           }`}
         >
-          {feedback.text}
-        </p>
+          <span
+            aria-hidden="true"
+            className={
+              feedback.tone === "success"
+                ? "text-warning"
+                : "text-error"
+            }
+          >
+            {feedback.tone === "success" ? "*" : "!"}
+          </span>
+          <p>{feedback.text}</p>
+        </div>
       ) : null}
     </section>
   );
