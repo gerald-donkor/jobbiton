@@ -178,6 +178,86 @@ Last updated: 2026-06-09
 **Pattern notes:**
 Profile editor is a non-visual client wrapper around the attention banner, connected accounts card, resume card, and information card. Keep it `className="contents"` so it does not add another card, spacing layer, or nested visual shell around the profile sections. Failed server-action saves return the submitted profile snapshot; the editor keys/remounts the uncontrolled form fields from that snapshot so user-entered data is preserved instead of falling back to the last saved backend row. The attention banner must calculate completion from the editor's active profile snapshot, not a stale server-only prop, so clearing saved fields and saving immediately lowers the displayed percentage and missing-field tags.
 
+### Find Jobs Page Layout
+
+File: components/find-jobs/FindJobsPageContent.tsx
+Last updated: 2026-06-12
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | page `bg-background`, main `bg-background`                          |
+| Border           | none                                                                |
+| Border radius    | none                                                                |
+| Text — primary   | main `text-text-primary`                                            |
+| Text — secondary | inherited by child sections                                         |
+| Spacing          | main `px-6 py-8`, centered content stack `max-w-[866px] gap-6`      |
+| Hover state      | none                                                                |
+| Shadow           | none                                                                |
+| Accent usage     | pagination active page `bg-accent text-accent-foreground`           |
+
+**Pattern notes:**
+Find Jobs uses a centered 866px work area on the standard app background, matching the supplied browser screenshot. The shared navbar stays in its homepage-like state with the `Start for free` CTA visible and no active icon/underline treatment. Pagination sits outside the table card, not in the card footer. A non-visual client wrapper now owns the live search state and reuses the same visual card/table patterns instead of introducing a second page shell.
+
+### Find Jobs Search Card
+
+File: components/find-jobs/JobSearchCard.tsx
+Last updated: 2026-06-12
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | card `bg-surface`, inputs `bg-surface`                                |
+| Border           | card `border border-border`, inputs `border border-border`            |
+| Border radius    | card `rounded-xl`, inputs/buttons `rounded-md`                        |
+| Text — primary   | input values `text-text-primary text-[14px] font-normal leading-5`, button `whitespace-nowrap text-accent-foreground text-[14px] font-medium leading-5` |
+| Text — secondary | labels `text-text-secondary text-[12px] font-semibold leading-4`, placeholders `placeholder:text-text-muted` |
+| Spacing          | card `px-6 py-6`, control gap `gap-4`                                 |
+| Hover state      | primary action `hover:bg-accent-dark`, inputs `focus-within:border-accent focus-within:ring-1 focus-within:ring-accent` |
+| Shadow           | shared card shadow, inputs subtle token shadow                        |
+| Accent usage     | primary button `bg-accent`                                            |
+
+**Pattern notes:**
+Search controls match the supplied pre-search screenshot with uppercase 12px labels, 40px bordered input shells, placeholder-only example values, and a compact accent-purple action button. Do not use `defaultValue` for the example text; the fields should be controlled and empty with placeholders. Keep the Find Jobs action wide enough and `whitespace-nowrap` so the icon and label stay together inside one button. Live search states reuse this same shell: button copy changes to `Searching...`, and result feedback sits directly below the controls as a single 14px line using `text-success` or `text-error`.
+
+### Find Jobs Filter Bar
+
+File: components/find-jobs/JobFilterBar.tsx
+Last updated: 2026-06-12
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | search/selects `bg-surface`                                           |
+| Border           | search/selects `border border-border`                                 |
+| Border radius    | controls `rounded-md`                                                 |
+| Text — primary   | selects `text-text-primary text-[14px] font-normal leading-5`         |
+| Text — secondary | filter input `text-text-secondary`, placeholder `placeholder:text-text-muted` |
+| Spacing          | controls `px-3`, grid `gap-3`                                         |
+| Hover state      | selects `hover:border-accent focus:border-accent focus:ring-1 focus:ring-accent` |
+| Shadow           | each control uses subtle token shadow                                 |
+| Accent usage     | focus border/ring only                                                |
+
+**Pattern notes:**
+The filter controls are three separate 40px white controls, not one combined toolbar card: wide filter input, All Matches select, and Match Score select. Use native `select` controls with `appearance-none`, enough column width, and a custom caret overlay so labels stay on one line and the control rolls down an option list. The Match Score control needs extra width/padding so the label does not crowd the caret or focus ring. The selects are static mock controls for Feature 09 and should wire to real filters in Feature 11.
+
+### Find Jobs Table
+
+File: components/find-jobs/JobsTable.tsx
+Last updated: 2026-06-12
+
+| Property         | Class                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Background       | card/header `bg-surface`, row hover `hover:bg-surface-secondary`      |
+| Border           | card `border border-border`, rows/header `border-border`              |
+| Border radius    | card `rounded-xl`, company icon `rounded-md`, source `rounded-full`, score bars `rounded-full` |
+| Text — primary   | company `text-text-primary text-[14px] font-semibold leading-5`, role/salary `text-text-primary text-[14px] font-normal leading-5` |
+| Text — secondary | headers `text-text-secondary text-[12px] font-semibold leading-4`, dates `text-text-muted text-[14px] font-normal leading-5` |
+| Spacing          | headers `px-6/px-4 py-4`, rows `px-6/px-4 py-4`                      |
+| Hover state      | linked rows `hover:bg-surface-secondary focus-visible:outline-accent` |
+| Shadow           | shared card shadow                                                    |
+| Accent usage     | source badges `bg-accent-light text-accent`, score fills/text use `bg-success text-success`, `bg-info text-info`, or `bg-warning text-warning` |
+
+**Pattern notes:**
+The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, compact company placeholder icons, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 10 swaps the six mock rows for live saved search results, keeps match scores color-coded by range, and uses a centered muted empty state inside the card before the first search or when no results are returned. Filter/sort/pagination controls are still visual-only until Feature 11.
+
 ## Non-Visual Integrations
 
 ### InsForge Database Schema
@@ -195,6 +275,14 @@ Last updated: 2026-06-09
 
 **Pattern notes:**
 PostHog is initialized through the root `instrumentation-client.ts` file and kept out of visual component styling. Authenticated pages identify users through `PostHogIdentify`, logout resets the browser identity, and event capture is restricted to the typed event names in `lib/posthog-events.ts`.
+
+### Adzuna Job Discovery
+
+Files: app/api/agent/find/route.ts, agent/adzuna.ts, agent/matcher.ts, lib/adzuna.ts, lib/utils.ts, proxy.ts
+Last updated: 2026-06-12
+
+**Pattern notes:**
+Feature 10 keeps the Adzuna and matching flow entirely server-side. The client submits JSON to `POST /api/agent/find`; the route validates input, captures `job_search_started`, and calls the agent orchestration module. The agent creates an `agent_runs` row, searches Adzuna with `category=it-jobs`, scores each result against the saved profile, inserts saved `jobs` rows, records warnings/errors in `agent_logs`, and emits one `job_found` event per saved job. Matching prefers OpenRouter `openai/gpt-4o` when `OPENROUTER_API_KEY` exists, but falls back to a deterministic heuristic scorer so local development still returns usable results. `proxy.ts` includes `/api/agent/:path*` so stale InsForge sessions refresh before authenticated search requests run.
 
 ### Homepage Navbar
 

@@ -6,9 +6,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** Phase 2 — Profile Page
-**Last completed:** 07 AI Profile Extraction from Resume
-**Next:** 08 Resume PDF Generation from Profile
+**Phase:** Phase 3 — Find Jobs Page
+**Last completed:** 10 Adzuna Job Discovery
+**Next:** 11 Filter + Sort + Pagination
 
 ---
 
@@ -30,8 +30,8 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ### Phase 3 — Find Jobs Page
 
-- [ ] 09 Find Jobs Page — Full UI
-- [ ] 10 Adzuna Job Discovery
+- [x] 09 Find Jobs Page — Full UI
+- [x] 10 Adzuna Job Discovery
 - [ ] 11 Filter + Sort + Pagination
 
 ### Phase 4 — Job Details Page
@@ -115,3 +115,12 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-11 — Resume selection now uploads immediately through a dedicated server action, saves the resulting InsForge storage URL to `profiles.resume_pdf_url`, and keeps the resume available after refresh without requiring Save Profile.
 - 2026-06-11 — Resume extraction now normalizes LinkedIn and Portfolio/GitHub values into absolute `https://` URLs before filling profile URL inputs, preventing browser URL validation from blocking Save Profile.
 - 2026-06-11 — Feature 07 resume upload/extraction flow user-verified: extracted profile fields save successfully, uploaded resumes persist after refresh, and extracted Portfolio/GitHub URLs no longer block browser URL validation.
+- 2026-06-12 — Feature 09 Find Jobs Page Full UI completed with screenshot-matched mock search controls, success message, filter/sort bar, jobs table, match score bars, and pagination. `/find-jobs` now renders the full mock UI using protected auth and active icon navbar state. Feature 08 Resume PDF Generation remains outstanding because Feature 09 was built out of sequence by request.
+- 2026-06-12 — Feature 09 verification: `npm run lint` passes and `npm run build` passes after retrying the known network-dependent Inter font fetch; the build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-12 — Feature 09 visual correction completed against `Screenshot_20260612_160043.png`: search fields now use placeholders instead of filled test values, the layout is centered/narrowed, navbar CTA is visible, the success banner is removed, filter controls are separate, the jobs table includes a `SOURCE` badge column, and pagination/count sit outside the table card.
+- 2026-06-12 — Feature 09 filter controls corrected: All Matches and Match Score are native dropdown selects, stay on one line, and open option lists instead of behaving as static buttons.
+- 2026-06-12 — Feature 09 interaction polish: Match Score select widened so its label fits cleanly in the focused box, and mock job listings are now full-row links to `/find-jobs/[id]` placeholders.
+- 2026-06-12 — Feature 10 Adzuna Job Discovery completed with `app/api/agent/find/route.ts`, new `agent/` job-discovery and matching modules, `lib/adzuna.ts`, shared `MATCH_THRESHOLD`, and a client-side Find Jobs wrapper that submits live searches and renders saved results immediately.
+- 2026-06-12 — Feature 10 follows the project Adzuna and InsForge patterns: `category=it-jobs` search, `agent_runs` + `jobs` writes scoped to `user_id`, `agent_logs` warning/error logging, `job_search_started` + `job_found` PostHog events, and `proxy.ts` session refresh for `/api/agent/*`.
+- 2026-06-12 — Feature 10 matching prefers OpenRouter `openai/gpt-4o` when `OPENROUTER_API_KEY` is configured and falls back to a local heuristic scorer when that key is absent or the provider call fails, so local searches still return usable scores instead of hard failing.
+- 2026-06-12 — Feature 10 verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
