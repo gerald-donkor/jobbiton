@@ -1,32 +1,73 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type {
   FindJobsJobSummary,
   FindJobsSearchResponse,
 } from "@/agent/types";
 import { JobFilterBar } from "@/components/find-jobs/JobFilterBar";
-import type {
-  MatchFilterValue,
-  SortValue,
-} from "@/components/find-jobs/JobFilterBar";
 import { JobSearchCard } from "@/components/find-jobs/JobSearchCard";
 import { JobsTable } from "@/components/find-jobs/JobsTable";
+import type {
+  FindJobsListResult,
+  MatchFilterValue,
+  SortValue,
+} from "@/components/find-jobs/types";
 import { MATCH_THRESHOLD } from "@/lib/utils";
 
-export function FindJobsClient() {
+type FindJobsClientProps = {
+  jobsList: FindJobsListResult;
+  filters: {
+    query: string;
+    matchFilter: MatchFilterValue;
+    sortBy: SortValue;
+    runId: string | null;
+  };
+};
+
+export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
+  const router = useRouter();
   const [jobTitle, setJobTitle] = useState("");
   const [location, setLocation] = useState("");
-  const [jobs, setJobs] = useState<FindJobsJobSummary[]>([]);
-  const [filterQuery, setFilterQuery] = useState("");
-  const [matchFilter, setMatchFilter] = useState<MatchFilterValue>("all");
-  const [sortBy, setSortBy] = useState<SortValue>("score");
-  const [totalResults, setTotalResults] = useState(0);
+  const [filterQuery, setFilterQuery] = useState(filters.query);
+  const [latestSearchJobs, setLatestSearchJobs] = useState<
+    FindJobsJobSummary[] | null
+  >(null);
   const [feedback, setFeedback] = useState<{
     tone: "error" | "success";
     text: string;
   } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+
+  const visibleLatestSearchJobs = latestSearchJobs
+    ? filterAndSortJobs(latestSearchJobs, {
+        query: filterQuery,
+        matchFilter: filters.matchFilter,
+        sortBy: filters.sortBy,
+      })
+    : null;
+  const displayedJobs = visibleLatestSearchJobs ?? jobsList.jobs;
+  const displayedTotal = latestSearchJobs
+    ? displayedJobs.length
+    : jobsList.totalResults;
+  const showingFrom =
+    displayedTotal === 0
+      ? 0
+      : visibleLatestSearchJobs
+        ? 1
+        : (jobsList.currentPage - 1) * jobsList.pageSize + 1;
+  const showingTo = visibleLatestSearchJobs
+    ? visibleLatestSearchJobs.length
+    : Math.min(jobsList.currentPage * jobsList.pageSize, jobsList.totalResults);
+  const shouldShowPagination = visibleLatestSearchJobs
+    ? visibleLatestSearchJobs.length > 0
+    : jobsList.totalResults > 0;
+  const emptyMessage =
+    jobsList.error ??
+    (filterQuery.trim() || filters.matchFilter !== "all"
+      ? "No jobs match the current filters."
+      : "Search for jobs to see your saved matches here.");
 
   async function handleSearch(): Promise<void> {
     const trimmedJobTitle = jobTitle.trim();
@@ -56,8 +97,7 @@ export function FindJobsClient() {
       const result = (await response.json()) as FindJobsSearchResponse;
 
       if (!response.ok || !result.success) {
-        setJobs([]);
-        setTotalResults(0);
+        setLatestSearchJobs(null);
         setFeedback({
           tone: "error",
           text: result.success
@@ -67,8 +107,8 @@ export function FindJobsClient() {
         return;
       }
 
-      setJobs(result.data.jobs);
-      setTotalResults(result.data.totalFound);
+      setLatestSearchJobs(result.data.jobs);
+      setFilterQuery("");
       setFeedback({
         tone: "success",
         text:
@@ -76,10 +116,10 @@ export function FindJobsClient() {
             ? "No jobs matched that search right now."
             : `Found ${result.data.totalFound} jobs and saved ${result.data.strongMatchCount} strong matches.`,
       });
+      navigateToRun(result.data.runId);
     } catch (error) {
       console.error("[FindJobsClient] Search request failed", error);
-      setJobs([]);
-      setTotalResults(0);
+      setLatestSearchJobs(null);
       setFeedback({
         tone: "error",
         text: "We could not search for jobs right now.",
@@ -89,46 +129,76 @@ export function FindJobsClient() {
     }
   }
 
-  const normalizedQuery = filterQuery.trim().toLowerCase();
-  const filteredJobs = jobs
-    .filter((job) => {
-      if (matchFilter === "high" && job.matchScore < MATCH_THRESHOLD) {
-        return false;
-      }
+  function updateRoute(next: {
+    query?: string;
+    matchFilter?: MatchFilterValue;
+    sortBy?: SortValue;
+    page?: number;
+  }): void {
+    const nextQuery = next.query ?? filterQuery;
+    const nextMatchFilter = next.matchFilter ?? filters.matchFilter;
+    const nextSortBy = next.sortBy ?? filters.sortBy;
+    const nextPage = next.page ?? 1;
+    const params = new URLSearchParams();
 
-      if (matchFilter === "low" && job.matchScore >= MATCH_THRESHOLD) {
-        return false;
-      }
+    if (nextQuery.trim()) {
+      params.set("q", nextQuery.trim());
+    }
 
-      if (!normalizedQuery) {
-        return true;
-      }
+    if (filters.runId) {
+      params.set("run", filters.runId);
+    }
 
-      return (
-        job.company.toLowerCase().includes(normalizedQuery) ||
-        job.title.toLowerCase().includes(normalizedQuery)
-      );
-    })
-    .sort((left, right) => {
-      if (sortBy === "newest") {
-        return (
-          new Date(right.foundAt).getTime() - new Date(left.foundAt).getTime()
-        );
-      }
+    if (nextMatchFilter !== "all") {
+      params.set("match", nextMatchFilter);
+    }
 
-      if (sortBy === "oldest") {
-        return (
-          new Date(left.foundAt).getTime() - new Date(right.foundAt).getTime()
-        );
-      }
+    if (nextSortBy !== "score") {
+      params.set("sort", nextSortBy);
+    }
 
-      return right.matchScore - left.matchScore;
+    if (nextPage > 1) {
+      params.set("page", String(nextPage));
+    }
+
+    setLatestSearchJobs(null);
+    router.replace(params.size > 0 ? `/find-jobs?${params}` : "/find-jobs", {
+      scroll: false,
     });
+  }
 
-  const emptyMessage =
-    jobs.length === 0
-      ? "Search for jobs to see your saved matches here."
-      : "No jobs match the current filters.";
+  function navigateToRun(runId: string): void {
+    const params = new URLSearchParams();
+
+    params.set("run", runId);
+
+    if (filters.matchFilter !== "all") {
+      params.set("match", filters.matchFilter);
+    }
+
+    if (filters.sortBy !== "score") {
+      params.set("sort", filters.sortBy);
+    }
+
+    router.replace(`/find-jobs?${params}`, { scroll: false });
+  }
+
+  function handleFilterQueryChange(value: string): void {
+    setFilterQuery(value);
+    updateRoute({ query: value });
+  }
+
+  function handleMatchFilterChange(value: MatchFilterValue): void {
+    updateRoute({ matchFilter: value });
+  }
+
+  function handleSortByChange(value: SortValue): void {
+    updateRoute({ sortBy: value });
+  }
+
+  function handlePageChange(page: number): void {
+    updateRoute({ page });
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -143,60 +213,155 @@ export function FindJobsClient() {
       />
       <JobFilterBar
         filterQuery={filterQuery}
-        matchFilter={matchFilter}
-        sortBy={sortBy}
-        onFilterQueryChange={setFilterQuery}
-        onMatchFilterChange={setMatchFilter}
-        onSortByChange={setSortBy}
+        matchFilter={filters.matchFilter}
+        sortBy={filters.sortBy}
+        onFilterQueryChange={handleFilterQueryChange}
+        onMatchFilterChange={handleMatchFilterChange}
+        onSortByChange={handleSortByChange}
       />
-      <JobsTable jobs={filteredJobs} emptyMessage={emptyMessage} />
-      {jobs.length > 0 ? (
+      {jobsList.error ? (
+        <div className="rounded-md border border-error bg-surface px-4 py-3 text-[13px] font-medium leading-5 text-error">
+          {jobsList.error}
+        </div>
+      ) : null}
+      <JobsTable jobs={displayedJobs} emptyMessage={emptyMessage} />
+      {shouldShowPagination ? (
         <div className="-mt-1 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[14px] font-normal leading-5 text-text-muted">
             Showing{" "}
             <span className="font-semibold text-text-primary">
-              {filteredJobs.length === 0 ? 0 : 1}
+              {showingFrom}
             </span>{" "}
             to{" "}
             <span className="font-semibold text-text-primary">
-              {filteredJobs.length}
+              {showingTo}
             </span>{" "}
             of{" "}
             <span className="font-semibold text-text-primary">
-              {totalResults}
+              {displayedTotal}
             </span>{" "}
             results
           </p>
-          <nav
-            aria-label="Jobs pagination"
-            className="flex flex-wrap items-center gap-3"
-          >
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-8 items-center gap-2 text-[14px] font-normal leading-5 text-text-muted disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <span aria-hidden="true" className="find-jobs-chevron-left" />
-              Previous
-            </button>
-            <button
-              type="button"
-              aria-current="page"
-              className="h-8 min-w-8 rounded-full bg-accent text-[14px] font-medium leading-5 text-accent-foreground shadow-[0_6px_14px_color-mix(in_srgb,var(--color-accent)_22%,transparent)]"
-            >
-              1
-            </button>
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-8 items-center gap-2 text-[14px] font-normal leading-5 text-text-muted disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Next
-              <span aria-hidden="true" className="find-jobs-chevron-right" />
-            </button>
-          </nav>
+          {latestSearchJobs ? null : (
+            <JobsPagination
+              currentPage={jobsList.currentPage}
+              totalPages={jobsList.totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
       ) : null}
     </div>
   );
+}
+
+function JobsPagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  const pages = getVisiblePages(currentPage, totalPages);
+
+  return (
+    <nav
+      aria-label="Jobs pagination"
+      className="flex flex-wrap items-center gap-3"
+    >
+      <button
+        type="button"
+        disabled={currentPage <= 1}
+        onClick={() => onPageChange(currentPage - 1)}
+        className="inline-flex h-8 items-center gap-2 text-[14px] font-normal leading-5 text-text-muted transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:text-text-muted"
+      >
+        <span aria-hidden="true" className="find-jobs-chevron-left" />
+        Previous
+      </button>
+      {pages.map((page) => (
+        <button
+          key={page}
+          type="button"
+          aria-current={page === currentPage ? "page" : undefined}
+          onClick={() => onPageChange(page)}
+          className={
+            page === currentPage
+              ? "h-8 min-w-8 rounded-full bg-accent text-[14px] font-medium leading-5 text-accent-foreground shadow-[0_6px_14px_color-mix(in_srgb,var(--color-accent)_22%,transparent)]"
+              : "h-8 min-w-8 rounded-full text-[14px] font-medium leading-5 text-text-secondary transition-colors hover:bg-surface-secondary hover:text-accent"
+          }
+        >
+          {page}
+        </button>
+      ))}
+      <button
+        type="button"
+        disabled={currentPage >= totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+        className="inline-flex h-8 items-center gap-2 text-[14px] font-normal leading-5 text-text-muted transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:text-text-muted"
+      >
+        Next
+        <span aria-hidden="true" className="find-jobs-chevron-right" />
+      </button>
+    </nav>
+  );
+}
+
+function getVisiblePages(currentPage: number, totalPages: number): number[] {
+  const pages: number[] = [];
+  const start = Math.max(1, currentPage - 2);
+  const end = Math.min(totalPages, currentPage + 2);
+
+  for (let page = start; page <= end; page += 1) {
+    pages.push(page);
+  }
+
+  return pages;
+}
+
+function filterAndSortJobs(
+  jobs: FindJobsJobSummary[],
+  filters: {
+    query: string;
+    matchFilter: MatchFilterValue;
+    sortBy: SortValue;
+  },
+): FindJobsJobSummary[] {
+  const normalizedQuery = filters.query.trim().toLowerCase();
+
+  return jobs
+    .filter((job) => {
+      if (filters.matchFilter === "high" && job.matchScore < MATCH_THRESHOLD) {
+        return false;
+      }
+
+      if (filters.matchFilter === "low" && job.matchScore >= MATCH_THRESHOLD) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      return (
+        job.company.toLowerCase().includes(normalizedQuery) ||
+        job.title.toLowerCase().includes(normalizedQuery)
+      );
+    })
+    .sort((left, right) => {
+      if (filters.sortBy === "newest") {
+        return (
+          new Date(right.foundAt).getTime() - new Date(left.foundAt).getTime()
+        );
+      }
+
+      if (filters.sortBy === "oldest") {
+        return (
+          new Date(left.foundAt).getTime() - new Date(right.foundAt).getTime()
+        );
+      }
+
+      return right.matchScore - left.matchScore;
+    });
 }

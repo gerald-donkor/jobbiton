@@ -7,8 +7,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 3 — Find Jobs Page
-**Last completed:** 10 Adzuna Job Discovery
-**Next:** 11 Filter + Sort + Pagination
+**Last completed:** 11 Filter + Sort + Pagination
+**Next:** 12 Job Details Page — Full UI
 
 ---
 
@@ -32,7 +32,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 - [x] 09 Find Jobs Page — Full UI
 - [x] 10 Adzuna Job Discovery
-- [ ] 11 Filter + Sort + Pagination
+- [x] 11 Filter + Sort + Pagination
 
 ### Phase 4 — Job Details Page
 
@@ -132,3 +132,15 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-12 — Feature 10 follows the project Adzuna and InsForge patterns: `category=it-jobs` search, `agent_runs` + `jobs` writes scoped to `user_id`, `agent_logs` warning/error logging, `job_search_started` + `job_found` PostHog events, and `proxy.ts` session refresh for `/api/agent/*`.
 - 2026-06-12 — Feature 10 matching prefers OpenRouter `openai/gpt-4o` when `OPENROUTER_API_KEY` is configured and falls back to a local heuristic scorer when that key is absent or the provider call fails, so local searches still return usable scores instead of hard failing.
 - 2026-06-12 — Feature 10 verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-12 — Feature 11 Filter + Sort + Pagination completed with server-side InsForge querying in `app/find-jobs/page.tsx`, URL-driven `/find-jobs` filters, `q` text search across company/title, high/low match filtering, score/newest/oldest ordering, exact total counts, and 20-per-page pagination.
+- 2026-06-12 — Feature 11 keeps the instant post-search UX from Feature 10 by showing the latest returned jobs immediately after a successful Adzuna search, then returning to the DB-backed saved jobs list whenever filters, sorting, or pagination change.
+- 2026-06-12 — Feature 11 verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-12 — Feature 11 review fixes completed: saved-jobs query failures now surface a safe UI error instead of silently rendering zero jobs, text search is tokenized before building the InsForge OR filter, and Find Jobs filter/sort types were moved out of `agent/types.ts` into `components/find-jobs/types.ts`.
+- 2026-06-12 — Feature 11 review-fix verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-12 — Feature 11 filter/sort follow-up completed: the temporary latest-search results now respect the active filter query, High/Low Match select, and score/newest/oldest sort select, so controls like `High Match` + `Oldest` match the visible rows immediately after a live Adzuna search.
+- 2026-06-12 — Feature 11 filter/sort follow-up verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-12 — Matcher fallback scoring improved after High Match appeared empty for relevant searches: heuristic matching now uses skill aliases, word/phrase boundaries, title-token overlap, skill coverage, and a lower true no-match floor so relevant local-dev matches can cross `MATCH_THRESHOLD` while unrelated jobs score lower.
+- 2026-06-12 — Matcher fallback fix applies to newly scored jobs; existing saved jobs retain their stored `match_score` until rediscovered or explicitly rescored in a future feature.
+- 2026-06-12 — Matcher fallback verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-12 — Find Jobs stale-results leak resolved: each successful Adzuna search now returns its `agent_runs.id`, `/find-jobs` stores that as a `run` URL param, and saved DB listings are scoped to the active run so refreshes, filters, sorting, and pagination no longer revive older Backend Developer rows after a Frontend Developer search.
+- 2026-06-12 — Find Jobs run-scope verification: `npm run lint` passes and `npm run build` passes after allowing the known network-dependent Inter font fetch. A local dev-server smoke check was blocked by a stale `.next/dev` lock pointing at a dead PID, not by the app build.

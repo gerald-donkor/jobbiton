@@ -74,6 +74,7 @@ export async function POST(
       {
         success: true,
         data: {
+          runId: result.runId,
           jobs: result.jobs,
           totalFound: result.totalFound,
           strongMatchCount: result.strongMatchCount,
