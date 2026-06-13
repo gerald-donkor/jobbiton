@@ -1,56 +1,52 @@
-# Memory — Feature 11 Find Jobs Stabilization
+# Memory - Feature 12 Job Details Page
 
-Last updated: 2026-06-12 22:10 GMT
+Last updated: 2026-06-13 12:06 GMT
 
 ## What was built
 
-- Completed Phase 3 Feature 11: Filter + Sort + Pagination for `/find-jobs`.
-- Added server-side saved-job listing in `app/find-jobs/page.tsx` with user-scoped InsForge queries, exact counts, text search, match filtering, sorting, and 20-row pagination.
-- Added `components/find-jobs/types.ts` for Find Jobs filter/sort value types, list result typing, and parser helpers.
-- Updated `components/find-jobs/FindJobsPageContent.tsx` and `components/find-jobs/FindJobsClient.tsx` so saved jobs are loaded server-side while filter, sort, pagination, and live search state are URL-driven from the client wrapper.
-- Updated `components/find-jobs/JobFilterBar.tsx` to use the shared Find Jobs parser helpers instead of local UI type exports.
-- Improved `agent/matcher.ts` fallback matching with skill aliases, word/phrase boundaries, title-token overlap, skill coverage, and a lower true no-match floor so relevant searches can produce High Match rows even without OpenRouter.
-- Updated `agent/adzuna.ts`, `agent/types.ts`, and `app/api/agent/find/route.ts` so successful searches return the created `agent_runs.id`.
-- Fixed stale saved-search leakage: `/find-jobs` now writes that run id to the `run` URL param and scopes saved DB listings to the active run across refresh, filter, sort, and pagination changes.
-- Updated `context/progress-tracker.md` and `context/ui-registry.md` with the Feature 11 behavior and run-scoping rules.
+Feature 12, Job Details Page Full UI, was completed and then corrected through two review follow-ups.
+
+Created `components/job-details/` with:
+- `JobDetailsPageContent.tsx` - full job details UI for header, metadata cards, match reasoning, skills, job description, company research shell/dossier rendering, and apply CTA.
+- `JobDetailsNavbar.tsx` - protected screenshot-style navbar with logo, Dashboard/Find Jobs/Profile links, profile glyph shell, and compact sign-out.
+- `types.ts` - shared job details and company research dossier types.
+
+Modified:
+- `app/find-jobs/[id]/page.tsx` - replaced placeholder shell with real user-scoped InsForge job lookup and Next 16 async dynamic `params`.
+- `components/auth/SignOutButton.tsx` - added `variant="nav"` for compact navbar sign-out.
+- `app/globals.css` - added token-only CSS glyphs for job-details icons and controls.
+- `context/ui-registry.md` - imprinted job details layout, icon treatments, company research card, navbar, description callout, and widened metadata layout.
+- `context/progress-tracker.md` - marked Feature 12 complete and recorded the follow-up fixes.
 
 ## Decisions made
 
-- `/find-jobs` loads saved jobs in the route Server Component; the client component should not fetch saved job rows directly.
-- Filter state is URL-backed: `q`, `match=high|low`, `sort=score|newest|oldest`, `page`, and `run={agent_runs.id}`.
-- Search context is scoped by `run`; broad all-user saved-job listing should not be used in the current Find Jobs table unless a separate saved-jobs archive mode is intentionally designed.
-- A successful Adzuna search keeps the instant UX by temporarily rendering returned jobs immediately, then navigates to `/find-jobs?run={runId}` so refreshes and later control changes stay in the same search context.
-- Existing saved jobs are not automatically rescored. Matcher improvements apply to newly discovered jobs unless a future rescore flow is added.
+- Job details data stays server-rendered in `app/find-jobs/[id]/page.tsx`, scoped by both `id` and `user_id`.
+- Job details page uses a local protected navbar treatment because the provided design differs from the shared homepage/profile navbar.
+- The Company Research button remains visual-only for Feature 12; Browserbase/Stagehand research generation belongs to Feature 13.
+- Adzuna job descriptions can be snippet-only. The UI now renders every saved character and, if the saved preview ends mid-sentence, shows an inline `Open full job description` link to the original job post rather than pretending missing text is available.
+- Job details content width is now `max-w-[1040px]`; desktop metadata grid gives Location extra space with `lg:grid-cols-[1fr_1.55fr_1fr_1fr]`.
+- Metadata card values wrap with `break-words` instead of truncating, so long location names remain visible.
 
 ## Problems solved
 
-- High Match no longer empties purely because fallback matching missed aliases like React/React.js, Next/Next.js, Node/Node.js, or Postgres/PostgreSQL.
-- High Match plus sort controls now apply to temporary latest-search rows, not only server-loaded rows.
-- Saved-job query failures now show a safe inline error instead of silently looking like an empty result set.
-- Text search is tokenized before building the InsForge OR filter so punctuation-heavy input is less likely to create malformed query syntax.
-- Older Backend Developer results no longer reappear after refreshing or after searching for Frontend Developer, because the table is scoped to the active `agent_runs.id`.
+- Fixed the job description being visually/semantically cut off by removing clamping/truncation and adding a clear original-post fallback for truncated saved previews.
+- Refined screenshot-circled job-details visual elements: navbar profile shell, company placeholder icon, metadata icon chips, and match-reasoning glyph.
+- Fixed cramped metadata cards where the Location value was truncated; widened the details column and gave Location a larger desktop grid track.
 
 ## Current state
 
-- Phase 1 Foundation is complete.
-- Phase 2 Features 05, 06, 07, and 08 are complete.
-- Phase 3 Features 09, 10, and 11 are complete.
-- `/find-jobs` searches Adzuna, saves discovered jobs, lists saved jobs from InsForge, supports URL-backed text filtering, High/Low Match filtering, score/newest/oldest sorting, exact result counts, and 20-per-page pagination.
-- `/find-jobs` saved listings are scoped to the active `run` URL param, with latest completed run fallback only when no `run` param exists.
-- `/find-jobs/[id]` is still a protected placeholder; live job rows link there, but the real Job Details UI has not been built yet.
-- `OPENROUTER_API_KEY` is absent in the current `.env.local`, so job scoring falls back to the heuristic matcher unless that key is added.
 - `npm run lint` passes.
-- `npm run build` passes after allowing the known network-dependent Inter font fetch and still shows the existing Node `module.register()` deprecation warning.
-- A dev-server smoke check was not completed because `.next/dev/lock` referenced a dead PID and neither `localhost:3000` nor `localhost:3001` accepted connections. Production build verification passed.
+- `npm run build` passes.
+- Build still emits the existing Node `module.register()` deprecation warning.
+- A dev server was already running at `http://localhost:3000` during the last check.
+- Worktree has uncommitted Feature 12 changes, including new untracked `components/job-details/` files and modified app/context files.
+- Feature 12 is complete. Feature 13 Company Research Agent is still not implemented.
 
 ## Next session starts with
 
-Run `/remember restore`, then continue with Phase 4 Feature 12: Job Details Page — Full UI.
-
-Start by loading a single saved job by UUID from InsForge in `/find-jobs/[id]`, scoped to the current user. Build the full job details page using real saved job data and an empty Company Research card. Keep the Company Research agent logic for Feature 13.
+Run `/remember restore`, then begin Feature 13 Company Research Agent. Start by reading the required context files and the InsForge/Browserbase/Stagehand rules, then implement `POST /api/agent/research` plus the agent-side research flow and wire the Job Details `Research Company` button to it.
 
 ## Open questions
 
-- Whether to add `OPENROUTER_API_KEY` locally so job scoring uses GPT-4o instead of the heuristic fallback.
-- Whether `/find-jobs/[id]` should keep the current homepage-like navbar treatment or switch to an authenticated active Find Jobs nav treatment.
-- Whether the Job Details page should include a richer empty state for sparse Adzuna snippets, or simply render the saved `about_role` text until Feature 13.
+- Whether the current local dev server on port 3000 should be reused or restarted before visual verification.
+- Whether existing saved jobs with low-quality or snippet-only descriptions should be backfilled/rescored in a future feature. Feature 12 only improves display and fallback behavior.
