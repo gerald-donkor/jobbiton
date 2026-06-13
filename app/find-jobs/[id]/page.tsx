@@ -53,7 +53,16 @@ async function getJobDetailsForUser(
     return null;
   }
 
-  return mapJobDetailsRow(data);
+  const job = mapJobDetailsRow(data);
+
+  if (!job) {
+    return null;
+  }
+
+  return {
+    ...job,
+    companyWebsiteUrl: await resolveCompanyWebsiteUrl(job),
+  };
 }
 
 function mapJobDetailsRow(row: unknown): JobDetailsRecord | null {
@@ -92,9 +101,105 @@ function mapJobDetailsRow(row: unknown): JobDetailsRecord | null {
     missingSkills: readStringArray(record.missing_skills),
     externalApplyUrl: readString(record.external_apply_url) || "",
     sourceUrl: readString(record.source_url),
+    companyWebsiteUrl: null,
     foundAt,
     companyResearch: readCompanyResearch(record.company_research),
   };
+}
+
+const blockedSourceDomains = [
+  "adzuna.",
+  "greenhouse.io",
+  "lever.co",
+  "workable.com",
+  "smartrecruiters.com",
+  "ashbyhq.com",
+  "bamboohr.com",
+  "indeed.com",
+  "linkedin.com",
+  "ziprecruiter.com",
+];
+
+async function resolveCompanyWebsiteUrl(
+  job: JobDetailsRecord,
+): Promise<string | null> {
+  const candidates = [job.externalApplyUrl, job.sourceUrl].filter(
+    (value): value is string => Boolean(value),
+  );
+
+  for (const candidate of candidates) {
+    const resolvedUrl = await resolveLiveEmployerUrl(candidate);
+
+    if (resolvedUrl) {
+      return resolvedUrl;
+    }
+  }
+
+  return null;
+}
+
+async function resolveLiveEmployerUrl(value: string): Promise<string | null> {
+  let url: URL;
+
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    return null;
+  }
+
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      redirect: "follow",
+      signal: AbortSignal.timeout(6000),
+    });
+    const resolvedUrl = new URL(response.url);
+
+    if (isBlockedSourceDomain(resolvedUrl.hostname)) {
+      return null;
+    }
+
+    return `https://${getRootDomain(resolvedUrl.hostname)}`;
+  } catch (error) {
+    console.error("[find-jobs/[id]/page] Company website resolution failed", error);
+    return null;
+  }
+}
+
+function isBlockedSourceDomain(hostname: string): boolean {
+  const normalizedHostname = hostname.replace(/^www\./i, "").toLowerCase();
+
+  return blockedSourceDomains.some((domain) =>
+    domain.endsWith(".")
+      ? normalizedHostname.startsWith(domain)
+      : normalizedHostname === domain || normalizedHostname.endsWith(`.${domain}`),
+  );
+}
+
+function getRootDomain(hostname: string): string {
+  const parts = hostname
+    .replace(/^www\./i, "")
+    .split(".")
+    .filter(Boolean);
+
+  if (parts.length <= 2) {
+    return parts.join(".");
+  }
+
+  const last = parts[parts.length - 1];
+  const secondLast = parts[parts.length - 2];
+  const thirdLast = parts[parts.length - 3];
+  const secondLevelDomains = new Set(["co", "com", "edu", "gov", "net", "org"]);
+
+  if (last.length === 2 && secondLevelDomains.has(secondLast) && thirdLast) {
+    return `${thirdLast}.${secondLast}.${last}`;
+  }
+
+  return `${secondLast}.${last}`;
 }
 
 function readCompanyResearch(value: unknown): CompanyResearchDossier | null {

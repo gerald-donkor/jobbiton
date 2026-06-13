@@ -30,6 +30,7 @@ export type JobDetailsRecord = {
   missingSkills: string[];
   externalApplyUrl: string;
   sourceUrl: string | null;
+  companyWebsiteUrl: string | null;
   foundAt: string;
   companyResearch: CompanyResearchDossier | null;
 };
