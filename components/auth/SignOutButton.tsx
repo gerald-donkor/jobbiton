@@ -5,7 +5,11 @@ import { useState } from "react";
 import { insforge } from "@/lib/insforge-client";
 import { posthog } from "@/lib/posthog-client";
 
-export function SignOutButton() {
+type SignOutButtonProps = {
+  variant?: "button" | "nav";
+};
+
+export function SignOutButton({ variant = "button" }: SignOutButtonProps) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
 
@@ -30,6 +34,20 @@ export function SignOutButton() {
     posthog.reset();
     router.replace("/login");
     router.refresh();
+  }
+
+  if (variant === "nav") {
+    return (
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={isPending}
+        className="inline-flex items-center gap-2 text-[14px] font-medium leading-5 text-text-secondary transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span aria-hidden="true" className="job-details-signout-icon" />
+        {isPending ? "Signing out..." : "Sign out"}
+      </button>
+    );
   }
 
   return (

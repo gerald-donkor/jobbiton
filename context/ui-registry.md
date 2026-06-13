@@ -238,6 +238,86 @@ Last updated: 2026-06-12
 **Pattern notes:**
 The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 11 renders the server-provided saved jobs page by default, scoped to the active search run when one exists, shows a centered muted empty state when filters return no rows, and keeps pagination/count controls outside the table shell. The pagination uses compact text Previous/Next buttons with chevrons, circular page buttons, and the active page as `bg-accent text-accent-foreground`. Avoid broad all-user saved-job queries in this table unless a separate saved-jobs archive mode is explicitly designed.
 
+### Job Details Page Layout
+
+File: components/job-details/JobDetailsPageContent.tsx
+Last updated: 2026-06-13
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | page `bg-background`, cards `bg-surface`                            |
+| Border           | page `border-x border-border`, cards `border border-border`         |
+| Border radius    | cards `rounded-xl`, buttons `rounded-md`, badges `rounded-full`     |
+| Text — primary   | headings `text-text-primary font-semibold`, body `text-[15px] font-medium leading-6 text-text-primary` |
+| Text — secondary | labels `text-text-secondary text-[12px] font-semibold leading-4`, muted copy `text-text-muted` |
+| Spacing          | main `px-6 py-9`, content `max-w-[1040px] gap-6`, cards `px-6 py-6`, metadata grid `gap-3` |
+| Hover state      | back/job links `hover:text-accent`, bordered actions `hover:border-accent hover:text-accent`, primary actions `hover:bg-accent-dark` |
+| Shadow           | shared token card shadow                                            |
+| Accent usage     | active badges/buttons `bg-accent text-accent-foreground`, research icon/tag accents, missing-skill badges `bg-accent-muted text-accent` |
+
+**Pattern notes:**
+Job details pages use a centered `max-w-[1040px]` work column so real job metadata has room to breathe while keeping the same white rounded cards and full-width purple apply CTA. The metadata row uses `lg:grid-cols-[1fr_1.55fr_1fr_1fr]`, intentionally giving Location more horizontal space than Salary, Job Type, and Date Found. Info-card values use `break-words` rather than `truncate`, so longer location names wrap inside the card instead of being hidden. The header card uses a token CSS building placeholder and a green match badge next to the company name. AI match reasoning keeps an uppercase 12px label with a success icon chip; skill comparison uses green pills for matched skills and accent-muted pills for gaps. The description card renders every saved character without clamping, preserves paragraph breaks with `whitespace-pre-wrap`, renders saved structured arrays when present, and shows a bordered `bg-surface-secondary` callout with an `Open full job description` link when the saved Adzuna preview ends mid-sentence.
+
+### Job Details Icon Treatments
+
+File: app/globals.css
+Last updated: 2026-06-13
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | profile shell `bg-surface`, building/research empty `bg-surface-secondary`, info chips use token soft backgrounds |
+| Border           | profile/building shells `border border-border`                      |
+| Border radius    | profile `rounded-full`, building `rounded-xl`, info chips `rounded-lg`, match chip `rounded-full` |
+| Text — primary   | inherited                                                           |
+| Text — secondary | muted glyphs `text-text-muted` / `text-info-muted`, colored glyphs `text-success`, `text-info-medium`, `text-accent` |
+| Spacing          | icon shells are fixed-size CSS glyph controls; component spacing comes from the parent cards |
+| Hover state      | none at icon level                                                  |
+| Shadow           | subtle token inset/low elevation via `color-mix(... var(--color-overlay) ...)` |
+| Accent usage     | location/info/research icons use info/accent/success token families |
+
+**Pattern notes:**
+The circled elements from the job details screenshot are CSS glyphs, not image assets: `.job-details-user-control`, `.job-details-building-icon`, `.job-details-info-icon-*`, and `.job-details-match-icon`. Keep them token-only and sized as stable fixed-format controls so card layout does not shift. The navbar profile glyph is wrapped in a 34px round shell. Header and empty-state building marks use a soft secondary surface, muted glyph color, and subtle shadow. Salary/location/job-type/date info chips use 42px rounded token backgrounds, and match/research/document chips use 34px circular shells.
+
+### Job Details Company Research Card
+
+File: components/job-details/JobDetailsPageContent.tsx
+Last updated: 2026-06-13
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | card `bg-surface`, empty icon `bg-surface-secondary`, research icon `bg-accent-muted` |
+| Border           | card `border border-border`, header divider `border-b border-border` |
+| Border radius    | card `rounded-xl`, button `rounded-md`, icon chips `rounded-full`   |
+| Text — primary   | title `text-[18px] font-semibold leading-7 text-text-primary`, empty title `text-[15px] font-semibold` |
+| Text — secondary | empty copy `text-[14px] font-normal leading-5 text-text-muted`, sources `text-text-secondary` |
+| Spacing          | header `px-6 py-4`, empty state `min-h-[246px] px-6 py-14`, dossier body `px-6 py-6 space-y-6` |
+| Hover state      | research/apply buttons `hover:bg-accent-dark`, source links `hover:text-accent` |
+| Shadow           | shared token card shadow                                            |
+| Accent usage     | research CTA `bg-accent text-accent-foreground`, tags `bg-accent-muted text-accent` |
+
+**Pattern notes:**
+Feature 12 only renders the company research surface. The button is present and visually active to match the design, but the Browserbase/Stagehand generation flow belongs to Feature 13. Empty state copy should stay centered and company-specific. If `jobs.company_research` already contains a dossier, the same card renders all nine planned fields: overview, tech stack, culture, why this role, your edge, gaps, smart questions, interview prep, and sources.
+
+### Job Details Navbar
+
+File: components/job-details/JobDetailsNavbar.tsx
+Last updated: 2026-06-13
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | `bg-surface`                                                        |
+| Border           | `border-b border-border`                                            |
+| Border radius    | none                                                                |
+| Text — primary   | active find-jobs link `text-accent text-[14px] font-medium leading-5` |
+| Text — secondary | inactive links/sign-out `text-text-dark` / `text-text-secondary`    |
+| Spacing          | header `h-16 px-6`, nav `gap-8`, auth actions `gap-5`, profile shell `.job-details-user-control` |
+| Hover state      | inactive nav/sign-out `hover:text-accent`                           |
+| Shadow           | none                                                                |
+| Accent usage     | active Find Jobs text only                                          |
+
+**Pattern notes:**
+The job-details reference uses a protected top bar with the logo, compact nav links, a profile glyph in a soft circular shell, and a text sign-out control instead of the homepage CTA. Keep this treatment local to job-details until other protected pages are redesigned to match it. The sign-out control uses `SignOutButton variant="nav"` for the compact token text treatment.
+
 ## Non-Visual Integrations
 
 ### InsForge Database Schema

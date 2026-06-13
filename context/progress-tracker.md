@@ -6,9 +6,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** Phase 3 — Find Jobs Page
-**Last completed:** 11 Filter + Sort + Pagination
-**Next:** 12 Job Details Page — Full UI
+**Phase:** Phase 4 — Job Details Page
+**Last completed:** 12 Job Details Page — Full UI
+**Next:** 13 Company Research Agent
 
 ---
 
@@ -36,7 +36,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ### Phase 4 — Job Details Page
 
-- [ ] 12 Job Details Page — Full UI
+- [x] 12 Job Details Page — Full UI
 - [ ] 13 Company Research Agent
 
 ### Phase 5 — Dashboard
@@ -144,3 +144,9 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-12 — Matcher fallback verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
 - 2026-06-12 — Find Jobs stale-results leak resolved: each successful Adzuna search now returns its `agent_runs.id`, `/find-jobs` stores that as a `run` URL param, and saved DB listings are scoped to the active run so refreshes, filters, sorting, and pagination no longer revive older Backend Developer rows after a Frontend Developer search.
 - 2026-06-12 — Find Jobs run-scope verification: `npm run lint` passes and `npm run build` passes after allowing the known network-dependent Inter font fetch. A local dev-server smoke check was blocked by a stale `.next/dev` lock pointing at a dead PID, not by the app build.
+- 2026-06-13 — Feature 12 Job Details Page Full UI completed with a real user-scoped InsForge query for `/find-jobs/[id]`, screenshot-matched header/info/match/skills/description/research sections, external job links, and company research display support for existing dossiers while leaving research generation for Feature 13.
+- 2026-06-13 — Feature 12 verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 12 review fix completed: Job Description now renders all saved text without clamping, preserves paragraph breaks, and shows an inline `Open full job description` callout when the saved Adzuna preview ends mid-sentence. Circled job-details icon treatments from `Screenshot_20260613_114144.png` were refined and imprinted.
+- 2026-06-13 — Feature 12 review-fix verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 12 metadata layout follow-up completed: job-details cards widened to `max-w-[1040px]`, the desktop metadata grid now gives Location extra space, and info-card values wrap instead of truncating so long location names remain visible.
+- 2026-06-13 — Feature 12 metadata layout verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
