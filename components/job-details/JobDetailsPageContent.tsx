@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CompanyResearchPanel } from "@/components/job-details/CompanyResearchPanel";
 import type { JobDetailsRecord } from "@/components/job-details/types";
 
 type JobDetailsPageContentProps = {
@@ -252,146 +253,13 @@ function splitDescriptionText(value: string): string[] {
 }
 
 function CompanyResearchCard({ job }: { job: JobDetailsRecord }) {
-  const dossier = job.companyResearch;
-
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
-      <div className="flex flex-col gap-4 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden="true"
-            className="job-details-small-icon job-details-research-icon"
-          />
-          <h2 className="text-[18px] font-semibold leading-7 text-text-primary">
-            Company Research
-          </h2>
-        </div>
-        <button
-          type="button"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-accent px-4 text-[14px] font-semibold leading-5 text-accent-foreground transition-colors hover:bg-accent-dark"
-        >
-          <span aria-hidden="true" className="job-details-search-icon" />
-          Research Company
-        </button>
-      </div>
-      {dossier ? (
-        <div className="space-y-6 px-6 py-6">
-          <ResearchParagraph title="Company Overview" value={dossier.companyOverview} />
-          <ResearchTags title="Tech Stack" items={dossier.techStack} />
-          <ResearchList title="Culture" items={dossier.culture} />
-          <ResearchParagraph title="Why This Role" value={dossier.whyThisRole} />
-          <ResearchList title="Your Edge" items={dossier.yourEdge} />
-          <ResearchList title="Gaps to Address" items={dossier.gapsToAddress} />
-          <ResearchList title="Smart Questions" items={dossier.smartQuestions} />
-          <ResearchList title="Interview Prep" items={dossier.interviewPrep} />
-          <ResearchSources sources={dossier.sources} />
-        </div>
-      ) : (
-        <div className="flex min-h-[246px] flex-col items-center justify-center px-6 py-14 text-center">
-          <span
-            aria-hidden="true"
-            className="job-details-empty-research-icon"
-          />
-          <p className="mt-5 text-[15px] font-semibold leading-5 text-text-primary">
-            No research yet
-          </p>
-          <p className="mt-2 max-w-[320px] text-[14px] font-normal leading-5 text-text-muted">
-            Click &quot;Research Company&quot; to let the AI browse {job.company}
-            &apos;s public pages and build a dossier.
-          </p>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function ResearchParagraph({ title, value }: { title: string; value: string }) {
-  if (!value) {
-    return null;
-  }
-
-  return (
-    <section>
-      <h3 className="text-[14px] font-semibold leading-5 text-text-primary">
-        {title}
-      </h3>
-      <p className="mt-2 text-[14px] font-medium leading-6 text-text-primary">
-        {value}
-      </p>
-    </section>
-  );
-}
-
-function ResearchTags({ title, items }: { title: string; items: string[] }) {
-  if (items.length === 0) {
-    return null;
-  }
-
-  return (
-    <section>
-      <h3 className="text-[14px] font-semibold leading-5 text-text-primary">
-        {title}
-      </h3>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <span
-            key={item}
-            className="rounded-full bg-accent-muted px-3 py-1 text-[12px] font-medium leading-4 text-accent"
-          >
-            {item}
-          </span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ResearchList({ title, items }: { title: string; items: string[] }) {
-  if (items.length === 0) {
-    return null;
-  }
-
-  return (
-    <section>
-      <h3 className="text-[14px] font-semibold leading-5 text-text-primary">
-        {title}
-      </h3>
-      <ul className="mt-2 space-y-2 text-[14px] font-medium leading-6 text-text-primary">
-        {items.map((item) => (
-          <li key={item} className="flex gap-2">
-            <span aria-hidden="true" className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-accent" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function ResearchSources({ sources }: { sources: string[] }) {
-  if (sources.length === 0) {
-    return null;
-  }
-
-  return (
-    <section>
-      <h3 className="text-[14px] font-semibold leading-5 text-text-primary">
-        Sources
-      </h3>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {sources.map((source) => (
-          <a
-            key={source}
-            href={source}
-            target="_blank"
-            rel="noreferrer"
-            className="text-[12px] font-medium leading-4 text-text-secondary transition-colors hover:text-accent"
-          >
-            {source}
-          </a>
-        ))}
-      </div>
-    </section>
+    <CompanyResearchPanel
+      company={job.company}
+      companyWebsiteUrl={job.companyWebsiteUrl}
+      dossier={job.companyResearch}
+      jobId={job.id}
+    />
   );
 }
 

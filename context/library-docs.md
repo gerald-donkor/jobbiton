@@ -723,3 +723,28 @@ function extractTextFromPdf(pdfBuffer: Uint8Array): Promise<string> {
 - Destroy parser instances after success or failure
 - Always handle parse errors — some PDFs are image-based and return empty text
 - If extracted text is empty or very short — return error to user: "Could not extract text from this PDF. Please try a different file."
+
+---
+
+## Motion for React
+
+**Package:** `motion`
+**Import path:** `motion/react`
+**Official docs:** https://motion.dev/docs/react
+
+Use Motion for focused client-side interaction states where CSS transitions are not expressive enough, such as enter/exit transitions, progress-state changes, and animated multistep feedback. Keep animations tied to state and scoped to client components.
+
+```typescript
+"use client";
+
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+```
+
+**Rules:**
+
+- Import React animation APIs from `motion/react`, not `framer-motion`.
+- Use Motion only in `"use client"` components.
+- Prefer `AnimatePresence` for loading/content swaps and small `motion.div` transitions for progress/state changes.
+- Always check `useReducedMotion()` for looping or decorative motion, and disable or shorten animation when users prefer reduced motion.
+- Keep all colors in Tailwind token classes or CSS variables; do not animate raw hex colors.
+- Use Motion to clarify state, not as decoration. Long-running actions should show concrete step labels and progress cues.

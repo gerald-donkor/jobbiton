@@ -5,6 +5,7 @@ import {
   normalizeAdzunaJobType,
   searchAdzunaJobs,
 } from "@/lib/adzuna";
+import { logAgentMessage } from "@/lib/agent-logs";
 import { createInsforgeServer } from "@/lib/insforge-server";
 import { MATCH_THRESHOLD } from "@/lib/utils";
 import { matchJobToProfile } from "@/agent/matcher";
@@ -37,40 +38,6 @@ function describeError(error: unknown): Record<string, unknown> {
   }
 
   return { error };
-}
-
-async function logAgentMessage({
-  jobId,
-  level,
-  message,
-  runId,
-  userId,
-}: {
-  jobId?: string;
-  level: "info" | "success" | "warning" | "error";
-  message: string;
-  runId: string;
-  userId: string;
-}): Promise<void> {
-  try {
-    const insforge = await createInsforgeServer();
-    const { error } = await insforge.database.from("agent_logs").insert([
-      {
-        run_id: runId,
-        user_id: userId,
-        job_id: jobId ?? null,
-        level,
-        message,
-        created_at: new Date().toISOString(),
-      },
-    ]);
-
-    if (error) {
-      console.error("[agent/adzuna] Unable to write agent log", error);
-    }
-  } catch (error) {
-    console.error("[agent/adzuna] Unable to write agent log", error);
-  }
 }
 
 async function loadProfile(userId: string): Promise<FindJobsProfile | null> {

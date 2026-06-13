@@ -753,6 +753,169 @@ textarea {
   transform: rotate(45deg);
 }
 
+.job-details-loading-check-icon {
+  width: 9px;
+  height: 5px;
+  border-bottom: 1.7px solid currentColor;
+  border-left: 1.7px solid currentColor;
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+.job-details-research-card-icon {
+  position: relative;
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 78%, transparent);
+}
+
+.job-details-research-card-icon-overview,
+.job-details-research-card-icon-tech {
+  background: var(--color-info-lightest);
+  color: var(--color-info-medium);
+}
+
+.job-details-research-card-icon-culture,
+.job-details-research-card-icon-edge,
+.job-details-research-card-icon-prep {
+  background: var(--color-success-lightest);
+  color: var(--color-success);
+}
+
+.job-details-research-card-icon-why,
+.job-details-research-card-icon-gaps,
+.job-details-research-card-icon-questions {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.job-details-research-card-icon-overview::before {
+  width: 12px;
+  height: 14px;
+  border: 1.6px solid currentColor;
+  border-radius: 2px;
+  content: "";
+}
+
+.job-details-research-card-icon-overview::after {
+  position: absolute;
+  width: 4px;
+  height: 3px;
+  background: currentColor;
+  box-shadow:
+    -4px 0 0 currentColor,
+    4px 0 0 currentColor,
+    -4px 5px 0 currentColor,
+    4px 5px 0 currentColor;
+  content: "";
+}
+
+.job-details-research-card-icon-tech::before {
+  content: "</>";
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.job-details-research-card-icon-culture::before {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px 4px 7px 4px;
+  background: currentColor;
+  content: "";
+  transform: rotate(45deg);
+}
+
+.job-details-research-card-icon-culture::after {
+  position: absolute;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  box-shadow: -5px 0 0 currentColor;
+  content: "";
+}
+
+.job-details-research-card-icon-why::before {
+  width: 12px;
+  height: 14px;
+  border: 1.6px solid currentColor;
+  border-radius: 7px 7px 5px 5px;
+  content: "";
+}
+
+.job-details-research-card-icon-why::after {
+  position: absolute;
+  bottom: 7px;
+  width: 7px;
+  height: 1.6px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  box-shadow: 0 3px 0 currentColor;
+  content: "";
+}
+
+.job-details-research-card-icon-edge::before {
+  width: 15px;
+  height: 15px;
+  background: currentColor;
+  clip-path: polygon(50% 0, 61% 34%, 98% 34%, 68% 55%, 79% 91%, 50% 68%, 21% 91%, 32% 55%, 2% 34%, 39% 34%);
+  content: "";
+}
+
+.job-details-research-card-icon-gaps::before {
+  width: 0;
+  height: 0;
+  border-right: 8px solid transparent;
+  border-bottom: 15px solid currentColor;
+  border-left: 8px solid transparent;
+  content: "";
+}
+
+.job-details-research-card-icon-gaps::after {
+  position: absolute;
+  bottom: 8px;
+  width: 2px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: 0 8px 0 -0.5px var(--color-surface);
+  content: "";
+}
+
+.job-details-research-card-icon-questions::before {
+  content: "?";
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.job-details-research-card-icon-prep::before {
+  width: 15px;
+  height: 11px;
+  border: 1.6px solid currentColor;
+  border-radius: 4px;
+  content: "";
+}
+
+.job-details-research-card-icon-prep::after {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  width: 6px;
+  height: 6px;
+  border-bottom: 1.6px solid currentColor;
+  border-left: 1.6px solid currentColor;
+  content: "";
+  transform: rotate(-20deg);
+}
+
 .profile-progress-ring {
   background:
     radial-gradient(circle, var(--color-surface) 0 58%, transparent 59%),

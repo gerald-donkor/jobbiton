@@ -6,9 +6,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** Phase 4 — Job Details Page
-**Last completed:** 12 Job Details Page — Full UI
-**Next:** 13 Company Research Agent
+**Phase:** Phase 5 — Dashboard
+**Last completed:** 13 Company Research Agent
+**Next:** 14 Dashboard Page — Full UI
 
 ---
 
@@ -37,7 +37,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 4 — Job Details Page
 
 - [x] 12 Job Details Page — Full UI
-- [ ] 13 Company Research Agent
+- [x] 13 Company Research Agent
 
 ### Phase 5 — Dashboard
 
@@ -150,3 +150,27 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-13 — Feature 12 review-fix verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
 - 2026-06-13 — Feature 12 metadata layout follow-up completed: job-details cards widened to `max-w-[1040px]`, the desktop metadata grid now gives Location extra space, and info-card values wrap instead of truncating so long location names remain visible.
 - 2026-06-13 — Feature 12 metadata layout verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 Company Research Agent completed with `POST /api/agent/research`, Browserbase session creation, Stagehand extraction of the company homepage plus up to three internal pages, OpenRouter `openai/gpt-4o` JSON synthesis, user-scoped `jobs.company_research` updates, `company_researched` PostHog capture, and an inline Job Details research button that refreshes the dossier after success.
+- 2026-06-13 — Feature 13 preserves existing dossiers when OpenRouter is missing or fails, falls back to job/profile-only synthesis when Browserbase or Stagehand browsing fails, logs research messages to the job's existing `run_id` when present, and allows the same button to overwrite existing research as `Research Again`.
+- 2026-06-13 — Feature 13 verification: `npm run lint` passes and `npm run build` passes. A built-server smoke check confirms unauthenticated `POST /api/agent/research` returns the safe 401 JSON response. The build still shows the existing Node `module.register()` deprecation warning. Installing Browserbase/Stagehand dependencies reported existing npm audit warnings; no automatic dependency fixes were applied.
+- 2026-06-13 — Feature 13 review fixes completed: malformed JSON request bodies now return the planned safe 400 response instead of falling into the 500 catch, and the Job Details research button now narrows the API response at runtime instead of asserting the response type.
+- 2026-06-13 — Feature 13 review-fix verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 provider correction completed: company research now supports the existing server-side `GEMINI_API_KEY` for both Stagehand extraction and final dossier synthesis, while still preferring OpenRouter when `OPENROUTER_API_KEY` is configured. Gemini synthesis follows the project resume-generation pattern with `gemini-2.5-flash` and `gemini-2.5-flash-lite` fallback.
+- 2026-06-13 — Feature 13 Gemini provider verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 source-link hardening completed: company research prompts now require source entries to be absolute `http(s)` URLs from collected research, saved dossiers normalize sources to visited valid URLs, and the Job Details sources area filters any older invalid source strings before rendering links.
+- 2026-06-13 — Feature 13 source-link verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 research dossier UI polish completed: the Job Details company research dossier now renders each section as a token card with descriptive CSS icon chips, and the Sources area renders live external-link cards with readable domain/page labels plus absolute URLs instead of plain text links.
+- 2026-06-13 — Feature 13 research dossier UI verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 sources UI corrected to match the supplied compact reference: sources now render as a flat top-bordered strip with uppercase `Sources` label and simple live absolute URL links, while the rest of the research dossier keeps the polished section cards and icons.
+- 2026-06-13 — Feature 13 compact sources verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 sources strip alignment corrected again from screenshot feedback: the `Sources` section is now a full-width sibling below the dossier body, so its top border spans the entire research card and the label/URL padding matches the reference instead of being nested inside the dossier body spacing.
+- 2026-06-13 — Feature 13 full-width sources strip verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 source URL correction completed: Adzuna tracking domains are filtered out of both newly saved research sources and existing rendered dossier sources.
+- 2026-06-13 — Feature 13 source URL correction verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 verified employer-source correction completed: the Job Details page now resolves a live employer website by following the saved apply/source URL server-side, rejects Adzuna/ATS/job-board domains, and only renders verified employer URLs in `SOURCES`. Generic company-name URL fallbacks were removed from both rendering and research-source saving.
+- 2026-06-13 — Feature 13 verified employer-source verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 research loading UX completed: added Motion for React (`motion`) and replaced the standalone research button with a client `CompanyResearchPanel` that shows an animated multistep loading card while company research runs, including progress, active/queued/completed steps, reduced-motion handling, inline errors, and route refresh after success.
+- 2026-06-13 — Feature 13 research loading UX verification: `npm run lint` passes and `npm run build` passes. Installing Motion preserved the existing npm audit warnings: 17 low and 2 moderate. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 research loading animation polish completed: the Motion loading card now has a moving token scan band, breathing search glyph, step counter pill, animated progress highlight, active-step pulse rings, and status dots while preserving reduced-motion handling.
+- 2026-06-13 — Feature 13 research loading animation polish verification: `npm run lint` passes and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-13 — Feature 13 company source ordering completed: when the Job Details page resolves a verified live employer website, the compact bottom `SOURCES` strip now includes that company URL first and deduplicates it against any saved research source URLs.

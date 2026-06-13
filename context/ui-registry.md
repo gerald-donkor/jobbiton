@@ -280,23 +280,23 @@ The circled elements from the job details screenshot are CSS glyphs, not image a
 
 ### Job Details Company Research Card
 
-File: components/job-details/JobDetailsPageContent.tsx
+File: components/job-details/CompanyResearchPanel.tsx, components/job-details/JobDetailsPageContent.tsx
 Last updated: 2026-06-13
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
-| Background       | card `bg-surface`, empty icon `bg-surface-secondary`, research icon `bg-accent-muted` |
-| Border           | card `border border-border`, header divider `border-b border-border` |
-| Border radius    | card `rounded-xl`, button `rounded-md`, icon chips `rounded-full`   |
-| Text — primary   | title `text-[18px] font-semibold leading-7 text-text-primary`, empty title `text-[15px] font-semibold` |
-| Text — secondary | empty copy `text-[14px] font-normal leading-5 text-text-muted`, sources `text-text-secondary` |
-| Spacing          | header `px-6 py-4`, empty state `min-h-[246px] px-6 py-14`, dossier body `px-6 py-6 space-y-6` |
-| Hover state      | research/apply buttons `hover:bg-accent-dark`, source links `hover:text-accent` |
-| Shadow           | shared token card shadow                                            |
-| Accent usage     | research CTA `bg-accent text-accent-foreground`, tags `bg-accent-muted text-accent` |
+| Background       | card `bg-surface`, loading/dossier panels `bg-surface-secondary`, loading scan band `bg-accent-light`, loading step items `bg-surface`, empty icon `bg-surface-secondary`, research icon/loading pulse `bg-accent-muted` |
+| Border           | card/panels/queued steps `border border-border`, active loading step `border-accent`, header divider and sources strip `border-b/border-t border-border` |
+| Border radius    | card/panels `rounded-xl`, button `rounded-md`, icon chips `rounded-full` |
+| Text — primary   | title/loading heading/panel headings `text-[14px/18px] font-semibold text-text-primary`, source URLs `text-[12px] font-medium leading-4 text-text-primary`, button `text-[14px] font-semibold leading-5 text-accent-foreground` |
+| Text — secondary | loading body `text-[13px] font-medium leading-5 text-text-secondary`, step status/source label `text-[12px] font-semibold/medium leading-4 text-text-muted/text-text-secondary`, empty copy `text-[14px] font-normal leading-5 text-text-muted`, button error `text-[12px] font-medium leading-4 text-error` |
+| Spacing          | header `px-6 py-4`, loading wrapper `px-6 py-6`, loading panel `px-5 py-5`, loading step rows `px-3 py-3`, loading step grid `mt-5 gap-3`, empty state `min-h-[246px] px-6 py-14`, dossier body `px-6 py-6 space-y-5`, panels `px-4 py-4`, sources full-width strip `px-6 pb-5 pt-4` with URL row `mt-3 gap-x-5 gap-y-2`, research button wrapper `gap-2`, button `h-10 gap-2 px-4` |
+| Hover state      | research/apply buttons `hover:bg-accent-dark`, source links `hover:text-accent`, disabled research button `disabled:opacity-70` |
+| Shadow           | shared token card shadow, loading/panel subtle `shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_3/4%,transparent)]`, progress track inset shadow |
+| Accent usage     | research CTA/progress fill/active steps `bg-accent text-accent-foreground`, loading pulse and tags `bg-accent-muted text-accent`, section icons rotate through `bg-info-lightest text-info-medium`, `bg-success-lightest text-success`, and `bg-accent-muted text-accent` |
 
 **Pattern notes:**
-Feature 12 only renders the company research surface. The button is present and visually active to match the design, but the Browserbase/Stagehand generation flow belongs to Feature 13. Empty state copy should stay centered and company-specific. If `jobs.company_research` already contains a dossier, the same card renders all nine planned fields: overview, tech stack, culture, why this role, your edge, gaps, smart questions, interview prep, and sources.
+The company research surface is now a client panel because the header button, loading body, error state, and route refresh share interaction state. While `POST /api/agent/research` is running, render the animated multistep loading card with Motion (`motion/react`), an accent progress bar, a soft moving scan band, a breathing search glyph, a step counter pill, active-step pulse rings, and subtle animated status dots. The four status rows are resolving site, browsing pages, reading signals, and building the dossier. The card should reassure users that long research is still active without introducing queue/polling infrastructure. Respect `useReducedMotion()` for looping/decorative animation. Completed dossiers render as polished token cards with section-specific CSS icon chips. Source entries intentionally match the compact reference treatment: a flat top-bordered strip with the literal `SOURCES` label and simple live absolute `http(s)` URL links underneath. Sources must be verified employer-site URLs; Adzuna, ATS, and job-board domains are filtered, and the UI must not invent a company-domain fallback. Existing dossiers can be overwritten by the same control, which changes to `Research Again`.
 
 ### Job Details Navbar
 
