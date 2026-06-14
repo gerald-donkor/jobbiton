@@ -75,9 +75,7 @@ export function Navbar({
           >
             {ctaLabel}
           </Link>
-        ) : (
-          <div className="hidden w-[132px] md:block" />
-        )}
+        ) : null}
       </div>
     </header>
   );
