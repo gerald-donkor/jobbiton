@@ -1,8 +1,14 @@
-import { ProtectedShell } from "@/components/protected/ProtectedShell";
+import { DashboardPageContent } from "@/components/dashboard/DashboardPageContent";
 import { requireUser } from "@/lib/auth";
 
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  return <ProtectedShell title="Dashboard" userId={user.id} userEmail={user.email} userName={user.profile?.name} />;
+  return (
+    <DashboardPageContent
+      userId={user.id}
+      userEmail={user.email}
+      userName={user.profile?.name}
+    />
+  );
 }
