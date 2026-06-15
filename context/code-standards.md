@@ -317,6 +317,7 @@ Approved dependencies for this project:
 - `posthog-node` — PostHog server client
 - `@react-pdf/renderer` — Resume PDF generation
 - `pdf2json` — Extract text from uploaded PDF resumes server-side
+- `recharts` — Dashboard analytics chart rendering
 - `zod` — Schema validation
 - `lucide-react` — Icons
 - `tailwindcss` — Styling

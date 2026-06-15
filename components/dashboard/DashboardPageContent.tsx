@@ -5,11 +5,13 @@ import { JobsFoundChart } from "@/components/dashboard/JobsFoundChart";
 import { MatchDistributionChart } from "@/components/dashboard/MatchDistributionChart";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { StatCard } from "@/components/dashboard/StatCard";
+import type { DashboardAnalytics } from "@/lib/dashboard-analytics";
 import type { DashboardActivityItem } from "@/lib/dashboard-activity";
 import type { DashboardStat } from "@/lib/dashboard-stats";
 
 type DashboardPageContentProps = {
   activities: DashboardActivityItem[];
+  analytics: DashboardAnalytics;
   stats: DashboardStat[];
   userId: string;
   userEmail: string;
@@ -18,6 +20,7 @@ type DashboardPageContentProps = {
 
 export function DashboardPageContent({
   activities,
+  analytics,
   stats,
   userId,
   userEmail,
@@ -40,12 +43,12 @@ export function DashboardPageContent({
 
           <section className="grid gap-4 lg:grid-cols-2">
             <RecentActivity activities={activities} />
-            <CompanyResearchChart />
+            <CompanyResearchChart data={analytics.companyResearchActivity} />
           </section>
 
           <section className="grid gap-4 lg:grid-cols-2">
-            <JobsFoundChart />
-            <MatchDistributionChart />
+            <JobsFoundChart data={analytics.jobsFoundOverTime} />
+            <MatchDistributionChart data={analytics.matchScoreDistribution} />
           </section>
         </div>
       </main>
