@@ -140,23 +140,23 @@ Recent Activity uses the same compact white card shell as the dashboard charts. 
 
 ### Dashboard Chart Cards
 
-File: components/dashboard/ChartFrame.tsx, components/dashboard/ChartTooltip.tsx, components/dashboard/CompanyResearchChart.tsx, components/dashboard/JobsFoundChart.tsx, components/dashboard/MatchDistributionChart.tsx
+File: components/dashboard/ChartFrame.tsx, components/dashboard/DashboardChartEmptyState.tsx, components/dashboard/DashboardRechartsTooltip.tsx, components/dashboard/CompanyResearchChart.tsx, components/dashboard/JobsFoundChart.tsx, components/dashboard/MatchDistributionChart.tsx, lib/dashboard-analytics.ts
 Last updated: 2026-06-15
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
-| Background       | card `bg-surface`, bars `bg-info` / `bg-success`, line area uses token SVG gradient |
+| Background       | card `bg-surface`, empty state `bg-surface-secondary`, Recharts bars `var(--color-info)` / `var(--color-success)` |
 | Border           | card `border border-border`, chart grid `border-t border-dashed border-border` |
 | Border radius    | card `rounded-xl`, bars `rounded-sm`                                |
 | Text — primary   | titles `text-[16px] font-semibold leading-6 text-text-primary`      |
-| Text — secondary | axes `text-[12px] font-normal leading-4 text-text-muted`            |
-| Spacing          | card `px-6 py-6`, charts `min-h-[340px]`, chart areas `h-[228px]`, grid gaps `gap-3/gap-4` |
-| Hover state      | cards `hover:shadow-[0_14px_32px_color-mix(...)]`, chart lanes `group-hover:opacity-[0.04]` / `group-hover:opacity-[0.06]`, bars/points `group-hover:-translate-y-1 group-hover:bg-info-medium/group-hover:bg-success-alt`, tooltips `placement="chartTop"` with `group-hover:opacity-100 group-focus-visible:opacity-100` |
+| Text — secondary | axes and empty state `text-[12px] font-normal leading-4 text-text-muted` |
+| Spacing          | card `px-6 py-6`, charts `min-h-[340px]`, Recharts area/empty state `mt-7 h-[228px]` |
+| Hover state      | cards `hover:shadow-[0_14px_32px_color-mix(...)]`, Recharts tooltip hover/focus cursor, empty states non-interactive |
 | Shadow           | shared token card shadow, tooltip `shadow-[0_10px_24px_color-mix(in_srgb,var(--color-overlay)_12%,transparent)]` |
-| Accent usage     | jobs line `stroke="var(--color-accent)"`, area gradient uses `--color-accent-light`; research bars use info blue, score bars use success green |
+| Accent usage     | jobs line `stroke="var(--color-accent)"`; research bars use info blue, score bars use success green |
 
 **Pattern notes:**
-Feature 14 charts are mock, server-rendered SVG/CSS rather than a charting library. They are proportioned to the compact dashboard screenshot: each chart sits in a 340px card and shares the same padding, title scale, axis scale, and hover behavior. Chart data points are intentionally interactive through full-height hit lanes, not tiny targets: bar charts reveal a subtle token-colored lane wash, vertical guide line, and lifted/color-shifted bar; the Jobs Found line chart uses matching day lanes to reveal an accent wash, vertical guide line, and visible point marker. Tooltips must use the shared `chartTop` placement so they stay pinned near the top of the active lane instead of following short bars or low points down the plot. Use token colors in SVG attributes and Tailwind token utilities; do not add raw hex chart colors or inline style props.
+Feature 17 replaces mock chart arrays with DB-backed analytics from `lib/dashboard-analytics.ts` and Recharts internals. Keep each chart in the compact 340px `ChartFrame` shell with a 228px plot area. Jobs Found Over Time uses 30-day user-scoped `jobs.found_at` counts, Match Score Distribution uses 30-day user-scoped `jobs.match_score` buckets from 50-100%, and Company Research Activity uses 7-day successful company research `agent_logs.created_at` with researched-job fallback. Recharts colors must use project CSS variables, and charts with all-zero values must show `DashboardChartEmptyState` instead of fake data.
 
 ### Profile Attention Banner
 

@@ -7,8 +7,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 5 — Dashboard
-**Last completed:** 16 Recent Activity — Real Data
-**Next:** 17 Analytics Charts — PostHog Data
+**Last completed:** 17 Analytics Charts — Real Data
+**Next:** Phase 5 complete
 
 ---
 
@@ -44,7 +44,7 @@ Update this file after every completed feature. Any AI agent reading this should
 - [x] 14 Dashboard Page — Full UI
 - [x] 15 Stats Bar — Real Data
 - [x] 16 Recent Activity — Real Data
-- [ ] 17 Analytics Charts — PostHog Data
+- [x] 17 Analytics Charts — Real Data
 
 ---
 
@@ -185,3 +185,4 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-15 — Feature 15 Stats Bar Real Data completed: `/dashboard` now loads user-scoped InsForge `jobs` rows server-side through `lib/dashboard-stats.ts`, replacing the mock stat array with all-time jobs, average match rate, researched-company count, current-week jobs, and week-over-week trend values.
 - 2026-06-15 — Dashboard layout screenshot follow-up completed: `/dashboard` now uses the compact 80px top navbar with centered text links and right-side profile/sign-out controls, plus a centered `max-w-[824px]` dashboard track with 16px gaps, 128px stat cards, and 340px activity/chart cards matching the latest positioning reference.
 - 2026-06-15 — Feature 16 Recent Activity Real Data completed: `/dashboard` now loads recent completed `agent_runs` and researched `jobs` for the current user through `lib/dashboard-activity.ts`, merges them by timestamp, formats human-readable activity labels and relative times, and renders a compact empty state when no activity exists.
+- 2026-06-15 — Feature 17 Analytics Charts Real Data completed: `/dashboard` now loads DB-backed analytics through `lib/dashboard-analytics.ts`, using 30-day user-scoped `jobs` data for Jobs Found Over Time and Match Score Distribution, 7-day company research completion activity from `agent_logs` with researched-job fallback, and Recharts-powered chart internals with compact empty states.

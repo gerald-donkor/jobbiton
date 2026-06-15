@@ -614,6 +614,20 @@ await posthog.shutdown(); // required — ensures event is sent
 
 ---
 
+## Recharts
+
+Recharts is used only for dashboard analytics chart rendering.
+
+**Rules:**
+
+- Keep Recharts components inside focused Client Components because responsive chart measurement runs in the browser.
+- Load and shape analytics data server-side in `lib/` helpers, then pass typed arrays into chart components.
+- Use project CSS variables for Recharts colors, for example `stroke="var(--color-accent)"`; never use raw hex values or Tailwind built-in color classes.
+- Keep the dashboard card shell in `ChartFrame`; Recharts owns only the chart internals.
+- Show the dashboard chart empty state when all values are zero; never fall back to mock chart data.
+
+---
+
 ## @react-pdf/renderer
 
 **Check first:** Check AGENTS.md for an installed react-pdf skill. PDF generation APIs can differ from general training knowledge.
