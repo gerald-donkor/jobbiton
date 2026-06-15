@@ -7,8 +7,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 5 — Dashboard
-**Last completed:** 14 Dashboard Page — Full UI
-**Next:** 15 Stats Bar — Real Data
+**Last completed:** 16 Recent Activity — Real Data
+**Next:** 17 Analytics Charts — PostHog Data
 
 ---
 
@@ -42,8 +42,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 5 — Dashboard
 
 - [x] 14 Dashboard Page — Full UI
-- [ ] 15 Stats Bar — Real Data
-- [ ] 16 Recent Activity — Real Data
+- [x] 15 Stats Bar — Real Data
+- [x] 16 Recent Activity — Real Data
 - [ ] 17 Analytics Charts — PostHog Data
 
 ---
@@ -177,3 +177,11 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-13 — Feature 14 Dashboard Page Full UI completed against `context/designs/dashboard.png` with a screenshot-matched protected dashboard shell, active icon navbar, four mock stat cards, recent activity timeline, company research bar chart, jobs-found line chart, and match-score distribution bar chart.
 - 2026-06-13 — Feature 14 remains mock-data only by design; Features 15-17 will replace the dashboard arrays with real InsForge and PostHog data without changing the visual structure.
 - 2026-06-13 — Feature 14 verification: `npm run lint` passes and `npm run build` passes. A built-server unauthenticated smoke check confirms `/dashboard` still redirects to `/login?next=%2Fdashboard`. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-14 — Feature 14 recovered after review: the dashboard was rebuilt around the actual `context/designs/dashboard.png` proportions with a local 90px full-width `DashboardNavbar`, 70px desktop gutters, 34px grid gaps, taller stat cards, and larger chart/timeline typography so the UI tracks the screenshot instead of the narrower shared app shell.
+- 2026-06-15 — Feature 14 dashboard interactivity recovered after screenshot feedback: stat cards now lift on hover, Recent Activity rows highlight and focus, bar-chart data points show hover/focus tooltips, and the Jobs Found line chart exposes focusable point tooltips while remaining mock-data only for Features 15-17.
+- 2026-06-15 — Feature 14 Jobs Found line chart interactivity follow-up completed: tiny point-only targets were replaced with full-height day hit bands, hover/focus guide lines, visible accent markers, and matching tooltips so the chart responds while scanning across it.
+- 2026-06-15 — Feature 14 chart hover-flow follow-up completed: Company Research Activity and Match Score Distribution now use the same full-height data lanes as the Jobs Found chart, with lane wash, vertical guide line, lifted active bar, and tooltip beside the active data point.
+- 2026-06-15 — Feature 14 chart tooltip placement follow-up completed: the shared chart tooltip now supports a `chartTop` placement, and all dashboard charts pin hover/focus tooltips near the top of the active lane instead of letting short bars or low points place the tooltip down in the chart body.
+- 2026-06-15 — Feature 15 Stats Bar Real Data completed: `/dashboard` now loads user-scoped InsForge `jobs` rows server-side through `lib/dashboard-stats.ts`, replacing the mock stat array with all-time jobs, average match rate, researched-company count, current-week jobs, and week-over-week trend values.
+- 2026-06-15 — Dashboard layout screenshot follow-up completed: `/dashboard` now uses the compact 80px top navbar with centered text links and right-side profile/sign-out controls, plus a centered `max-w-[824px]` dashboard track with 16px gaps, 128px stat cards, and 340px activity/chart cards matching the latest positioning reference.
+- 2026-06-15 — Feature 16 Recent Activity Real Data completed: `/dashboard` now loads recent completed `agent_runs` and researched `jobs` for the current user through `lib/dashboard-activity.ts`, merges them by timestamp, formats human-readable activity labels and relative times, and renders a compact empty state when no activity exists.

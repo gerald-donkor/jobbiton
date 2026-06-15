@@ -76,87 +76,87 @@ Last updated: 2026-06-09
 | Accent usage     | active link text and bottom rule `absolute inset-x-0 bottom-0 h-0.5 bg-accent` |
 
 **Pattern notes:**
-Protected pages can pass `activeHref` to the shared navbar to render the active nav item with a token-purple text state and a 2px bottom rule. Nav icons are hidden by default; pass `showNavIcons` only for a design that explicitly includes them. The screenshot-matched profile page uses the plain navbar with the visible `Start for free` CTA. When `showCta={false}`, the navbar removes the CTA slot entirely so icon navigation can sit flush to the right like the dashboard reference.
+Protected pages can pass `activeHref` to the shared navbar to render the active nav item with a token-purple text state and a 2px bottom rule. Nav icons are hidden by default; pass `showNavIcons` only for a design that explicitly includes them. The screenshot-matched profile page uses the plain navbar with the visible `Start for free` CTA.
 
 ### Dashboard Page Layout
 
-File: components/dashboard/DashboardPageContent.tsx
-Last updated: 2026-06-13
+File: components/dashboard/DashboardPageContent.tsx, components/dashboard/DashboardNavbar.tsx
+Last updated: 2026-06-15
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
 | Background       | page/main `bg-background`, navbar `bg-surface`                      |
-| Border           | main `border-x border-border`                                       |
+| Border           | navbar `border-b border-border`; page content unframed              |
 | Border radius    | none at page level                                                  |
-| Text — primary   | main `text-text-primary`                                            |
-| Text — secondary | inherited by child cards                                            |
-| Spacing          | main `px-6 py-8`, content grid `gap-6`                              |
+| Text — primary   | main `text-text-primary`, dashboard nav active `text-text-primary text-[14px] font-medium leading-5` |
+| Text — secondary | inactive nav `text-text-dark`                                       |
+| Spacing          | navbar `h-20 px-10`, nav `gap-12`, main `px-6 pt-8 pb-16`, content grid `max-w-[824px] gap-4` |
 | Hover state      | navbar links inherit shared `hover:text-accent`                     |
 | Shadow           | none at page level                                                  |
 | Accent usage     | active Dashboard nav uses `text-accent` and `bg-accent` underline   |
 
 **Pattern notes:**
-Dashboard is a dense operational page with no hero, footer, or nested layout shell. It uses the shared navbar with `activeHref="/dashboard"`, visible nav icons, and no CTA or placeholder CTA slot so the header matches the supplied dashboard reference. The dashboard content is one full-width `max-w-[1440px]` work area on the app background with a simple 24px grid rhythm. Feature 14 uses screenshot-matched mock data only; later dashboard data features should replace the arrays/props without changing the visual structure.
+Dashboard is a dense operational page with no hero, footer, or nested layout shell. The corrected dashboard reference uses a compact 80px top bar: logo on the left, text-only nav links centered absolutely in the viewport, and a profile icon plus `Sign out` action on the right. The dashboard content sits in a narrow centered `max-w-[824px]` column with 16px gaps so the four stat cards and two-column chart rows align like the screenshot. Feature 15 feeds the stat cards from real user-scoped data; later dashboard data features should replace activity/chart data without changing this compact spatial structure.
 
 ### Dashboard Stat Cards
 
-File: components/dashboard/StatCard.tsx
-Last updated: 2026-06-13
+File: components/dashboard/StatCard.tsx, lib/dashboard-stats.ts
+Last updated: 2026-06-15
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
 | Background       | `bg-surface`                                                        |
 | Border           | `border border-border`                                              |
 | Border radius    | `rounded-xl`                                                        |
-| Text — primary   | value `text-text-primary text-[34px] font-semibold leading-10`      |
-| Text — secondary | label `text-text-secondary text-[14px] font-semibold leading-5`, helper `text-text-muted text-[13px] font-normal leading-5` |
-| Spacing          | card `px-6 py-7`, trend row `mt-3 gap-3`                            |
-| Hover state      | none                                                                |
-| Shadow           | shared card shadow `shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
-| Accent usage     | trend badges use `bg-success-lightest text-success-darker`          |
+| Text — primary   | value `text-text-primary text-[30px] font-semibold leading-9`        |
+| Text — secondary | label `text-text-secondary text-[14px] font-medium leading-5`, helper `text-text-muted text-[12px] font-normal leading-4` |
+| Spacing          | card `min-h-[128px] px-6 py-6`, trend row `mt-2 gap-2`              |
+| Hover state      | `hover:-translate-y-1`                                               |
+| Shadow           | shared card shadow plus hover lift `hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_2px_6px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
+| Accent usage     | trend text uses `text-success-darker`                                |
 
 **Pattern notes:**
-Dashboard stat cards are broad white metric surfaces with a muted 14px label, large 34px number, and optional compact square-corner green trend badge. The third and fourth cards intentionally show muted helper text without a trend badge, matching the dashboard reference.
+Dashboard stat cards are compact white metric surfaces sized for four cards inside the `max-w-[824px]` dashboard track. Use a muted 14px label, a 30px metric, and a small inline success trend text before the helper copy. Stat cards keep a subtle hover lift so the dashboard feels inspectable. Feature 15 feeds these cards from `lib/dashboard-stats.ts`: total jobs and average match rate use all user-scoped jobs, trends compare the current UTC week with the previous UTC week, companies researched counts jobs with saved `company_research`, and Jobs This Week counts jobs whose `found_at` is inside the current UTC week.
 
 ### Dashboard Activity Timeline
 
-File: components/dashboard/RecentActivity.tsx
-Last updated: 2026-06-13
+File: components/dashboard/RecentActivity.tsx, lib/dashboard-activity.ts
+Last updated: 2026-06-15
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
 | Background       | `bg-surface`                                                        |
 | Border           | card/header `border border-border` / `border-b border-border`       |
 | Border radius    | `rounded-xl`, dots `rounded-full`                                   |
-| Text — primary   | title `text-[18px] font-semibold leading-6 text-text-primary`, items `text-[16px] font-medium leading-6 text-text-primary` |
-| Text — secondary | timestamps `text-[14px] font-normal leading-5 text-text-muted`      |
-| Spacing          | header `px-6 py-6`, body `px-6 py-6`, item gap `gap-5`              |
-| Hover state      | none                                                                |
+| Text — primary   | title `text-[16px] font-semibold leading-6 text-text-primary`, items `text-[14px] font-medium leading-5 text-text-primary` |
+| Text — secondary | timestamps/empty state `text-[12px] font-normal leading-4 text-text-muted` |
+| Spacing          | card `min-h-[340px] px-6 py-6`, body `mt-5`, item gap `gap-4`, connector `h-7`, empty state `mt-5 min-h-[236px] px-6` |
+| Hover state      | rows `hover:bg-surface-secondary focus-visible:bg-surface-secondary focus-visible:ring-2 focus-visible:ring-accent`, row text `group-hover:text-accent group-focus-visible:text-accent`, dots `group-hover:scale-125` |
 | Shadow           | shared token card shadow                                            |
-| Accent usage     | timeline dots rotate through `bg-accent`, `bg-info`, and `bg-success` |
+| Accent usage     | timeline dots use `bg-info` for company research and `bg-success` for completed job searches |
 
 **Pattern notes:**
-Recent Activity uses a white card with a separated header and a simple vertical timeline. Dots use token-colored fills with a soft surface ring, and the connector line is `bg-border`. Keep entries concise so the card remains scan-friendly.
+Recent Activity uses the same compact white card shell as the dashboard charts. Keep the header unseparated inside the card, then start the timeline at `mt-5`. Feature 16 feeds this card from `lib/dashboard-activity.ts`, merging completed `agent_runs` and researched `jobs` for the current user, sorting by timestamp, and limiting the list to five entries so the 340px card stays readable. Dots use token-colored fills with a soft surface ring, and the connector line is `bg-border`. Activity rows are focusable and hoverable so users can scan the feed with mouse or keyboard. When there is no activity, show the dashed `bg-surface-secondary` empty state instead of mock rows.
 
 ### Dashboard Chart Cards
 
-File: components/dashboard/ChartFrame.tsx, components/dashboard/CompanyResearchChart.tsx, components/dashboard/JobsFoundChart.tsx, components/dashboard/MatchDistributionChart.tsx
-Last updated: 2026-06-13
+File: components/dashboard/ChartFrame.tsx, components/dashboard/ChartTooltip.tsx, components/dashboard/CompanyResearchChart.tsx, components/dashboard/JobsFoundChart.tsx, components/dashboard/MatchDistributionChart.tsx
+Last updated: 2026-06-15
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
 | Background       | card `bg-surface`, bars `bg-info` / `bg-success`, line area uses token SVG gradient |
 | Border           | card `border border-border`, chart grid `border-t border-dashed border-border` |
 | Border radius    | card `rounded-xl`, bars `rounded-sm`                                |
-| Text — primary   | titles `text-[18px] font-semibold leading-6 text-text-primary`      |
-| Text — secondary | axes `text-[13px] font-normal leading-4 text-text-muted`            |
-| Spacing          | card `px-6 py-7`, chart top spacing `mt-8` / `mt-16`, axis gaps `gap-3` |
-| Hover state      | none                                                                |
-| Shadow           | shared token card shadow                                            |
+| Text — primary   | titles `text-[16px] font-semibold leading-6 text-text-primary`      |
+| Text — secondary | axes `text-[12px] font-normal leading-4 text-text-muted`            |
+| Spacing          | card `px-6 py-6`, charts `min-h-[340px]`, chart areas `h-[228px]`, grid gaps `gap-3/gap-4` |
+| Hover state      | cards `hover:shadow-[0_14px_32px_color-mix(...)]`, chart lanes `group-hover:opacity-[0.04]` / `group-hover:opacity-[0.06]`, bars/points `group-hover:-translate-y-1 group-hover:bg-info-medium/group-hover:bg-success-alt`, tooltips `placement="chartTop"` with `group-hover:opacity-100 group-focus-visible:opacity-100` |
+| Shadow           | shared token card shadow, tooltip `shadow-[0_10px_24px_color-mix(in_srgb,var(--color-overlay)_12%,transparent)]` |
 | Accent usage     | jobs line `stroke="var(--color-accent)"`, area gradient uses `--color-accent-light`; research bars use info blue, score bars use success green |
 
 **Pattern notes:**
-Feature 14 charts are mock, server-rendered SVG/CSS rather than a charting library. This keeps the visual exact enough for the supplied dashboard screenshot while leaving PostHog/Recharts-style real wiring for Feature 17 if needed. Use token colors in SVG attributes and Tailwind token utilities; do not add raw hex chart colors or inline style props.
+Feature 14 charts are mock, server-rendered SVG/CSS rather than a charting library. They are proportioned to the compact dashboard screenshot: each chart sits in a 340px card and shares the same padding, title scale, axis scale, and hover behavior. Chart data points are intentionally interactive through full-height hit lanes, not tiny targets: bar charts reveal a subtle token-colored lane wash, vertical guide line, and lifted/color-shifted bar; the Jobs Found line chart uses matching day lanes to reveal an accent wash, vertical guide line, and visible point marker. Tooltips must use the shared `chartTop` placement so they stay pinned near the top of the active lane instead of following short bars or low points down the plot. Use token colors in SVG attributes and Tailwind token utilities; do not add raw hex chart colors or inline style props.
 
 ### Profile Attention Banner
 
