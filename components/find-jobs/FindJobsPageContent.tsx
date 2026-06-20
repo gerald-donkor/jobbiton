@@ -1,6 +1,8 @@
 import { PostHogIdentify } from "@/components/auth/PostHogIdentify";
 import { FindJobsClient } from "@/components/find-jobs/FindJobsClient";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageIntro } from "@/components/layout/PageIntro";
+import { Reveal } from "@/components/motion/Reveal";
 import type {
   FindJobsListResult,
   MatchFilterValue,
@@ -31,13 +33,20 @@ export function FindJobsPageContent({
     <div className="min-h-screen bg-background">
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
       <Navbar />
-      <main className="mx-auto w-full max-w-[1440px] bg-background px-6 py-8 text-text-primary">
+      <PageIntro
+        eyebrow="Discovery"
+        title="Search roles, then let fit rise to the top."
+        copy="The search page now follows the same editorial flow: intent first, action second, then an organized list of matched opportunities."
+      />
+      <main className="mx-auto w-full max-w-[1440px] bg-background px-4 py-6 text-text-primary sm:px-6 sm:py-8">
         <div className="mx-auto flex w-full max-w-[1192px] flex-col gap-6">
-          <FindJobsClient
-            key={`${filters.runId ?? "no-run"}:${filters.query}:${filters.matchFilter}:${filters.sortBy}:${jobsList.currentPage}`}
-            jobsList={jobsList}
-            filters={filters}
-          />
+          <Reveal>
+            <FindJobsClient
+              key={`${filters.runId ?? "no-run"}:${filters.query}:${filters.matchFilter}:${filters.sortBy}:${jobsList.currentPage}`}
+              jobsList={jobsList}
+              filters={filters}
+            />
+          </Reveal>
         </div>
       </main>
     </div>

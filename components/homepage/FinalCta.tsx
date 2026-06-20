@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Reveal } from "@/components/motion/Reveal";
 
 type FinalCtaProps = {
   primaryHref?: string;
@@ -15,16 +16,16 @@ export function FinalCta({
 }: FinalCtaProps) {
   return (
     <section>
-      <div className="diagonal-band h-24 border-y border-border" aria-hidden="true" />
-      <div className="soft-gradient-panel px-6 py-20 text-center md:px-16 md:py-28">
-        <h2 className="mx-auto max-w-[860px] text-[48px] font-bold leading-[1.08] text-text-primary md:text-[64px]">
+      <div className="diagonal-band h-16 border-y border-border md:h-24" aria-hidden="true" />
+      <Reveal className="soft-gradient-panel px-4 py-16 text-center sm:px-6 md:px-16 md:py-28">
+        <h2 className="mx-auto max-w-[860px] text-[38px] font-bold leading-[1.08] text-text-primary sm:text-[48px] md:text-[64px]">
           Your next job search can feel a lot less overwhelming
         </h2>
-        <p className="supporting-text-tone mt-8 text-[20px] font-normal leading-8">
+        <p className="supporting-text-tone mt-8 text-[18px] font-normal leading-7 md:text-[20px] md:leading-8">
           Set up your profile, upload your resume, and start finding matches in
           minutes.
         </p>
-        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="mt-8 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
           <Link
             href={primaryHref}
             className="button-primary button-primary-lg"
@@ -38,8 +39,8 @@ export function FinalCta({
             {secondaryLabel}
           </Link>
         </div>
-      </div>
-      <div className="diagonal-band h-24 border-t border-border" aria-hidden="true" />
+      </Reveal>
+      <div className="diagonal-band h-16 border-t border-border md:h-24" aria-hidden="true" />
     </section>
   );
 }

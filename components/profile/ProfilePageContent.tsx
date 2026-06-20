@@ -1,5 +1,7 @@
 import { PostHogIdentify } from "@/components/auth/PostHogIdentify";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageIntro } from "@/components/layout/PageIntro";
+import { Reveal } from "@/components/motion/Reveal";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import type { ProfileValues } from "@/lib/profile";
 
@@ -20,9 +22,16 @@ export function ProfilePageContent({
     <div className="min-h-screen bg-background">
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
       <Navbar />
-      <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-background px-6 py-8 text-text-primary">
+      <PageIntro
+        eyebrow="Profile launchpad"
+        title="One profile powers the whole search."
+        copy="Set the source of truth once, then let extraction, resume generation, job matching, and company research reuse it across the product."
+      />
+      <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-background px-4 py-6 text-text-primary sm:px-6 sm:py-8">
         <div className="mx-auto flex w-full max-w-[940px] flex-col gap-6">
-          <ProfileEditor profile={profile} />
+          <Reveal>
+            <ProfileEditor profile={profile} />
+          </Reveal>
         </div>
       </main>
     </div>

@@ -77,20 +77,68 @@
   --radius-full: 9999px;
 }
 
+:root[data-theme="dark"] {
+  --color-background: #101421;
+  --color-surface: #171b2a;
+  --color-surface-secondary: #1e2334;
+  --color-surface-tertiary: #252b3d;
+  --color-surface-muted: #202638;
+  --color-border: #30374b;
+  --color-border-light: #394158;
+  --color-border-muted: #485169;
+  --color-text-primary: #f5f7fb;
+  --color-text-secondary: #bac3d4;
+  --color-text-muted: #8d97ab;
+  --color-text-dark: #d5dceb;
+  --color-text-darker: #e7ebf5;
+  --color-text-darkest: #ffffff;
+  --color-text-black: #f5f7fb;
+  --color-text-slate: #edf1f8;
+  --color-text-slate-medium: #b4bdcf;
+  --color-accent: #9b83ff;
+  --color-accent-dark: #7c5cfc;
+  --color-accent-light: #3a315f;
+  --color-accent-muted: #24203e;
+  --color-success-light: #123d32;
+  --color-success-lightest: #102f29;
+  --color-success-foreground: #7de3bd;
+  --color-info-light: #18375f;
+  --color-info-lightest: #142842;
+  --color-info-foreground: #9cc8ff;
+  --color-info-muted: #7f92b8;
+  --color-linkedin-light: #173456;
+  --color-overlay: #050713;
+  --color-overlay-dark: #02030a;
+}
+
 * {
   box-sizing: border-box;
 }
 
 html {
   min-height: 100%;
+  background: var(--color-background);
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--color-background);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface) 48%, var(--color-background) 52%) 0%,
+      var(--color-background) 44%
+    );
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 a {
@@ -115,6 +163,95 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+.loading-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-top-color: currentColor;
+  border-radius: var(--radius-full);
+  animation: loading-spin 760ms linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.brand-logo-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    color-mix(in srgb, var(--color-accent-dark) 72%, var(--color-overlay) 28%) 100%
+  );
+  box-shadow:
+    0 10px 20px color-mix(in srgb, var(--color-accent) 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 24%, transparent);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.brand-logo-briefcase {
+  position: relative;
+  width: 19px;
+  height: 15px;
+  border: 1.7px solid color-mix(in srgb, var(--color-accent-foreground) 86%, transparent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-accent-foreground) 16%, transparent);
+}
+
+.brand-logo-handle {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  width: 9px;
+  height: 7px;
+  transform: translateX(-50%);
+  border: 1.7px solid color-mix(in srgb, var(--color-accent-foreground) 86%, transparent);
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+}
+
+.brand-logo-latch {
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  width: 5px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: var(--color-accent-foreground);
+}
+
+.brand-logo-spark {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--color-accent-foreground) 82%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-accent-foreground) 10%, transparent),
+    0 0 12px color-mix(in srgb, var(--color-accent-foreground) 44%, transparent);
+}
+
+.group:hover .brand-logo-mark {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 26px color-mix(in srgb, var(--color-accent) 24%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 28%, transparent);
 }
 
 .soft-gradient-panel {

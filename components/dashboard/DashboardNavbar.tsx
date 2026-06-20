@@ -1,7 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { BrandLogo } from "@/components/layout/BrandLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
@@ -12,24 +13,11 @@ const navItems = [
 export function DashboardNavbar() {
   return (
     <header className="border-b border-border bg-surface">
-      <div className="relative mx-auto flex h-20 w-full items-center justify-between px-10">
-        <Link
-          href="/"
-          aria-label="JobPilot home"
-          className="inline-flex items-center"
-        >
-          <Image
-            src="/logo.png"
-            alt="JobPilot"
-            width={148}
-            height={50}
-            priority
-            className="h-10 w-auto"
-          />
-        </Link>
+      <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:px-10">
+        <BrandLogo />
         <nav
           aria-label="Main navigation"
-          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-12 md:flex"
+          className="order-3 flex w-full items-center gap-2 overflow-x-auto lg:order-none lg:w-auto lg:justify-center lg:gap-12"
         >
           {navItems.map((item) => {
             const isActive = item.href === "/dashboard";
@@ -38,8 +26,10 @@ export function DashboardNavbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`inline-flex h-20 items-center text-[14px] font-medium leading-5 transition-colors ${
-                  isActive ? "text-text-primary" : "text-text-dark hover:text-accent"
+                className={`inline-flex h-9 shrink-0 items-center rounded-full px-3 text-[14px] font-medium leading-5 transition-colors lg:h-20 lg:rounded-none lg:px-0 ${
+                  isActive
+                    ? "bg-accent-muted text-accent lg:bg-transparent lg:text-text-primary"
+                    : "text-text-dark hover:bg-surface-secondary hover:text-accent lg:hover:bg-transparent"
                 }`}
               >
                 {item.label}
@@ -47,15 +37,18 @@ export function DashboardNavbar() {
             );
           })}
         </nav>
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="flex items-center gap-3 lg:gap-6">
+          <ThemeToggle />
           <Link
             href="/profile"
             aria-label="Open profile"
-            className="job-details-user-button"
+            className="job-details-user-button hidden lg:inline-flex"
           >
             <span aria-hidden="true" className="job-details-user-icon" />
           </Link>
-          <SignOutButton variant="nav" />
+          <div className="hidden lg:block">
+            <SignOutButton variant="nav" />
+          </div>
         </div>
       </div>
     </header>

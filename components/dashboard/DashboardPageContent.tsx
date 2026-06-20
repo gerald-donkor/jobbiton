@@ -5,6 +5,8 @@ import { JobsFoundChart } from "@/components/dashboard/JobsFoundChart";
 import { MatchDistributionChart } from "@/components/dashboard/MatchDistributionChart";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { PageIntro } from "@/components/layout/PageIntro";
+import { RevealGroup, RevealItem } from "@/components/motion/Reveal";
 import type { DashboardAnalytics } from "@/lib/dashboard-analytics";
 import type { DashboardActivityItem } from "@/lib/dashboard-activity";
 import type { DashboardStat } from "@/lib/dashboard-stats";
@@ -30,27 +32,42 @@ export function DashboardPageContent({
     <div className="min-h-screen bg-background">
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
       <DashboardNavbar />
-      <main className="w-full bg-background px-6 pb-16 pt-8 text-text-primary">
-        <div className="mx-auto grid max-w-[824px] gap-4">
+      <PageIntro
+        eyebrow="Command center"
+        title="Track the search as it compounds."
+        copy="See the same proof-led flow from the landing page translated into live analytics: jobs found, match quality, company research, and recent agent activity."
+      />
+      <main className="w-full bg-background px-4 pb-16 pt-6 text-text-primary sm:px-6 lg:pt-8">
+        <RevealGroup className="mx-auto grid w-full max-w-[1120px] gap-4 2xl:max-w-[1240px]">
           <section
             aria-label="Dashboard statistics"
-            className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           >
             {stats.map((stat) => (
-              <StatCard key={stat.label} {...stat} />
+              <RevealItem key={stat.label}>
+                <StatCard {...stat} />
+              </RevealItem>
             ))}
           </section>
 
           <section className="grid gap-4 lg:grid-cols-2">
-            <RecentActivity activities={activities} />
-            <CompanyResearchChart data={analytics.companyResearchActivity} />
+            <RevealItem>
+              <RecentActivity activities={activities} />
+            </RevealItem>
+            <RevealItem>
+              <CompanyResearchChart data={analytics.companyResearchActivity} />
+            </RevealItem>
           </section>
 
           <section className="grid gap-4 lg:grid-cols-2">
-            <JobsFoundChart data={analytics.jobsFoundOverTime} />
-            <MatchDistributionChart data={analytics.matchScoreDistribution} />
+            <RevealItem>
+              <JobsFoundChart data={analytics.jobsFoundOverTime} />
+            </RevealItem>
+            <RevealItem>
+              <MatchDistributionChart data={analytics.matchScoreDistribution} />
+            </RevealItem>
           </section>
-        </div>
+        </RevealGroup>
       </main>
     </div>
   );

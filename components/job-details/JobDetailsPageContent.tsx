@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { CompanyResearchPanel } from "@/components/job-details/CompanyResearchPanel";
+import { PageIntro } from "@/components/layout/PageIntro";
+import { RevealGroup, RevealItem } from "@/components/motion/Reveal";
 import type { JobDetailsRecord } from "@/components/job-details/types";
 
 type JobDetailsPageContentProps = {
@@ -10,8 +12,14 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
   const jobUrl = job.externalApplyUrl || job.sourceUrl || "/find-jobs";
 
   return (
-    <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-background px-6 py-9 text-text-primary">
-      <div className="mx-auto flex w-full max-w-[1040px] flex-col gap-6">
+    <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-background text-text-primary">
+      <PageIntro
+        eyebrow="Opportunity brief"
+        title={job.title}
+        copy={`Review the role at ${job.company}, inspect the match, research the employer, and move into the application with context.`}
+      />
+      <RevealGroup className="mx-auto flex w-full max-w-[1040px] flex-col gap-6 px-4 py-6 sm:px-6 sm:py-9">
+        <RevealItem>
         <Link
           href="/find-jobs"
           className="inline-flex w-fit items-center gap-3 text-[14px] font-medium leading-5 text-text-secondary transition-colors hover:text-accent"
@@ -19,7 +27,9 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
           <span aria-hidden="true" className="job-details-chevron-left" />
           Back to Jobs
         </Link>
+        </RevealItem>
 
+        <RevealItem>
         <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-4">
@@ -51,14 +61,18 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
             </a>
           </div>
         </section>
+        </RevealItem>
 
+        <RevealItem>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1.55fr_1fr_1fr]">
           <InfoCard icon="salary" value={job.salary ?? "Not listed"} label="SALARY EST." />
           <InfoCard icon="location" value={job.location} label="LOCATION" />
           <InfoCard icon="job-type" value={formatJobType(job.jobType)} label="JOB TYPE" />
           <InfoCard icon="date" value={formatFoundDate(job.foundAt)} label="DATE FOUND" />
         </div>
+        </RevealItem>
 
+        <RevealItem>
         <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
           <div className="mb-5 flex items-center gap-3">
             <span
@@ -73,7 +87,9 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
             {job.matchReason || "No match reasoning was saved for this job."}
           </p>
         </section>
+        </RevealItem>
 
+        <RevealItem>
         <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
           <h2 className="text-[12px] font-semibold leading-4 text-text-secondary">
             REQUIRED SKILLS VS YOUR PROFILE
@@ -91,7 +107,9 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
             tone="missing"
           />
         </section>
+        </RevealItem>
 
+        <RevealItem>
         <section className="rounded-xl border border-border bg-surface px-6 py-7 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
           <div className="mb-6 flex items-center gap-3">
             <span
@@ -104,9 +122,13 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
           </div>
           <JobDescription job={job} />
         </section>
+        </RevealItem>
 
+        <RevealItem>
         <CompanyResearchCard job={job} />
+        </RevealItem>
 
+        <RevealItem>
         <a
           href={jobUrl}
           target="_blank"
@@ -115,7 +137,8 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
         >
           Apply Now at {job.company}
         </a>
-      </div>
+        </RevealItem>
+      </RevealGroup>
     </main>
   );
 }

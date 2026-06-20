@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { posthog } from "@/lib/posthog-client";
+import { initPostHog, posthog } from "@/lib/posthog-client";
 
 type PostHogIdentifyProps = {
   userId: string;
@@ -11,6 +11,7 @@ type PostHogIdentifyProps = {
 
 export function PostHogIdentify({ userId, email, name }: PostHogIdentifyProps) {
   useEffect(() => {
+    initPostHog();
     posthog.identify(userId, {
       email,
       ...(name ? { name } : {}),

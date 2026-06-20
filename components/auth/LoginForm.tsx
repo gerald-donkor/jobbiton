@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type AuthProvider = "google" | "github";
 
@@ -103,7 +104,7 @@ export function LoginForm() {
       <div className="flex min-h-[420px] items-center px-8 py-10 md:px-8">
         <div className="w-full">
           <p className="text-[12px] font-medium leading-5 text-text-secondary">Welcome to</p>
-          <h2 className="mt-1 text-[24px] font-semibold leading-8 text-text-primary">JobPilot</h2>
+          <h2 className="mt-1 text-[24px] font-semibold leading-8 text-text-primary">Jobbiton</h2>
           <p className="mt-3 text-[13px] leading-5 text-text-secondary">
             Choose your preferred provider to continue.
           </p>
@@ -116,16 +117,19 @@ export function LoginForm() {
 
           <div className="mt-6 space-y-3">
             {providers.map((provider) => (
-              <button
+              <Button
                 key={provider.id}
-                type="button"
                 onClick={() => handleOAuth(provider.id)}
                 disabled={pendingProvider !== null}
-                className="flex h-10 w-full items-center justify-center gap-3 rounded-md border border-border bg-surface px-4 text-[13px] font-medium leading-5 text-text-primary shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_4%,transparent)] transition hover:border-accent hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                loading={pendingProvider === provider.id}
+                loadingLabel="Opening..."
+                variant="secondary"
+                size="md"
+                className="w-full gap-3"
               >
                 <ProviderIcon mark={provider.mark} />
-                {pendingProvider === provider.id ? "Opening..." : provider.label}
-              </button>
+                {provider.label}
+              </Button>
             ))}
           </div>
         </div>
