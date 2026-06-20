@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
+import { Button } from "@/components/ui/button";
 import { RESUME_ACCEPT } from "@/lib/resume-files";
 
 type ResumeSectionProps = {
@@ -119,14 +120,17 @@ export function ResumeSection({
               Select Resume
             </label>
             {hasResume ? (
-              <button
-                type="button"
+              <Button
                 disabled={isRemoving || isResumeUploading}
-                className="inline-flex h-[38px] items-center justify-center rounded-md border border-border bg-surface px-5 text-[13px] font-semibold leading-5 text-error transition-colors hover:border-error disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-text-muted"
+                loading={isRemoving}
+                loadingLabel="Removing..."
+                variant="secondary"
+                size="sm"
+                className="text-error hover:border-error hover:text-error"
                 onClick={onRemoveResume}
               >
-                {isRemoving ? "Removing..." : "Remove resume"}
-              </button>
+                Remove resume
+              </Button>
             ) : null}
           </div>
           {hasResume ? (
@@ -172,14 +176,17 @@ export function ResumeSection({
               Review the extracted details before saving your profile.
             </p>
           </div>
-          <button
-            type="button"
+          <Button
             disabled={isExtracting}
-            className="inline-flex h-[38px] shrink-0 items-center justify-center rounded-md bg-accent px-4 text-[13px] font-semibold leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-text-muted disabled:shadow-none"
+            loading={isExtracting}
+            loadingLabel="Extracting..."
+            variant="primary"
+            size="sm"
+            className="shrink-0"
             onClick={onExtractResume}
           >
-            {isExtracting ? "Extracting..." : "Extract from Resume"}
-          </button>
+            Extract from Resume
+          </Button>
         </div>
       ) : null}
 
@@ -257,15 +264,17 @@ export function ResumeSection({
         <p className="text-[13px] font-semibold leading-5 text-text-secondary">
           Need a fresh document based on the fields below?
         </p>
-        <button
-          type="button"
+        <Button
           disabled={isGenerating}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-accent px-5 text-[13px] font-semibold leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-text-muted disabled:shadow-none"
+          loading={isGenerating}
+          loadingLabel="Generating..."
+          variant="primary"
+          size="lg"
           onClick={onGenerateResume}
         >
           <span className="document-icon" aria-hidden="true" />
-          {isGenerating ? "Generating..." : "Generate Resume from Profile"}
-        </button>
+          Generate Resume from Profile
+        </Button>
       </div>
       {generateMessage ? (
         <p

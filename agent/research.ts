@@ -698,8 +698,8 @@ async function synthesizeWithOpenRouter({
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://jobpilot.local",
-      "X-Title": "JobPilot",
+      "HTTP-Referer": "https://jobbiton.local",
+      "X-Title": "Jobbiton",
     },
     body: JSON.stringify({
       model: "openai/gpt-4o",

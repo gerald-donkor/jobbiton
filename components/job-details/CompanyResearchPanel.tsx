@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import type { CompanyResearchDossier } from "@/components/job-details/types";
 import type { CompanyResearchResponse } from "@/agent/types";
 
@@ -151,19 +152,17 @@ export function CompanyResearchPanel({
           </h2>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
-          <button
-            type="button"
+          <Button
             onClick={handleResearch}
             disabled={isBusy}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-accent px-4 text-[14px] font-semibold leading-5 text-accent-foreground transition-colors hover:bg-accent-dark disabled:opacity-70"
+            loading={isBusy}
+            loadingLabel="Researching..."
+            variant="primary"
+            size="md"
           >
             <span aria-hidden="true" className="job-details-search-icon" />
-            {isBusy
-              ? "Researching..."
-              : dossier
-                ? "Research Again"
-                : "Research Company"}
-          </button>
+            {dossier ? "Research Again" : "Research Company"}
+          </Button>
           {error ? (
             <p className="max-w-[280px] text-left text-[12px] font-medium leading-4 text-error sm:text-right">
               {error}

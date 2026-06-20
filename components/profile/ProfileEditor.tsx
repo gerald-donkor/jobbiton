@@ -7,6 +7,7 @@ import {
   uploadResume,
   type SaveProfileState,
 } from "@/actions/profile";
+import { ScrollFloat } from "@/components/motion/ScrollFlow";
 import { ProfileInformationForm } from "@/components/profile/ProfileInformationForm";
 import { ProfileAttentionBanner } from "@/components/profile/ProfileAttentionBanner";
 import { ResumeSection } from "@/components/profile/ResumeSection";
@@ -544,67 +545,73 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
 
   return (
     <form action={formAction} className="contents">
-      <ProfileAttentionBanner completion={calculateProfileCompletion(activeProfile)} />
-      <ResumeSection
-        resumePdfUrl={activeProfile.resumePdfUrl}
-        resumeInputKey={resumeInputKey}
-        resumeName={resumeName}
-        resumePreviewUrl={resumePreviewUrl}
-        isResumeSaved={Boolean(activeProfile.resumePdfUrl)}
-        isResumeUploading={isResumeUploading}
-        resumeUploadMessage={resumeUploadMessage}
-        isResumeUploadSuccess={isResumeUploadSuccess}
-        canEmbedResume={canEmbedResumeFormat(activeResumeFormat)}
-        resumePreviewText={resumePreviewText}
-        isResumePreviewLoading={isResumePreviewLoading}
-        resumePreviewMessage={resumePreviewMessage}
-        canExtractResume={canExtractResumeFormat(activeResumeFormat)}
-        isExtracting={isExtracting}
-        extractMessage={extractMessage}
-        isGenerating={isGeneratingResume}
-        generateMessage={generateResumeMessage}
-        isGenerateSuccess={isGenerateResumeSuccess}
-        isRemoving={isRemovingResume}
-        removeMessage={removeResumeMessage}
-        isRemoveSuccess={isRemoveResumeSuccess}
-        onResumeChange={handleResumeChange}
-        onExtractResume={extractResume}
-        onGenerateResume={generateResume}
-        onRemoveResume={handleRemoveResume}
-      />
-      <ProfileInformationForm
-        key={formSnapshotKey}
-        profile={activeProfile}
-        skills={currentDraft.skills}
-        industries={currentDraft.industries}
-        skillInput={skillInput}
-        industryInput={industryInput}
-        workExperience={currentDraft.workExperience}
-        isPending={isPending}
-        actionState={state}
-        onSkillInputChange={setSkillInput}
-        onIndustryInputChange={setIndustryInput}
-        onAddSkill={addSkill}
-        onAddIndustry={addIndustry}
-        onRemoveSkill={(skill) =>
-          setDraft((currentDraftState) => ({
-            ...currentDraftState,
-            skills: currentDraftState.skills.filter(
-              (currentSkill) => currentSkill !== skill,
-            ),
-          }))
-        }
-        onRemoveIndustry={(industry) =>
-          setDraft((currentDraftState) => ({
-            ...currentDraftState,
-            industries: currentDraftState.industries.filter(
-              (currentIndustry) => currentIndustry !== industry,
-            ),
-          }))
-        }
-        onAddWorkExperience={addWorkExperience}
-        onRemoveWorkExperience={removeWorkExperience}
-      />
+      <ScrollFloat direction="up" intensity={24} scale>
+        <ProfileAttentionBanner completion={calculateProfileCompletion(activeProfile)} />
+      </ScrollFloat>
+      <ScrollFloat direction="right" intensity={26} scale>
+        <ResumeSection
+          resumePdfUrl={activeProfile.resumePdfUrl}
+          resumeInputKey={resumeInputKey}
+          resumeName={resumeName}
+          resumePreviewUrl={resumePreviewUrl}
+          isResumeSaved={Boolean(activeProfile.resumePdfUrl)}
+          isResumeUploading={isResumeUploading}
+          resumeUploadMessage={resumeUploadMessage}
+          isResumeUploadSuccess={isResumeUploadSuccess}
+          canEmbedResume={canEmbedResumeFormat(activeResumeFormat)}
+          resumePreviewText={resumePreviewText}
+          isResumePreviewLoading={isResumePreviewLoading}
+          resumePreviewMessage={resumePreviewMessage}
+          canExtractResume={canExtractResumeFormat(activeResumeFormat)}
+          isExtracting={isExtracting}
+          extractMessage={extractMessage}
+          isGenerating={isGeneratingResume}
+          generateMessage={generateResumeMessage}
+          isGenerateSuccess={isGenerateResumeSuccess}
+          isRemoving={isRemovingResume}
+          removeMessage={removeResumeMessage}
+          isRemoveSuccess={isRemoveResumeSuccess}
+          onResumeChange={handleResumeChange}
+          onExtractResume={extractResume}
+          onGenerateResume={generateResume}
+          onRemoveResume={handleRemoveResume}
+        />
+      </ScrollFloat>
+      <ScrollFloat direction="left" intensity={22}>
+        <ProfileInformationForm
+          key={formSnapshotKey}
+          profile={activeProfile}
+          skills={currentDraft.skills}
+          industries={currentDraft.industries}
+          skillInput={skillInput}
+          industryInput={industryInput}
+          workExperience={currentDraft.workExperience}
+          isPending={isPending}
+          actionState={state}
+          onSkillInputChange={setSkillInput}
+          onIndustryInputChange={setIndustryInput}
+          onAddSkill={addSkill}
+          onAddIndustry={addIndustry}
+          onRemoveSkill={(skill) =>
+            setDraft((currentDraftState) => ({
+              ...currentDraftState,
+              skills: currentDraftState.skills.filter(
+                (currentSkill) => currentSkill !== skill,
+              ),
+            }))
+          }
+          onRemoveIndustry={(industry) =>
+            setDraft((currentDraftState) => ({
+              ...currentDraftState,
+              industries: currentDraftState.industries.filter(
+                (currentIndustry) => currentIndustry !== industry,
+              ),
+            }))
+          }
+          onAddWorkExperience={addWorkExperience}
+          onRemoveWorkExperience={removeWorkExperience}
+        />
+      </ScrollFloat>
     </form>
   );
 }

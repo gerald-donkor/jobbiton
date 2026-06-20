@@ -38,6 +38,66 @@ Last updated: 2026-06-09
 **Pattern notes:**
 All semantic interactive elements should expose the hand cursor without each component repeating the class. Buttons and `a[href]` links receive Tailwind's `cursor-pointer` globally; disabled buttons are overridden to `cursor-not-allowed`. Use real anchors/buttons/labels for clickable UI whenever possible. If a future custom interactive element cannot use a semantic control, add `role="button"` and keyboard handling or add `cursor-pointer` directly with the required accessibility behavior.
 
+### Global Theme and Page Motion
+
+File: app/globals.css, app/layout.tsx, components/layout/PageTransition.tsx
+Last updated: 2026-06-15
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | light/dark `--color-*` token overrides, body token linear background           |
+| Border           | inherited token border overrides                                               |
+| Border radius    | none                                                                           |
+| Text — primary   | body `color: var(--color-text-primary)`                                        |
+| Text — secondary | inherited from token overrides                                                 |
+| Spacing          | layout wrapper `flex min-h-full flex-col`                                      |
+| Hover state      | none                                                                           |
+| Shadow           | none                                                                           |
+| Accent usage     | theme is selected by `html[data-theme]`; page entry uses Motion opacity/y transition |
+
+**Pattern notes:**
+The root layout runs a small pre-paint theme script before rendering page content, reading `jobbiton-theme` from local storage and falling back to system preference. Theme mode is represented by `html[data-theme="light|dark"]`, and dark mode works by overriding existing design tokens rather than adding raw `dark:` color utilities to components. `PageTransition` is a client-only Motion wrapper that keys by pathname, fades/slides pages in, and respects `useReducedMotion()`. Future app-wide animation should stay in focused client wrappers and preserve token-only colors.
+
+### Brand Logo
+
+File: components/layout/BrandLogo.tsx, app/globals.css
+Last updated: 2026-06-15
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | `.brand-logo-mark` token gradient from `--color-accent` and `--color-accent-dark` |
+| Border           | `.brand-logo-cell` uses token foreground color mix                             |
+| Border radius    | mark `10px`, cells `3px`                                                       |
+| Text — primary   | `text-text-darkest text-[19px] font-bold leading-7`                            |
+| Text — secondary | none                                                                           |
+| Spacing          | link `inline-flex items-center gap-3`, mark `36px` with `8px` padding          |
+| Hover state      | `hover:text-accent`, `.group:hover .brand-logo-mark` lifts 1px                 |
+| Shadow           | mark token shadow using `var(--color-accent)` and `var(--color-overlay)`       |
+| Accent usage     | mark background and hover text use accent tokens                               |
+
+**Pattern notes:**
+All visible product-logo usage now goes through `BrandLogo` so every page shows the `Jobbiton` wordmark instead of the old bitmap asset. The mark is code-native and token-driven so it adapts to dark mode without separate image files. Future navs and footers should import this component rather than using `/logo.png`.
+
+### Theme Toggle
+
+File: components/theme/ThemeToggle.tsx
+Last updated: 2026-06-15
+
+| Property         | Class                                                                         |
+| ---------------- | ----------------------------------------------------------------------------- |
+| Background       | `bg-surface-secondary`, switch track `bg-surface`, knob `bg-accent`           |
+| Border           | `border border-border`, hover `hover:border-accent`                           |
+| Border radius    | control/track/knob `rounded-full`                                             |
+| Text — primary   | hover `hover:text-text-primary`                                               |
+| Text — secondary | `text-text-secondary text-[12px] font-semibold leading-4`                     |
+| Spacing          | `h-9 gap-2 px-2.5`, track `h-5 w-9`                                           |
+| Hover state      | `hover:border-accent hover:text-text-primary`                                 |
+| Shadow           | subtle token control shadow and knob shadow                                   |
+| Accent usage     | active knob and focus outline use `bg-accent` / `focus-visible:outline-accent` |
+
+**Pattern notes:**
+The theme toggle reads the current `data-theme` value through `useSyncExternalStore`, writes `jobbiton-theme` to local storage, and dispatches a local theme-change event after toggles. It is intentionally compact for nav placement: text hides on small screens while the switch remains visible. Future theme controls should use this component rather than duplicating local storage or DOM theme logic.
+
 ### Profile Page Layout
 
 File: components/profile/ProfilePageContent.tsx
@@ -453,7 +513,7 @@ Last updated: 2026-06-09
 `.button-primary .button-primary-sm`
 
 **Pattern notes:**
-Top navigation uses a full-width white surface with a constrained 1440px inner row. The full JobPilot logo/wordmark brand link points to `/`, and `proxy.ts` allows `/` through even when authenticated so it lands on the homescreen URL (`localhost:3000` in local dev) from every page that renders the shared navbar. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a darker bluish-charcoal hover. On the homepage, `app/page.tsx` passes auth-aware CTA props: logged-out users see `Start for free` to `/login`, logged-in users see `Go to Profile` to `/profile`.
+Top navigation uses a full-width token surface with a constrained 1440px inner row. The reusable `BrandLogo` wordmark link points to `/`, and `proxy.ts` allows `/` through even when authenticated so it lands on the homescreen URL (`localhost:3000` in local dev) from every page that renders the shared navbar. The right side includes the compact `ThemeToggle` before the optional CTA. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a darker bluish-charcoal hover. On the homepage, `app/page.tsx` passes auth-aware CTA props: logged-out users see `Start for free` to `/login`, logged-in users see `Go to Profile` to `/profile`.
 
 ### Homepage Footer
 
@@ -473,7 +533,7 @@ Last updated: 2026-06-08
 | Accent usage     | none                                               |
 
 **Pattern notes:**
-Footer mirrors the navbar logo treatment and keeps links on the same restrained white surface used throughout the landing page. The footer logo/wordmark also points to `/` and relies on the same root-route proxy behavior. Footer nav text uses the exact same shared `supporting-text-tone` class as the final CTA supporting copy, including on hover.
+Footer mirrors the shared `BrandLogo` treatment and keeps links on the same restrained token surface used throughout the landing page. The footer logo/wordmark points to `/` and relies on the same root-route proxy behavior. Footer nav text uses the exact same shared `supporting-text-tone` class as the final CTA supporting copy, including on hover.
 
 ### Homepage Hero
 
@@ -683,3 +743,183 @@ Last updated: 2026-06-08
 
 **Pattern notes:**
 Temporary protected-route shells keep the existing navbar/footer frame and use one compact status panel. Future full dashboard/profile/jobs pages should replace the panel content while retaining the page-frame rhythm unless the page-specific design requires a denser operational layout.
+
+### Jobbiton Brand Mark
+
+File: components/layout/BrandLogo.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | token-built `.brand-logo-mark` with accent surface               |
+| Border           | none                                                             |
+| Border radius    | `rounded-[10px]` mark, `rounded-[3px]` briefcase body            |
+| Text — primary   | `text-text-primary text-[20px] font-semibold tracking-normal`    |
+| Text — secondary | none                                                             |
+| Spacing          | `inline-flex items-center gap-3`                                 |
+| Hover state      | Motion hover/tap scale on the logo group                         |
+| Shadow           | token `color-mix()` accent shadow on the mark                    |
+| Accent usage     | briefcase body, latch, and spark use accent/accent-foreground tokens |
+
+**Pattern notes:**
+Use `BrandLogo` for all visible Jobbiton branding instead of `/logo.png` or text-only marks. The mark is a compact briefcase-plus-spark symbol, matching the job-search product without adding external image dependencies.
+
+### shadcn-style Button Primitive
+
+File: components/ui/button.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | `primary bg-accent`, `secondary bg-surface`, `ghost/nav transparent` |
+| Border           | `secondary border border-border`; focus uses accent outline      |
+| Border radius    | `rounded-md`                                                     |
+| Text — primary   | `text-accent-foreground` or `text-text-primary`                  |
+| Text — secondary | `text-text-secondary` for ghost/nav                              |
+| Spacing          | sizes `sm`, `md`, `lg`, `icon`                                   |
+| Hover state      | token hover colors, Motion `whileTap` scale                      |
+| Shadow           | primary accent shadow; loading pulse uses token `boxShadow`      |
+| Accent usage     | loading spinner, sheen, focus, and primary background            |
+
+**Pattern notes:**
+Use this primitive for repeated app actions, especially any button that can enter a pending state. Pending buttons must pass `loading` plus a meaningful `loadingLabel`; the primitive handles spinner, sheen, pulse, disabled state, and reduced-motion behavior.
+
+### Theme Toggle
+
+File: components/theme/ThemeToggle.tsx, components/ui/switch.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | switch track uses `bg-accent` when active, `bg-surface-secondary` when inactive |
+| Border           | `border border-border`                                           |
+| Border radius    | `rounded-full`                                                   |
+| Text — primary   | icon-only visual state with screen-reader label                  |
+| Text — secondary | none                                                             |
+| Spacing          | compact navbar control, no card wrapper                          |
+| Hover state      | token border/text hover inherited from control                   |
+| Shadow           | switch thumb uses token overlay shadow                           |
+| Accent usage     | active dark/light state uses accent tokens                       |
+
+**Pattern notes:**
+Dark mode is the primary theme. `app/layout.tsx` renders `html[data-theme="dark"]` by default and the pre-paint script honors `jobbiton-theme` from local storage. Toggle code must continue writing `jobbiton-theme` and dispatching `jobbiton-theme-change`.
+
+### App Motion System
+
+File: components/layout/PageTransition.tsx, components/motion/Reveal.tsx, components/motion/ScrollFlow.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | none                                                             |
+| Border           | none                                                             |
+| Border radius    | none                                                             |
+| Text — primary   | inherited                                                        |
+| Text — secondary | inherited                                                        |
+| Spacing          | components preserve their own layout spacing                     |
+| Hover state      | page transitions animate opacity, y, scale, and blur             |
+| Shadow           | none                                                             |
+| Accent usage     | none                                                             |
+
+**Pattern notes:**
+Use `Reveal`, `RevealGroup`, and `RevealItem` for page section entrances. Keep animations stateful and purposeful, respect `useReducedMotion()`, and avoid adding decorative motion that obscures core workflows.
+
+### Scroll-Linked Motion
+
+File: components/motion/ScrollFlow.tsx, app/page.tsx, components/homepage/Hero.tsx, components/homepage/JobbitonFlowSections.tsx, components/homepage/ProductFeatures.tsx, components/layout/PageIntro.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | progress track `bg-border`, progress fill `bg-accent`           |
+| Border           | inherited section borders                                        |
+| Border radius    | none                                                             |
+| Text — primary   | inherited                                                        |
+| Text — secondary | inherited                                                        |
+| Spacing          | wrappers preserve child layout spacing                           |
+| Hover state      | none                                                             |
+| Shadow           | inherited from animated child surfaces                           |
+| Accent usage     | sticky scroll progress fill uses accent                          |
+
+**Pattern notes:**
+Use `ScrollFloat` when an element should respond continuously to scroll position with subtle x/y drift, opacity, and optional scale. Use `ScrollProgressBand` once near the top of long editorial pages. Both helpers respect `useReducedMotion()` and must stay token-only. Avoid high intensities on form-heavy operational surfaces; PageIntro uses small opposing horizontal movement while landing page showcase images/cards can use stronger motion.
+
+### Profile Scroll Motion
+
+File: components/profile/ProfileEditor.tsx, components/profile/ProfileInformationForm.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | inherited profile cards `bg-surface` and form blocks             |
+| Border           | inherited `border-border` card and section separators            |
+| Border radius    | inherited `rounded-xl` card shells                               |
+| Text — primary   | inherited profile form typography                                |
+| Text — secondary | inherited profile form typography                                |
+| Spacing          | profile column `gap-6`, form section `space-y-12`                |
+| Hover state      | inherited button/tag/input states                                |
+| Shadow           | inherited profile card shadows                                   |
+| Accent usage     | inherited form actions, focus states, completion accents         |
+
+**Pattern notes:**
+Profile must show scroll-linked animation beyond the shared page intro. Wrap the attention banner, resume card, profile information card, and each major form section in `ScrollFloat` with low intensity so the long form feels alive while remaining usable. Do not increase motion so much that inputs shift away from the cursor while editing.
+
+### Responsive App Frame
+
+File: components/layout/Navbar.tsx, components/dashboard/DashboardNavbar.tsx, components/job-details/JobDetailsNavbar.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | `bg-surface` navbar, page content `bg-background`                |
+| Border           | `border-b border-border`; page frames keep token borders         |
+| Border radius    | no navbar card radius                                            |
+| Text — primary   | `text-text-primary`                                              |
+| Text — secondary | `text-text-secondary`                                            |
+| Spacing          | mobile `px-4`, tablet `sm:px-6`, desktop constrained max widths  |
+| Hover state      | nav links use token hover/active states                          |
+| Shadow           | no decorative navbar shadow                                      |
+| Accent usage     | active links, focus rings, and theme/action controls             |
+
+**Pattern notes:**
+Navigation wraps into a horizontal scroll row on small screens instead of hiding core routes. Protected content uses responsive padding and constrained tracks so it reads well from mobile through extra-large screens without changing data flow.
+
+### Jobbiton Landing Flow
+
+File: components/homepage/JobbitonFlowSections.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | `bg-surface`, `bg-surface-muted`, `bg-surface-secondary` hover   |
+| Border           | `border-y`, `border-b`, `border-r`, `border-border` section grid |
+| Border radius    | image showcase `rounded-xl`, badges `rounded-full`               |
+| Text — primary   | section headlines `text-text-primary text-[38px]-[64px] font-semibold` |
+| Text — secondary | supporting copy `text-text-secondary text-[15px]-[18px] leading-6/8` |
+| Spacing          | mobile `px-6 py-12`, desktop `md:px-16 md:py-20`                 |
+| Hover state      | showcase cards `hover:bg-surface-secondary`, links `group-hover:text-accent` |
+| Shadow           | dashboard showcase image uses token overlay shadow               |
+| Accent usage     | section eyebrows, step numbers, action links, FAQ plus marks     |
+
+**Pattern notes:**
+The homepage now uses a Jobbiton-owned editorial flow: launchpad intro, proof stats, featured flows, visual product proof, services/capabilities, process steps, FAQs, testimonial, and CTA. Keep the flow scroll-driven and adapt all language to Jobbiton job-search outcomes.
+
+### App Page Intro Band
+
+File: components/layout/PageIntro.tsx
+Last updated: 2026-06-20
+
+| Property         | Class / Pattern                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| Background       | `bg-surface`                                                     |
+| Border           | `border-b border-border`                                         |
+| Border radius    | none                                                             |
+| Text — primary   | title `text-text-primary text-[32px] sm:text-[40px] md:text-[48px] font-semibold` |
+| Text — secondary | copy `text-text-secondary text-[15px] sm:text-[16px] leading-7`  |
+| Spacing          | `px-4 py-8 sm:px-6 md:py-10`, inner `max-w-[1120px]`             |
+| Hover state      | none                                                             |
+| Shadow           | none                                                             |
+| Accent usage     | eyebrow `text-accent uppercase`                                  |
+
+**Pattern notes:**
+Use `PageIntro` at the top of operational pages when they need the same editorial pacing as the landing page. It should introduce intent without replacing the core product surface below it. Dashboard, Find Jobs, Profile, and Job Details use this band while preserving existing data fetching and actions.

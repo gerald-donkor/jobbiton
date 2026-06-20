@@ -1,6 +1,8 @@
 "use client";
 
 import type { SaveProfileState } from "@/actions/profile";
+import { ScrollFloat } from "@/components/motion/ScrollFlow";
+import { Button } from "@/components/ui/button";
 import type { ProfileValues, WorkExperienceEntry } from "@/lib/profile";
 
 type ProfileInformationFormProps = {
@@ -59,6 +61,7 @@ export function ProfileInformationForm({
       </div>
 
       <div className="mt-10 space-y-12">
+        <ScrollFloat direction="up" intensity={18}>
         <section className="space-y-6">
           <h3 className="text-[16px] font-semibold leading-6 text-text-primary">
             Personal Info
@@ -114,7 +117,9 @@ export function ProfileInformationForm({
             </label>
           </div>
         </section>
+        </ScrollFloat>
 
+        <ScrollFloat direction="right" intensity={20}>
         <section className="space-y-6 border-t border-border pt-10">
           <h3 className="text-[16px] font-semibold leading-6 text-text-primary">
             Professional Info
@@ -214,7 +219,9 @@ export function ProfileInformationForm({
             </div>
           </div>
         </section>
+        </ScrollFloat>
 
+        <ScrollFloat direction="left" intensity={20}>
         <section className="space-y-6 border-t border-border pt-10">
           <div className="flex items-center justify-between gap-4">
             <h3 className="text-[16px] font-semibold leading-6 text-text-primary">
@@ -301,7 +308,9 @@ export function ProfileInformationForm({
             ))}
           </div>
         </section>
+        </ScrollFloat>
 
+        <ScrollFloat direction="up" intensity={18}>
         <section className="space-y-6 border-t border-border pt-10">
           <h3 className="text-[16px] font-semibold leading-6 text-text-primary">
             Education
@@ -346,7 +355,9 @@ export function ProfileInformationForm({
             </label>
           </div>
         </section>
+        </ScrollFloat>
 
+        <ScrollFloat direction="right" intensity={20}>
         <section className="space-y-6 border-t border-border pt-10">
           <h3 className="text-[16px] font-semibold leading-6 text-text-primary">
             Job Preferences
@@ -403,7 +414,9 @@ export function ProfileInformationForm({
             </label>
           </div>
         </section>
+        </ScrollFloat>
 
+        <ScrollFloat direction="up" intensity={16}>
         <div className="border-t border-border pt-8">
           {actionState.message ? (
             <p
@@ -413,14 +426,19 @@ export function ProfileInformationForm({
               {actionState.message}
             </p>
           ) : null}
-          <button
+          <Button
             type="submit"
             disabled={isPending}
-            className="flex h-12 w-full items-center justify-center rounded-md bg-accent px-5 text-[14px] font-semibold leading-5 text-accent-foreground transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:bg-accent-muted disabled:text-accent"
+            loading={isPending}
+            loadingLabel="Saving..."
+            variant="primary"
+            size="lg"
+            className="w-full"
           >
-            {isPending ? "Saving..." : "Save Profile"}
-          </button>
+            Save Profile
+          </Button>
         </div>
+        </ScrollFloat>
       </div>
     </section>
   );

@@ -1,12 +1,13 @@
 import Image from "next/image";
+import { Reveal } from "@/components/motion/Reveal";
 
 export function Testimonial() {
   return (
-    <section className="px-6 py-24 text-center md:px-16">
+    <Reveal className="px-4 py-16 text-center sm:px-6 md:px-16 md:py-24">
       <p className="text-[14px] font-medium uppercase leading-5 text-accent">
         Success Stories
       </p>
-      <blockquote className="mx-auto mt-8 max-w-[940px] text-[32px] font-medium leading-[1.35] text-text-slate md:text-[40px]">
+      <blockquote className="mx-auto mt-8 max-w-[940px] text-[28px] font-medium leading-[1.35] text-text-slate md:text-[40px]">
         &ldquo;I used to spend my evenings copy-pasting resumes. Now I open my
         dashboard to see interviews waiting. It feels like cheating. Had 3 offers
         on the table simultaneously.&rdquo;
@@ -28,6 +29,6 @@ export function Testimonial() {
           </p>
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 }

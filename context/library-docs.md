@@ -1,6 +1,6 @@
 # Library Docs
 
-Project-specific usage patterns for every third party library in this project. This file only covers how we use each library in this specific project — rules, patterns, and constraints specific to JobPilot.
+Project-specific usage patterns for every third party library in this project. This file only covers how we use each library in this specific project — rules, patterns, and constraints specific to Jobbiton.
 
 Read the relevant section before implementing any feature that touches these libraries.
 
@@ -762,3 +762,24 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 - Always check `useReducedMotion()` for looping or decorative motion, and disable or shorten animation when users prefer reduced motion.
 - Keep all colors in Tailwind token classes or CSS variables; do not animate raw hex colors.
 - Use Motion to clarify state, not as decoration. Long-running actions should show concrete step labels and progress cues.
+- Loading buttons should use the shared `components/ui/button.tsx` primitive with `loading` and `loadingLabel`; it provides click/tap feedback, a subtle loading pulse, spinner, and moving sheen while preserving the original submit/link behavior around it.
+
+---
+
+## shadcn/ui
+
+**Official docs:** https://ui.shadcn.com/docs/components
+
+Use shadcn-style local primitives when adding shared controls. Network install may be unavailable in local agent sessions, so keep project-owned primitives in `components/ui/` and wire them to the existing token system instead of introducing hardcoded colors.
+
+**Current local primitives:**
+
+- `components/ui/button.tsx` — Motion-backed button with `primary`, `secondary`, `ghost`, `nav`, and loading states.
+- `components/ui/switch.tsx` — accessible token-backed switch used by the theme toggle.
+
+**Rules:**
+
+- Do not import raw shadcn colors or Tailwind palette colors; map all states to Jobbiton tokens.
+- Keep primitives small and composable. Page components own their business behavior; primitives own reusable interaction and visual states.
+- Prefer these primitives for repeated action controls before creating page-specific buttons or switches.
+- If adding official Radix-backed shadcn components later, install only the needed component dependencies and preserve the same token classes and dark-mode behavior.

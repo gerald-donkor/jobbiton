@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 type JobSearchCardProps = {
   jobTitle: string;
   location: string;
@@ -67,20 +69,23 @@ export function JobSearchCard({
             />
           </span>
         </label>
-        <button
-          type="button"
+        <Button
           onClick={() => {
             void onSearch();
           }}
           disabled={isSearching}
-          className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-accent px-4 text-[14px] font-medium leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_24%,transparent)] transition-colors hover:bg-accent-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-70"
+          loading={isSearching}
+          loadingLabel="Searching..."
+          variant="primary"
+          size="md"
+          className="w-full lg:w-auto"
         >
           <span
             aria-hidden="true"
             className="nav-icon nav-icon-search shrink-0 text-accent-foreground"
           />
-          {isSearching ? "Searching..." : "Find Jobs"}
-        </button>
+          Find Jobs
+        </Button>
       </div>
       {feedback ? (
         <div

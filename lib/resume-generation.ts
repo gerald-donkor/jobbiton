@@ -313,7 +313,7 @@ async function generateWithOpenRouter(profile: ProfileValues): Promise<Generated
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "HTTP-Referer": "https://jobpilot.local",
-      "X-Title": "JobPilot",
+      "X-Title": "Jobbiton",
     },
     body: JSON.stringify({
       model: OPENROUTER_MODEL,

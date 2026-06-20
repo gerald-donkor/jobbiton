@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { insforge } from "@/lib/insforge-client";
 import { posthog } from "@/lib/posthog-client";
 
@@ -38,26 +39,31 @@ export function SignOutButton({ variant = "button" }: SignOutButtonProps) {
 
   if (variant === "nav") {
     return (
-      <button
-        type="button"
+      <Button
         onClick={handleSignOut}
         disabled={isPending}
-        className="inline-flex items-center gap-2 text-[14px] font-medium leading-5 text-text-secondary transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
+        loading={isPending}
+        loadingLabel="Signing out..."
+        variant="nav"
+        size="sm"
+        className="px-0"
       >
         <span aria-hidden="true" className="job-details-signout-icon" />
-        {isPending ? "Signing out..." : "Sign out"}
-      </button>
+        Sign out
+      </Button>
     );
   }
 
   return (
-    <button
-      type="button"
+    <Button
       onClick={handleSignOut}
       disabled={isPending}
-      className="button-secondary button-primary-sm disabled:cursor-not-allowed disabled:opacity-60"
+      loading={isPending}
+      loadingLabel="Signing out..."
+      variant="secondary"
+      size="sm"
     >
-      {isPending ? "Signing out..." : "Sign out"}
-    </button>
+      Sign out
+    </Button>
   );
 }

@@ -7,7 +7,7 @@ type StatCardProps = {
 
 export function StatCard({ label, value, helper, trend }: StatCardProps) {
   return (
-    <article className="group min-h-[128px] rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] transition-transform duration-150 hover:-translate-y-1 hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_2px_6px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <article className="group min-h-[128px] rounded-xl border border-border bg-surface px-5 py-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] transition-transform duration-150 hover:-translate-y-1 hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_2px_6px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] sm:px-6 sm:py-6">
       <p className="text-[14px] font-medium leading-5 text-text-secondary">
         {label}
       </p>
