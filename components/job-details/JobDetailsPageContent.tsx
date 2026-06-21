@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CompanyResearchPanel } from "@/components/job-details/CompanyResearchPanel";
+import { JobApplicationWorkspace } from "@/components/job-workflow/JobApplicationWorkspace";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { RevealGroup, RevealItem } from "@/components/motion/Reveal";
 import type { JobDetailsRecord } from "@/components/job-details/types";
@@ -87,6 +88,10 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
             {job.matchReason || "No match reasoning was saved for this job."}
           </p>
         </section>
+        </RevealItem>
+
+        <RevealItem>
+        <JobApplicationWorkspace job={job} />
         </RevealItem>
 
         <RevealItem>

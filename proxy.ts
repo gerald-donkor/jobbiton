@@ -1,7 +1,7 @@
 import { updateSession, type CookieStore } from "@insforge/sdk/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/profile", "/find-jobs"];
+const protectedRoutes = ["/dashboard", "/profile", "/find-jobs", "/compare"];
 const authRedirectRoutes = ["/login"];
 const authCookieName = "insforge_access_token";
 

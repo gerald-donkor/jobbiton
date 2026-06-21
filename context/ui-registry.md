@@ -61,22 +61,22 @@ The root layout runs a small pre-paint theme script before rendering page conten
 ### Brand Logo
 
 File: components/layout/BrandLogo.tsx, app/globals.css
-Last updated: 2026-06-15
+Last updated: 2026-06-20
 
 | Property         | Class / Selector                                                               |
 | ---------------- | ------------------------------------------------------------------------------ |
 | Background       | `.brand-logo-mark` token gradient from `--color-accent` and `--color-accent-dark` |
 | Border           | `.brand-logo-cell` uses token foreground color mix                             |
-| Border radius    | mark `10px`, cells `3px`                                                       |
-| Text — primary   | `text-text-darkest text-[19px] font-bold leading-7`                            |
+| Border radius    | mark `10px`, inline mark `0.34em`, cells `3px`                                 |
+| Text — primary   | nav wordmark `text-text-darkest text-[19px] font-bold leading-7`, inline brand inherits parent text |
 | Text — secondary | none                                                                           |
-| Spacing          | link `inline-flex items-center gap-3`, mark `36px` with `8px` padding          |
+| Spacing          | link `inline-flex items-center gap-3`, inline brand `inline-flex items-center gap-2`, mark `36px`, inline mark `1.35em` |
 | Hover state      | `hover:text-accent`, `.group:hover .brand-logo-mark` lifts 1px                 |
 | Shadow           | mark token shadow using `var(--color-accent)` and `var(--color-overlay)`       |
 | Accent usage     | mark background and hover text use accent tokens                               |
 
 **Pattern notes:**
-All visible product-logo usage now goes through `BrandLogo` so every page shows the `Jobbiton` wordmark instead of the old bitmap asset. The mark is code-native and token-driven so it adapts to dark mode without separate image files. Future navs and footers should import this component rather than using `/logo.png`.
+All actual product-logo placements now go through `BrandLogo` for linked navigation wordmarks or `BrandName` for non-link brand-heading placements such as the login welcome title. The mark is code-native and token-driven so it adapts to dark mode without separate image files. Future navs and footers should import `BrandLogo` rather than using `/logo.png`. Do not replace every body-copy mention of `Jobbiton` with a logo mark; ordinary sentence text should remain plain text unless the design position is explicitly a logo/brand lockup.
 
 ### Theme Toggle
 
@@ -217,6 +217,46 @@ Last updated: 2026-06-15
 
 **Pattern notes:**
 Feature 17 replaces mock chart arrays with DB-backed analytics from `lib/dashboard-analytics.ts` and Recharts internals. Keep each chart in the compact 340px `ChartFrame` shell with a 228px plot area. Jobs Found Over Time uses 30-day user-scoped `jobs.found_at` counts, Match Score Distribution uses 30-day user-scoped `jobs.match_score` buckets from 50-100%, and Company Research Activity uses 7-day successful company research `agent_logs.created_at` with researched-job fallback. Recharts colors must use project CSS variables, and charts with all-zero values must show `DashboardChartEmptyState` instead of fake data.
+
+### Job Workflow Controls
+
+File: components/find-jobs/JobsTable.tsx, components/job-workflow/useJobWorkflow.ts, components/job-workflow/JobApplicationWorkspace.tsx
+Last updated: 2026-06-20
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | toolbar/card `bg-surface`, inactive tabs/selects `bg-surface-secondary`, active controls `bg-accent` / `bg-accent-light` |
+| Border           | `border border-border`, active/hover `border-accent`                |
+| Border radius    | cards `rounded-xl`, tabs `rounded-full`, controls `rounded-md`      |
+| Text — primary   | card headings `text-text-primary`, selects `text-[13px] font-medium leading-5`, action buttons `text-[12px] font-semibold leading-4` |
+| Text — secondary | helper copy `text-text-muted`, inactive controls `text-text-secondary` |
+| Spacing          | toolbar `px-4 py-4 gap-3`, mobile/tablet/laptop cards `px-4 py-4`, desktop table cells `px-3 py-4`, icon cell `px-2 py-4`, action buttons `px-2.5 gap-2`, detail workspace `px-6 py-6` |
+| Hover state      | inactive controls `hover:border-accent hover:text-accent`, table rows `hover:bg-surface-secondary` |
+| Shadow           | shared token card shadows, active tabs/compare CTA use accent token shadow |
+| Accent usage     | active workflow filters, compare CTA, saved/compared state, prep bullets |
+
+**Pattern notes:**
+Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
+
+### Company Comparison View
+
+File: app/compare/page.tsx
+Last updated: 2026-06-20
+
+| Property         | Class                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Background       | page `bg-background`, cards/table `bg-surface`, label cells `bg-surface-secondary` |
+| Border           | cards/table `border border-border`, matrix separators `border-b border-border` and `border-l border-border` |
+| Border radius    | cards/table `rounded-xl`, pills/buttons `rounded-md` / `rounded-full` |
+| Text — primary   | headings `text-text-primary`, matrix body `text-[14px] font-medium leading-6` |
+| Text — secondary | labels and empty copy `text-text-muted` / `text-text-secondary`      |
+| Spacing          | page `px-4 py-6 sm:px-6 sm:py-8`, cards `px-5 py-5`, matrix cells `px-4 py-4` |
+| Hover state      | links/buttons `hover:border-accent hover:text-accent` or `hover:bg-accent-dark` |
+| Shadow           | shared token card shadows and accent CTA shadow                     |
+| Accent usage     | match pills, skill pills, apply CTA, empty-state CTA                |
+
+**Pattern notes:**
+`/compare` is a protected server-rendered route. It accepts up to four selected job IDs via `?jobs=...`, scopes the InsForge query to the signed-in user, and renders responsive comparison cards plus a horizontal decision matrix. The cards emphasize company, role, match score, salary, location, strongest overlaps, prep gaps, and apply/detail actions. The matrix stays horizontally scrollable on smaller screens instead of compressing dense text into unreadable columns.
 
 ### Profile Attention Banner
 
@@ -647,7 +687,7 @@ Final CTA reuses the same button styling and gradient treatment as the hero sect
 ### Shared Supporting Text
 
 File: app/globals.css
-Last updated: 2026-06-08
+Last updated: 2026-06-20
 
 | Property         | Class                    |
 | ---------------- | ------------------------ |
@@ -674,15 +714,15 @@ Last updated: 2026-06-08
 | Background       | `.button-primary`, `.button-secondary`                                |
 | Border           | `.button-primary` uses a subtle surface-tinted border; `.button-secondary` uses token border; focus uses accent outline |
 | Border radius    | `border-radius: var(--radius-md)`                                     |
-| Text — primary   | `.button-primary { color: var(--color-surface) }`                     |
+| Text — primary   | `.button-primary { color: var(--color-surface) }`; dark mode overrides to `var(--color-accent-foreground)` |
 | Text — secondary | `.button-secondary { color: var(--color-text-slate) }`                |
 | Spacing          | `.button-primary-sm`, `.button-primary-lg`, `.button-secondary-lg`    |
-| Hover state      | `.button-primary:hover` adds a darker bluish-charcoal tint, `.button-secondary:hover` remains neutral |
+| Hover state      | `.button-primary:hover` adds a darker bluish-charcoal tint in light mode and an accent lift in dark mode, `.button-secondary:hover` remains neutral |
 | Shadow           | layered CTA shadows in `.button-primary` and `.button-secondary`      |
-| Accent usage     | focus rings and secondary hover border pick up `--color-accent`       |
+| Accent usage     | focus rings, secondary hover border, and dark-mode primary CTA background pick up `--color-accent` |
 
 **Pattern notes:**
-Use shared global button classes for every landing-page CTA instead of repeating raw utility strings. The correct landing-page button direction is compact 38px-tall charcoal primary buttons with white text, a darker bluish-charcoal hover, and compact bright-surface secondary buttons with subtle borders.
+Use shared global button classes for every landing-page CTA instead of repeating raw utility strings. In light mode, primary CTAs stay compact 38px-tall charcoal buttons with white text and a darker bluish-charcoal hover. In dark mode, primary CTAs must not use `var(--color-surface)` for text because that token becomes a dark panel color; dark mode overrides `.button-primary` and `.button-caret` to `var(--color-accent-foreground)` and uses an accent gradient so navbar, hero, and final CTA buttons remain readable.
 
 ### Auth Login Card
 

@@ -247,6 +247,51 @@ textarea {
     0 0 12px color-mix(in srgb, var(--color-accent-foreground) 44%, transparent);
 }
 
+.brand-logo-mark-inline {
+  width: 1.35em;
+  height: 1.35em;
+  min-width: 1.35em;
+  border-radius: 0.34em;
+  vertical-align: -0.2em;
+  box-shadow:
+    0 0.28em 0.58em color-mix(in srgb, var(--color-accent) 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 24%, transparent);
+}
+
+.brand-logo-mark-inline .brand-logo-briefcase {
+  width: 0.72em;
+  height: 0.57em;
+  border-width: 0.07em;
+  border-radius: 0.18em;
+}
+
+.brand-logo-mark-inline .brand-logo-handle {
+  top: -0.24em;
+  width: 0.34em;
+  height: 0.27em;
+  border-width: 0.07em;
+  border-bottom: 0;
+  border-radius: 0.18em 0.18em 0 0;
+}
+
+.brand-logo-mark-inline .brand-logo-latch {
+  top: 0.19em;
+  width: 0.18em;
+  height: 0.12em;
+  border-radius: 0.07em;
+}
+
+.brand-logo-mark-inline .brand-logo-spark {
+  right: 0.22em;
+  top: 0.22em;
+  width: 0.17em;
+  height: 0.17em;
+  border-radius: 0.04em;
+  box-shadow:
+    0 0 0 0.1em color-mix(in srgb, var(--color-accent-foreground) 10%, transparent),
+    0 0 0.38em color-mix(in srgb, var(--color-accent-foreground) 44%, transparent);
+}
+
 .group:hover .brand-logo-mark {
   transform: translateY(-1px);
   box-shadow:
@@ -317,6 +362,34 @@ textarea {
     inset 0px 1px 0px color-mix(in srgb, var(--color-surface) 15%, transparent);
 }
 
+html[data-theme="dark"] .button-primary {
+  border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border) 58%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 88%, var(--color-surface) 12%) 0%,
+    color-mix(in srgb, var(--color-accent-dark) 84%, var(--color-overlay) 16%) 100%
+  );
+  color: var(--color-accent-foreground);
+  box-shadow:
+    0px 10px 24px color-mix(in srgb, var(--color-accent) 24%, transparent),
+    0px 0px 0px 1px color-mix(in srgb, var(--color-accent) 18%, transparent),
+    inset 0px 1px 0px color-mix(in srgb, var(--color-accent-foreground) 18%, transparent);
+}
+
+html[data-theme="dark"] .button-primary:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 64%, var(--color-border) 36%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 94%, var(--color-surface) 6%) 0%,
+    var(--color-accent-dark) 100%
+  );
+  color: var(--color-accent-foreground);
+  box-shadow:
+    0px 12px 28px color-mix(in srgb, var(--color-accent) 32%, transparent),
+    0px 0px 0px 1px color-mix(in srgb, var(--color-accent) 22%, transparent),
+    inset 0px 1px 0px color-mix(in srgb, var(--color-accent-foreground) 22%, transparent);
+}
+
 .button-primary:focus-visible,
 .button-secondary:focus-visible {
   outline: 2px solid var(--color-accent);
@@ -372,6 +445,10 @@ textarea {
   color: var(--color-surface);
   font-size: 10px;
   line-height: 1;
+}
+
+html[data-theme="dark"] .button-caret {
+  color: var(--color-accent-foreground);
 }
 
 .nav-icon {
