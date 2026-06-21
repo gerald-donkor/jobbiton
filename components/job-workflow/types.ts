@@ -23,12 +23,23 @@ export type JobWorkflowSnapshot = Pick<
   | "externalApplyUrl"
 >;
 
+export type JobWorkflowCompareSession = {
+  id: string;
+  scopeKey: string;
+  label: string;
+  createdAt: string;
+  jobs: JobWorkflowSnapshot[];
+};
+
 export type JobWorkflowState = {
   favorites: Record<string, true>;
   dismissed: Record<string, true>;
   statuses: Record<string, JobWorkflowStatus>;
   notes: Record<string, string>;
   compare: Record<string, JobWorkflowSnapshot>;
+  activeCompareScopeKey: string | null;
+  activeCompareScopeLabel: string | null;
+  compareHistory: JobWorkflowCompareSession[];
 };
 
 export const workflowStatuses: {
@@ -42,4 +53,3 @@ export const workflowStatuses: {
   { value: "rejected", label: "Rejected" },
   { value: "archived", label: "Archived" },
 ];
-

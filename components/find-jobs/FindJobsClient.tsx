@@ -26,6 +26,14 @@ type FindJobsClientProps = {
   };
 };
 
+const LIVE_SEARCH_PAGE_SIZE = 10;
+
+type LiveSearchRequest = {
+  jobTitle: string;
+  location: string;
+  runId: string;
+};
+
 export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
   const router = useRouter();
   const [jobTitle, setJobTitle] = useState("");
@@ -34,6 +42,15 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
   const [latestSearchJobs, setLatestSearchJobs] = useState<
     FindJobsJobSummary[] | null
   >(null);
+  const [latestSearchRunId, setLatestSearchRunId] = useState<string | null>(null);
+  const [latestSearchPage, setLatestSearchPage] = useState(1);
+  const [latestSearchTotalAvailable, setLatestSearchTotalAvailable] =
+    useState<number | null>(null);
+  const [latestSearchPages, setLatestSearchPages] = useState<
+    Record<number, FindJobsJobSummary[]>
+  >({});
+  const [liveSearchRequest, setLiveSearchRequest] =
+    useState<LiveSearchRequest | null>(null);
   const [feedback, setFeedback] = useState<{
     tone: "error" | "success";
     text: string;
@@ -48,18 +65,31 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
       })
     : null;
   const displayedJobs = visibleLatestSearchJobs ?? jobsList.jobs;
+  const compareScopeKey =
+    latestSearchRunId ?? filters.runId ?? jobsList.activeRunId ?? "no-active-search";
+  const compareScopeLabel = latestSearchRunId
+    ? `Search for ${jobTitle.trim() || "new roles"}`
+    : "Current search";
   const displayedTotal = latestSearchJobs
-    ? displayedJobs.length
+    ? (latestSearchTotalAvailable ?? displayedJobs.length)
     : jobsList.totalResults;
   const showingFrom =
     displayedTotal === 0
       ? 0
       : visibleLatestSearchJobs
-        ? 1
+        ? (latestSearchPage - 1) * LIVE_SEARCH_PAGE_SIZE + 1
         : (jobsList.currentPage - 1) * jobsList.pageSize + 1;
   const showingTo = visibleLatestSearchJobs
-    ? visibleLatestSearchJobs.length
+    ? Math.min(
+        (latestSearchPage - 1) * LIVE_SEARCH_PAGE_SIZE +
+          visibleLatestSearchJobs.length,
+        displayedTotal,
+      )
     : Math.min(jobsList.currentPage * jobsList.pageSize, jobsList.totalResults);
+  const latestSearchTotalPages =
+    latestSearchTotalAvailable === null
+      ? 1
+      : Math.max(1, Math.ceil(latestSearchTotalAvailable / LIVE_SEARCH_PAGE_SIZE));
   const shouldShowPagination = visibleLatestSearchJobs
     ? visibleLatestSearchJobs.length > 0
     : jobsList.totalResults > 0;
@@ -97,7 +127,7 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
       const result = (await response.json()) as FindJobsSearchResponse;
 
       if (!response.ok || !result.success) {
-        setLatestSearchJobs(null);
+        resetLatestSearchState();
         setFeedback({
           tone: "error",
           text: result.success
@@ -108,18 +138,27 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
       }
 
       setLatestSearchJobs(result.data.jobs);
+      setLatestSearchRunId(result.data.runId);
+      setLatestSearchPage(result.data.page);
+      setLatestSearchTotalAvailable(result.data.totalAvailable);
+      setLatestSearchPages({ [result.data.page]: result.data.jobs });
+      setLiveSearchRequest({
+        jobTitle: trimmedJobTitle,
+        location: location.trim(),
+        runId: result.data.runId,
+      });
       setFilterQuery("");
       setFeedback({
         tone: "success",
         text:
-          result.data.totalFound === 0
+          result.data.totalAvailable === 0
             ? "No jobs matched that search right now."
-            : `Found ${result.data.totalFound} jobs and saved ${result.data.strongMatchCount} strong matches.`,
+            : `Found ${result.data.totalAvailable} available jobs. Saved and scored ${result.data.totalFound} for this page, including ${result.data.strongMatchCount} strong matches.`,
       });
       navigateToRun(result.data.runId);
     } catch (error) {
       console.error("[FindJobsClient] Search request failed", error);
-      setLatestSearchJobs(null);
+      resetLatestSearchState();
       setFeedback({
         tone: "error",
         text: "We could not search for jobs right now.",
@@ -161,7 +200,7 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
       params.set("page", String(nextPage));
     }
 
-    setLatestSearchJobs(null);
+    resetLatestSearchState();
     router.replace(params.size > 0 ? `/find-jobs?${params}` : "/find-jobs", {
       scroll: false,
     });
@@ -171,6 +210,26 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
     const params = new URLSearchParams();
 
     params.set("run", runId);
+
+    if (filters.matchFilter !== "all") {
+      params.set("match", filters.matchFilter);
+    }
+
+    if (filters.sortBy !== "score") {
+      params.set("sort", filters.sortBy);
+    }
+
+    router.replace(`/find-jobs?${params}`, { scroll: false });
+  }
+
+  function navigateToRunPage(runId: string, page: number): void {
+    const params = new URLSearchParams();
+
+    params.set("run", runId);
+
+    if (page > 1) {
+      params.set("page", String(page));
+    }
 
     if (filters.matchFilter !== "all") {
       params.set("match", filters.matchFilter);
@@ -200,6 +259,76 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
     updateRoute({ page });
   }
 
+  async function handleLiveSearchPageChange(page: number): Promise<void> {
+    if (!liveSearchRequest || page === latestSearchPage) {
+      return;
+    }
+
+    const cachedPage = latestSearchPages[page];
+
+    if (cachedPage) {
+      setLatestSearchJobs(cachedPage);
+      setLatestSearchPage(page);
+      return;
+    }
+
+    setIsSearching(true);
+    setFeedback(null);
+
+    try {
+      const response = await fetch("/api/agent/find", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jobTitle: liveSearchRequest.jobTitle,
+          location: liveSearchRequest.location,
+          page,
+          runId: liveSearchRequest.runId,
+        }),
+      });
+      const result = (await response.json()) as FindJobsSearchResponse;
+
+      if (!response.ok || !result.success) {
+        setFeedback({
+          tone: "error",
+          text: result.success
+            ? "We could not load that jobs page right now."
+            : result.error,
+        });
+        return;
+      }
+
+      setLatestSearchJobs(result.data.jobs);
+      setLatestSearchRunId(result.data.runId);
+      setLatestSearchPage(result.data.page);
+      setLatestSearchTotalAvailable(result.data.totalAvailable);
+      setLatestSearchPages((current) => ({
+        ...current,
+        [result.data.page]: result.data.jobs,
+      }));
+      navigateToRunPage(result.data.runId, result.data.page);
+    } catch (error) {
+      console.error("[FindJobsClient] Search page request failed", error);
+      setFeedback({
+        tone: "error",
+        text: "We could not load that jobs page right now.",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  function resetLatestSearchState(): void {
+    setLatestSearchJobs(null);
+    setLatestSearchRunId(null);
+    setLatestSearchPage(1);
+    setLatestSearchTotalAvailable(null);
+    setLatestSearchPages({});
+    setLiveSearchRequest(null);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <JobSearchCard
@@ -224,7 +353,12 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
           {jobsList.error}
         </div>
       ) : null}
-      <JobsTable jobs={displayedJobs} emptyMessage={emptyMessage} />
+      <JobsTable
+        jobs={displayedJobs}
+        emptyMessage={emptyMessage}
+        compareScopeKey={compareScopeKey}
+        compareScopeLabel={compareScopeLabel}
+      />
       {shouldShowPagination ? (
         <div className="-mt-1 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[14px] font-normal leading-5 text-text-muted">
@@ -242,13 +376,13 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
             </span>{" "}
             results
           </p>
-          {latestSearchJobs ? null : (
-            <JobsPagination
-              currentPage={jobsList.currentPage}
-              totalPages={jobsList.totalPages}
-              onPageChange={handlePageChange}
-            />
-          )}
+          <JobsPagination
+            currentPage={latestSearchJobs ? latestSearchPage : jobsList.currentPage}
+            totalPages={latestSearchJobs ? latestSearchTotalPages : jobsList.totalPages}
+            onPageChange={
+              latestSearchJobs ? handleLiveSearchPageChange : handlePageChange
+            }
+          />
         </div>
       ) : null}
     </div>

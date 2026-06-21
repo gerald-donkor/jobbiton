@@ -7,7 +7,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 5 — Dashboard
-**Last completed:** Global Brand, Theme, and Motion Refresh
+**Last completed:** Adzuna Available Results Footer
 **Next:** Phase 5 complete
 
 ---
@@ -212,3 +212,9 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-20 — Find Jobs row-icon alignment follow-up completed: desktop table icon cells now top-align with row content instead of centering against taller action cells, keeping icons horizontally aligned with company/role text.
 - 2026-06-20 — Jobbiton logo-placement follow-up completed: `BrandLogo` now exports a non-link `BrandName` variant for actual brand-heading placements such as the login welcome title, ordinary homepage body-copy `Jobbiton` mentions remain plain text, and `app/favicon.ico` was regenerated as a Jobbiton mark instead of using the old JobPilot asset.
 - 2026-06-20 — Dark-mode CTA contrast fix completed: `.button-primary` and `.button-caret` now have dark-mode-only overrides that use accent gradients and `text-accent-foreground`, fixing unreadable navbar/hero/final CTA text without changing light mode.
+- 2026-06-21 — Scoped Compare Selection and Comparison History completed: Find Jobs now scopes active compare selections to the current search run, archives prior compare groups when a new search scope appears, resets the visible Compare count to zero for the latest search, and exposes a History panel for reopening, restoring, or removing previous comparison groups.
+- 2026-06-21 — Scoped compare verification: `npm run lint`, `npm run build`, `git diff --check`, and a raw Tailwind color scan over touched workflow files pass. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-21 — Adzuna Available Results Footer completed: Adzuna search now preserves the full available job count from the API response while still saving/scoring 10 listings for Jobbiton, stores the available count on `agent_runs.jobs_found`, and keeps the Find Jobs footer visually consistent with the normal Previous / page / Next pagination treatment for live search results.
+- 2026-06-21 — Available results verification: official Adzuna search docs were checked, `npm run lint`, `npm run build`, `git diff --check`, and a raw Tailwind color scan over touched Find Jobs/Adzuna files pass. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-21 — Live Adzuna pagination completed: the Previous/Next controls now fetch additional 10-job Adzuna pages into the same search run, cache pages client-side during the live search, keep the current compare scope stable across page changes, and use 10-row saved-run pagination after refresh.
+- 2026-06-21 — Live pagination verification: `npm run lint` and `npm run build` pass. The build still shows the existing Node `module.register()` deprecation warning.

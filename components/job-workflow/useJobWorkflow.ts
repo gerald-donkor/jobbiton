@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
+  JobWorkflowCompareSession,
   JobWorkflowSnapshot,
   JobWorkflowState,
   JobWorkflowStatus,
 } from "@/components/job-workflow/types";
 
 const storageKey = "jobbiton-job-workflow-v1";
+const compareHistoryLimit = 8;
 
 const emptyWorkflowState: JobWorkflowState = {
   favorites: {},
@@ -15,6 +17,9 @@ const emptyWorkflowState: JobWorkflowState = {
   statuses: {},
   notes: {},
   compare: {},
+  activeCompareScopeKey: null,
+  activeCompareScopeLabel: null,
+  compareHistory: [],
 };
 
 export function useJobWorkflow() {
@@ -44,6 +49,56 @@ export function useJobWorkflow() {
         .filter((job) => Boolean(job.id))
         .slice(0, 4),
     [state.compare],
+  );
+
+  const activateCompareScope = useCallback(
+    ({
+      scopeKey,
+      label,
+      visibleJobIds,
+    }: {
+      scopeKey: string;
+      label: string;
+      visibleJobIds: string[];
+    }) => {
+      setState((current) => {
+        if (current.activeCompareScopeKey === scopeKey) {
+          return current;
+        }
+
+        const visibleJobIdSet = new Set(visibleJobIds);
+        const comparedJobs = Object.values(current.compare).filter((job) =>
+          Boolean(job.id),
+        );
+        const shouldKeepMigratedCompare =
+          current.activeCompareScopeKey === null &&
+          comparedJobs.length > 0 &&
+          comparedJobs.every((job) => visibleJobIdSet.has(job.id));
+        const nextHistory = shouldKeepMigratedCompare
+          ? current.compareHistory
+          : addCompareHistory(
+              current.compareHistory,
+              createCompareSession({
+                scopeKey: current.activeCompareScopeKey ?? "legacy",
+                label:
+                  current.activeCompareScopeLabel ??
+                  (current.activeCompareScopeKey === null
+                    ? "Previous comparison"
+                    : "Previous search"),
+                jobs: comparedJobs,
+              }),
+            );
+
+        return {
+          ...current,
+          compare: shouldKeepMigratedCompare ? current.compare : {},
+          activeCompareScopeKey: scopeKey,
+          activeCompareScopeLabel: label,
+          compareHistory: nextHistory,
+        };
+      });
+    },
+    [],
   );
 
   const setStatus = useCallback(
@@ -139,10 +194,33 @@ export function useJobWorkflow() {
     }));
   }, []);
 
+  const restoreCompareSession = useCallback((sessionId: string) => {
+    setState((current) => {
+      const session = current.compareHistory.find((item) => item.id === sessionId);
+
+      if (!session) {
+        return current;
+      }
+
+      return {
+        ...current,
+        compare: Object.fromEntries(session.jobs.slice(0, 4).map((job) => [job.id, job])),
+      };
+    });
+  }, []);
+
+  const removeCompareSession = useCallback((sessionId: string) => {
+    setState((current) => ({
+      ...current,
+      compareHistory: current.compareHistory.filter((session) => session.id !== sessionId),
+    }));
+  }, []);
+
   return {
     state,
     isLoaded,
     compareJobs,
+    activateCompareScope,
     setStatus,
     setNote,
     toggleFavorite,
@@ -150,6 +228,8 @@ export function useJobWorkflow() {
     toggleCompare,
     removeCompare,
     clearCompare,
+    restoreCompareSession,
+    removeCompareSession,
   };
 }
 
@@ -173,6 +253,9 @@ function readStoredState(): JobWorkflowState {
       statuses: readStatusRecord(parsed.statuses),
       notes: readStringRecord(parsed.notes),
       compare: readCompareRecord(parsed.compare),
+      activeCompareScopeKey: readNullableString(parsed.activeCompareScopeKey),
+      activeCompareScopeLabel: readNullableString(parsed.activeCompareScopeLabel),
+      compareHistory: readCompareHistory(parsed.compareHistory),
     };
   } catch {
     return emptyWorkflowState;
@@ -205,6 +288,10 @@ function readStringRecord(value: unknown): Record<string, string> {
       (entry): entry is [string, string] => typeof entry[1] === "string",
     ),
   );
+}
+
+function readNullableString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
 }
 
 function readStatusRecord(value: unknown): Record<string, JobWorkflowStatus> {
@@ -244,4 +331,104 @@ function readCompareRecord(value: unknown): Record<string, JobWorkflowSnapshot> 
         typeof entry[1].company === "string",
     ),
   );
+}
+
+function readCompareHistory(value: unknown): JobWorkflowCompareSession[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map(readCompareSession)
+    .filter((session): session is JobWorkflowCompareSession => Boolean(session))
+    .slice(0, compareHistoryLimit);
+}
+
+function readCompareSession(value: unknown): JobWorkflowCompareSession | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const id = readNullableString(value.id);
+  const scopeKey = readNullableString(value.scopeKey);
+  const label = readNullableString(value.label);
+  const createdAt = readNullableString(value.createdAt);
+  const jobs = readCompareList(value.jobs);
+
+  if (!id || !scopeKey || !label || !createdAt || jobs.length < 2) {
+    return null;
+  }
+
+  return {
+    id,
+    scopeKey,
+    label,
+    createdAt,
+    jobs,
+  };
+}
+
+function readCompareList(value: unknown): JobWorkflowSnapshot[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(
+      (item): item is JobWorkflowSnapshot =>
+        isRecord(item) &&
+        typeof item.id === "string" &&
+        typeof item.title === "string" &&
+        typeof item.company === "string",
+    )
+    .slice(0, 4);
+}
+
+function createCompareSession({
+  scopeKey,
+  label,
+  jobs,
+}: {
+  scopeKey: string;
+  label: string;
+  jobs: JobWorkflowSnapshot[];
+}): JobWorkflowCompareSession | null {
+  const sessionJobs = jobs.slice(0, 4);
+
+  if (sessionJobs.length < 2) {
+    return null;
+  }
+
+  const createdAt = new Date().toISOString();
+
+  return {
+    id: `${scopeKey}-${createdAt}`,
+    scopeKey,
+    label,
+    createdAt,
+    jobs: sessionJobs,
+  };
+}
+
+function addCompareHistory(
+  history: JobWorkflowCompareSession[],
+  session: JobWorkflowCompareSession | null,
+): JobWorkflowCompareSession[] {
+  if (!session) {
+    return history;
+  }
+
+  const nextJobKey = getCompareJobKey(session.jobs);
+
+  return [
+    session,
+    ...history.filter((item) => getCompareJobKey(item.jobs) !== nextJobKey),
+  ].slice(0, compareHistoryLimit);
+}
+
+function getCompareJobKey(jobs: JobWorkflowSnapshot[]): string {
+  return jobs
+    .map((job) => job.id)
+    .sort()
+    .join("|");
 }

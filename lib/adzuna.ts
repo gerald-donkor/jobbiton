@@ -17,6 +17,12 @@ export type AdzunaJob = {
   category?: { tag: string; label: string };
 };
 
+export type AdzunaSearchResult = {
+  jobs: AdzunaJob[];
+  totalAvailable: number;
+  searchUrl: string;
+};
+
 const COUNTRY_PATTERNS: Array<{ country: AdzunaCountry; patterns: RegExp[] }> = [
   {
     country: "gb",
@@ -103,7 +109,8 @@ export async function searchAdzunaJobs(
   jobTitle: string,
   location: string,
   country: AdzunaCountry,
-): Promise<AdzunaJob[]> {
+  page: number = 1,
+): Promise<AdzunaSearchResult> {
   const appId = process.env.ADZUNA_APP_ID;
   const appKey = process.env.ADZUNA_APP_KEY;
 
@@ -125,7 +132,7 @@ export async function searchAdzunaJobs(
   }
 
   const response = await fetch(
-    `https://api.adzuna.com/v1/api/jobs/${country}/search/1?${params.toString()}`,
+    `https://api.adzuna.com/v1/api/jobs/${country}/search/${page}?${params.toString()}`,
     {
       cache: "no-store",
     },
@@ -135,9 +142,55 @@ export async function searchAdzunaJobs(
     throw new Error(`Adzuna API error: ${response.status}`);
   }
 
-  const json = (await response.json()) as { results?: AdzunaJob[] };
+  const json = (await response.json()) as {
+    count?: unknown;
+    results?: AdzunaJob[];
+  };
+  const jobs = Array.isArray(json.results) ? json.results.slice(0, 10) : [];
 
-  return Array.isArray(json.results) ? json.results.slice(0, 10) : [];
+  return {
+    jobs,
+    totalAvailable: readAvailableCount(json.count) ?? jobs.length,
+    searchUrl: buildAdzunaSearchUrl(jobTitle, location, country),
+  };
+}
+
+function readAvailableCount(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
+    return Math.floor(value);
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return Math.floor(parsed);
+    }
+  }
+
+  return null;
+}
+
+export function buildAdzunaSearchUrl(
+  jobTitle: string,
+  location: string,
+  country: AdzunaCountry,
+): string {
+  const hostByCountry: Record<AdzunaCountry, string> = {
+    au: "www.adzuna.com.au",
+    ca: "www.adzuna.ca",
+    gb: "www.adzuna.co.uk",
+    us: "www.adzuna.com",
+  };
+  const url = new URL(`https://${hostByCountry[country]}/search`);
+
+  url.searchParams.set("q", jobTitle.trim());
+
+  if (location.trim()) {
+    url.searchParams.set("loc", location.trim());
+  }
+
+  return url.toString();
 }
 
 export function getScoreColor(score: number): "success" | "info" | "warning" {

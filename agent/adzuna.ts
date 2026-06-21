@@ -19,8 +19,11 @@ type DiscoverJobsResult =
       success: true;
       runId: string;
       jobs: FindJobsJobSummary[];
+      page: number;
       totalFound: number;
+      totalAvailable: number;
       strongMatchCount: number;
+      searchUrl: string;
     }
   | {
       success: false;
@@ -106,16 +109,30 @@ async function loadProfile(userId: string): Promise<FindJobsProfile | null> {
   };
 }
 
-export async function discoverJobsForUser({
+type RunContext =
+  | {
+      success: true;
+      runId: string;
+      jobTitle: string;
+      location: string;
+    }
+  | {
+      success: false;
+      error: string;
+      statusCode?: number;
+    };
+
+async function createSearchRun({
+  insforge,
   jobTitle,
   location,
   userId,
 }: {
+  insforge: Awaited<ReturnType<typeof createInsforgeServer>>;
   jobTitle: string;
   location: string;
   userId: string;
-}): Promise<DiscoverJobsResult> {
-  const insforge = await createInsforgeServer();
+}): Promise<RunContext> {
   const { data: run, error: runError } = await insforge.database
     .from("agent_runs")
     .insert([
@@ -136,7 +153,93 @@ export async function discoverJobsForUser({
     return { success: false, error: "We could not start your job search." };
   }
 
-  const runId = run.id;
+  return {
+    success: true,
+    runId: String(run.id),
+    jobTitle,
+    location,
+  };
+}
+
+async function loadExistingRun({
+  runId,
+  userId,
+}: {
+  runId: string;
+  userId: string;
+}): Promise<RunContext> {
+  const insforge = await createInsforgeServer();
+  const { data, error } = await insforge.database
+    .from("agent_runs")
+    .select("id, job_title_searched, location_searched")
+    .eq("id", runId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[agent/adzuna] Existing run lookup failed", error);
+    return {
+      success: false,
+      error: "We could not load that job search.",
+      statusCode: 500,
+    };
+  }
+
+  if (!data?.id || typeof data.job_title_searched !== "string") {
+    return {
+      success: false,
+      error: "We could not load that job search.",
+      statusCode: 404,
+    };
+  }
+
+  return {
+    success: true,
+    runId: String(data.id),
+    jobTitle: data.job_title_searched,
+    location:
+      typeof data.location_searched === "string" ? data.location_searched : "",
+  };
+}
+
+export async function discoverJobsForUser({
+  jobTitle,
+  location,
+  page = 1,
+  runId: requestedRunId = null,
+  userId,
+}: {
+  jobTitle: string;
+  location: string;
+  page?: number;
+  runId?: string | null;
+  userId: string;
+}): Promise<DiscoverJobsResult> {
+  const insforge = await createInsforgeServer();
+  const requestedPage = Math.max(1, page);
+  const runContext = requestedRunId
+    ? await loadExistingRun({
+        runId: requestedRunId,
+        userId,
+      })
+    : await createSearchRun({
+        insforge,
+        jobTitle,
+        location,
+        userId,
+      });
+
+  if (!runContext.success) {
+    return {
+      success: false,
+      error: runContext.error,
+      statusCode: runContext.statusCode,
+    };
+  }
+
+  const { runId } = runContext;
+  const effectiveJobTitle = runContext.jobTitle;
+  const effectiveLocation = runContext.location;
 
   try {
     const profile = await loadProfile(userId);
@@ -164,15 +267,21 @@ export async function discoverJobsForUser({
       };
     }
 
-    const country = detectAdzunaCountry(location);
-    const adzunaJobs = await searchAdzunaJobs(jobTitle, location, country);
+    const country = detectAdzunaCountry(effectiveLocation);
+    const adzunaSearch = await searchAdzunaJobs(
+      effectiveJobTitle,
+      effectiveLocation,
+      country,
+      requestedPage,
+    );
+    const adzunaJobs = adzunaSearch.jobs;
 
     if (adzunaJobs.length === 0) {
       await insforge.database
         .from("agent_runs")
         .update({
           status: "completed",
-          jobs_found: 0,
+          jobs_found: adzunaSearch.totalAvailable,
           completed_at: new Date().toISOString(),
         })
         .eq("id", runId)
@@ -182,8 +291,11 @@ export async function discoverJobsForUser({
         success: true,
         runId,
         jobs: [],
+        page: requestedPage,
         totalFound: 0,
+        totalAvailable: adzunaSearch.totalAvailable,
         strongMatchCount: 0,
+        searchUrl: adzunaSearch.searchUrl,
       };
     }
 
@@ -232,7 +344,7 @@ export async function discoverJobsForUser({
         .from("agent_runs")
         .update({
           status: "failed",
-          jobs_found: adzunaJobs.length,
+          jobs_found: adzunaSearch.totalAvailable,
           completed_at: new Date().toISOString(),
         })
         .eq("id", runId)
@@ -263,7 +375,7 @@ export async function discoverJobsForUser({
         .from("agent_runs")
         .update({
           status: "failed",
-          jobs_found: adzunaJobs.length,
+          jobs_found: adzunaSearch.totalAvailable,
           completed_at: new Date().toISOString(),
         })
         .eq("id", runId)
@@ -321,7 +433,7 @@ export async function discoverJobsForUser({
       .from("agent_runs")
       .update({
         status: "completed",
-        jobs_found: adzunaJobs.length,
+        jobs_found: adzunaSearch.totalAvailable,
         completed_at: new Date().toISOString(),
       })
       .eq("id", runId)
@@ -329,7 +441,7 @@ export async function discoverJobsForUser({
 
     await logAgentMessage({
       level: "success",
-      message: `Discovered ${adzunaJobs.length} jobs and saved ${jobs.length}.`,
+      message: `Found ${adzunaSearch.totalAvailable} available jobs and saved ${jobs.length}.`,
       runId,
       userId,
     });
@@ -338,9 +450,12 @@ export async function discoverJobsForUser({
       success: true,
       runId,
       jobs,
+      page: requestedPage,
       totalFound: adzunaJobs.length,
+      totalAvailable: adzunaSearch.totalAvailable,
       strongMatchCount: jobs.filter((job) => job.matchScore >= MATCH_THRESHOLD)
         .length,
+      searchUrl: adzunaSearch.searchUrl,
     };
   } catch (error) {
     console.error("[agent/adzuna]", describeError(error));

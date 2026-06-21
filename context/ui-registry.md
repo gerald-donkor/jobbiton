@@ -221,22 +221,22 @@ Feature 17 replaces mock chart arrays with DB-backed analytics from `lib/dashboa
 ### Job Workflow Controls
 
 File: components/find-jobs/JobsTable.tsx, components/job-workflow/useJobWorkflow.ts, components/job-workflow/JobApplicationWorkspace.tsx
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
-| Background       | toolbar/card `bg-surface`, inactive tabs/selects `bg-surface-secondary`, active controls `bg-accent` / `bg-accent-light` |
+| Background       | toolbar/card/history `bg-surface`, inactive tabs/selects/history items `bg-surface-secondary`, active controls `bg-accent` / `bg-accent-light` |
 | Border           | `border border-border`, active/hover `border-accent`                |
 | Border radius    | cards `rounded-xl`, tabs `rounded-full`, controls `rounded-md`      |
-| Text — primary   | card headings `text-text-primary`, selects `text-[13px] font-medium leading-5`, action buttons `text-[12px] font-semibold leading-4` |
+| Text — primary   | card/history headings `text-text-primary`, selects `text-[13px] font-medium leading-5`, action buttons `text-[12px] font-semibold leading-4` |
 | Text — secondary | helper copy `text-text-muted`, inactive controls `text-text-secondary` |
-| Spacing          | toolbar `px-4 py-4 gap-3`, mobile/tablet/laptop cards `px-4 py-4`, desktop table cells `px-3 py-4`, icon cell `px-2 py-4`, action buttons `px-2.5 gap-2`, detail workspace `px-6 py-6` |
+| Spacing          | toolbar `px-4 py-4 gap-3`, history panel `px-5 py-5`, history item `px-4 py-4`, mobile/tablet/laptop cards `px-4 py-4`, desktop table cells `px-3 py-4`, icon cell `px-2 py-4`, action buttons `px-2.5 gap-2`, detail workspace `px-6 py-6` |
 | Hover state      | inactive controls `hover:border-accent hover:text-accent`, table rows `hover:bg-surface-secondary` |
 | Shadow           | shared token card shadows, active tabs/compare CTA use accent token shadow |
-| Accent usage     | active workflow filters, compare CTA, saved/compared state, prep bullets |
+| Accent usage     | active workflow filters, compare CTA, saved/compared state, history labels/open action, prep bullets |
 
 **Pattern notes:**
-Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
+Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. Active compare selection is scoped to the current search run: when the Find Jobs search scope changes, any active compare group with at least two jobs is archived into comparison history and the visible Compare count returns to zero for the new result set. The History control opens a compact panel of previous comparison groups with `Open comparison`, `Make active`, and `Remove` actions; old groups must not appear as active compare state on a fresh search unless the user explicitly restores them. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
 
 ### Company Comparison View
 
@@ -401,7 +401,7 @@ The filter controls are three separate 40px white controls, not one combined too
 ### Find Jobs Table
 
 File: components/find-jobs/JobsTable.tsx
-Last updated: 2026-06-12
+Last updated: 2026-06-21
 
 | Property         | Class                                                                 |
 | ---------------- | --------------------------------------------------------------------- |
@@ -416,7 +416,7 @@ Last updated: 2026-06-12
 | Accent usage     | source badges `bg-accent-light text-accent`, score fills/text use `bg-success text-success`, `bg-info text-info`, or `bg-warning text-warning` |
 
 **Pattern notes:**
-The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 11 renders the server-provided saved jobs page by default, scoped to the active search run when one exists, shows a centered muted empty state when filters return no rows, and keeps pagination/count controls outside the table shell. The pagination uses compact text Previous/Next buttons with chevrons, circular page buttons, and the active page as `bg-accent text-accent-foreground`. Avoid broad all-user saved-job queries in this table unless a separate saved-jobs archive mode is explicitly designed.
+The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 11 renders the server-provided saved jobs page by default, scoped to the active search run when one exists, shows a centered muted empty state when filters return no rows, and keeps pagination/count controls outside the table shell. The pagination uses compact text Previous/Next buttons with chevrons, circular page buttons, and the active page as `bg-accent text-accent-foreground`. Live Adzuna searches use this same pagination treatment and must be functional: Next/Previous fetch additional 10-job Adzuna pages into the current search run while preserving the current compare scope. Avoid broad all-user saved-job queries in this table unless a separate saved-jobs archive mode is explicitly designed.
 
 ### Job Details Page Layout
 

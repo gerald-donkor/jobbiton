@@ -169,7 +169,7 @@ export async function searchJobs(
   jobTitle: string,
   location: string,
   country: string = "us",
-): Promise<AdzunaJob[]> {
+): Promise<AdzunaSearchResult> {
   const params = new URLSearchParams({
     app_id: process.env.ADZUNA_APP_ID!,
     app_key: process.env.ADZUNA_APP_KEY!,
@@ -193,9 +193,15 @@ export async function searchJobs(
   }
 
   const data = await response.json();
-  return data.results || [];
+  return {
+    jobs: data.results || [],
+    totalAvailable: typeof data.count === "number" ? data.count : data.results?.length ?? 0,
+    searchUrl: buildAdzunaSearchUrl(jobTitle, location, country),
+  };
 }
 ```
+
+`searchAdzunaJobs()` should request one Adzuna page at a time and save/score only the 10 returned listings for the current Jobbiton page, but it must preserve Adzuna's full available count from the response `count` field for search feedback and saved run metadata. The Find Jobs table footer remains Jobbiton-scoped and uses the normal compact pagination control. Live search pagination should request additional Adzuna pages into the same `agent_runs.id`, not create a new search run for every page.
 
 ### Response Shape
 
@@ -248,6 +254,7 @@ const jobRecord = {
 
 - Always include `category=it-jobs` — never search Adzuna without this filter
 - Never pass `where` if location is empty — omit the parameter entirely
+- Preserve Adzuna's full response `count` as the available-results total; do not derive the total from the 10 saved/scored rows
 - `source` is always `'search'` for Adzuna jobs — never any other value
 - `salary_is_predicted: "1"` means Adzuna estimated the salary — this is normal
 - Adzuna description is a snippet — GPT-4o scores from it, not a full description
