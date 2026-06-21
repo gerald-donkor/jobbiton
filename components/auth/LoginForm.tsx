@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { BrandName } from "@/components/layout/BrandLogo";
+import { ProcessOverlay } from "@/components/loading/ProcessOverlay";
 import { Button } from "@/components/ui/button";
 
 type AuthProvider = "google" | "github";
@@ -80,7 +81,16 @@ export function LoginForm() {
   }
 
   return (
-    <section className="grid w-full max-w-[760px] overflow-hidden rounded-xl border border-border bg-surface shadow-[0_14px_30px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)] md:grid-cols-[1.08fr_0.92fr]">
+    <section className="relative grid w-full max-w-[760px] overflow-hidden rounded-xl border border-border bg-surface shadow-[0_14px_30px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)] md:grid-cols-[1.08fr_0.92fr]">
+      <ProcessOverlay
+        active={pendingProvider !== null}
+        variant="auth"
+        title="Opening secure sign in"
+        description={`Connecting to ${
+          pendingProvider === "github" ? "GitHub" : "Google"
+        } and preparing your session.`}
+        steps={["Starting OAuth", "Opening provider", "Securing session"]}
+      />
       <div className="soft-gradient-panel flex min-h-[420px] flex-col justify-between border-b border-border px-8 py-8 md:border-r md:border-b-0 md:px-10">
         <div>
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium leading-4 text-text-secondary shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)]">

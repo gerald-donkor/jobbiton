@@ -44,9 +44,7 @@ export type FindJobsSearchResponse =
       data: {
         runId: string;
         jobs: FindJobsJobSummary[];
-        page: number;
         totalFound: number;
-        totalAvailable: number;
         strongMatchCount: number;
         searchUrl: string;
       };

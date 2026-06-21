@@ -19,7 +19,6 @@ export type AdzunaJob = {
 
 export type AdzunaSearchResult = {
   jobs: AdzunaJob[];
-  totalAvailable: number;
   searchUrl: string;
 };
 
@@ -109,7 +108,6 @@ export async function searchAdzunaJobs(
   jobTitle: string,
   location: string,
   country: AdzunaCountry,
-  page: number = 1,
 ): Promise<AdzunaSearchResult> {
   const appId = process.env.ADZUNA_APP_ID;
   const appKey = process.env.ADZUNA_APP_KEY;
@@ -132,7 +130,7 @@ export async function searchAdzunaJobs(
   }
 
   const response = await fetch(
-    `https://api.adzuna.com/v1/api/jobs/${country}/search/${page}?${params.toString()}`,
+    `https://api.adzuna.com/v1/api/jobs/${country}/search/1?${params.toString()}`,
     {
       cache: "no-store",
     },
@@ -143,32 +141,14 @@ export async function searchAdzunaJobs(
   }
 
   const json = (await response.json()) as {
-    count?: unknown;
     results?: AdzunaJob[];
   };
   const jobs = Array.isArray(json.results) ? json.results.slice(0, 10) : [];
 
   return {
     jobs,
-    totalAvailable: readAvailableCount(json.count) ?? jobs.length,
     searchUrl: buildAdzunaSearchUrl(jobTitle, location, country),
   };
-}
-
-function readAvailableCount(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
-    return Math.floor(value);
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number(value);
-
-    if (Number.isFinite(parsed) && parsed >= 0) {
-      return Math.floor(parsed);
-    }
-  }
-
-  return null;
 }
 
 export function buildAdzunaSearchUrl(

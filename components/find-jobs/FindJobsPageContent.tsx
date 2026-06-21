@@ -6,7 +6,6 @@ import { Reveal } from "@/components/motion/Reveal";
 import type {
   FindJobsListResult,
   MatchFilterValue,
-  SortValue,
 } from "@/components/find-jobs/types";
 
 type FindJobsPageContentProps = {
@@ -17,7 +16,6 @@ type FindJobsPageContentProps = {
   filters: {
     query: string;
     matchFilter: MatchFilterValue;
-    sortBy: SortValue;
     runId: string | null;
   };
 };
@@ -42,7 +40,7 @@ export function FindJobsPageContent({
         <div className="mx-auto flex w-full max-w-[1192px] flex-col gap-6">
           <Reveal>
             <FindJobsClient
-              key={`${filters.runId ?? "no-run"}:${filters.query}:${filters.matchFilter}:${filters.sortBy}:${jobsList.currentPage}`}
+              key={`${filters.runId ?? "no-run"}:${filters.query}:${filters.matchFilter}:${jobsList.currentPage}`}
               jobsList={jobsList}
               filters={filters}
             />

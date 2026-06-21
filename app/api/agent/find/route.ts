@@ -12,8 +12,6 @@ export const runtime = "nodejs";
 const requestSchema = z.object({
   jobTitle: z.string().trim().min(1).max(120),
   location: z.string().trim().max(120).optional().default(""),
-  page: z.number().int().min(1).max(100).optional().default(1),
-  runId: z.string().trim().max(80).optional().nullable(),
 });
 
 function jsonResponse(
@@ -45,25 +43,21 @@ export async function POST(
       );
     }
 
-    const { jobTitle, location, page, runId } = body.data;
+    const { jobTitle, location } = body.data;
 
-    if (!runId) {
-      await capturePostHogServerEvent({
-        name: "job_search_started",
-        distinctId: user.id,
-        properties: {
-          userId: user.id,
-          jobTitle,
-          location,
-        },
-      });
-    }
+    await capturePostHogServerEvent({
+      name: "job_search_started",
+      distinctId: user.id,
+      properties: {
+        userId: user.id,
+        jobTitle,
+        location,
+      },
+    });
 
     const result = await discoverJobsForUser({
       jobTitle,
       location,
-      page,
-      runId,
       userId: user.id,
     });
 
@@ -82,9 +76,7 @@ export async function POST(
         data: {
           runId: result.runId,
           jobs: result.jobs,
-          page: result.page,
           totalFound: result.totalFound,
-          totalAvailable: result.totalAvailable,
           strongMatchCount: result.strongMatchCount,
           searchUrl: result.searchUrl,
         },
