@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { BrandName } from "@/components/layout/BrandLogo";
 import { Button } from "@/components/ui/button";
 
 type AuthProvider = "google" | "github";
@@ -104,7 +105,9 @@ export function LoginForm() {
       <div className="flex min-h-[420px] items-center px-8 py-10 md:px-8">
         <div className="w-full">
           <p className="text-[12px] font-medium leading-5 text-text-secondary">Welcome to</p>
-          <h2 className="mt-1 text-[24px] font-semibold leading-8 text-text-primary">Jobbiton</h2>
+          <h2 className="mt-1 text-[24px] font-semibold leading-8 text-text-primary">
+            <BrandName />
+          </h2>
           <p className="mt-3 text-[13px] leading-5 text-text-secondary">
             Choose your preferred provider to continue.
           </p>

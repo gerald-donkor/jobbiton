@@ -82,16 +82,19 @@ const processSteps = [
 
 const faqs = [
   {
+    key: "apply-for-me",
     question: "Does Jobbiton apply to jobs for me?",
     answer:
       "No. It prepares the search, scoring, and company research so you can decide where to apply.",
   },
   {
+    key: "change-profile",
     question: "Can I change my profile after matching jobs?",
     answer:
       "Yes. Your profile is editable at any time, and future searches use the updated information.",
   },
   {
+    key: "thin-research",
     question: "What happens when company research is thin?",
     answer:
       "The research flow falls back gracefully and still builds a useful briefing from the job and profile context.",
@@ -289,7 +292,7 @@ export function JobbitonFlowSections() {
         </Reveal>
         <RevealGroup>
           {faqs.map((item) => (
-            <RevealItem key={item.question}>
+            <RevealItem key={item.key}>
               <ScrollFloat direction="up" intensity={18}>
               <details className="group border-b border-border px-6 py-7 last:border-b-0 sm:px-8 md:px-12">
                 <summary className="flex items-center justify-between gap-6 text-[20px] font-semibold leading-7 text-text-primary">

@@ -31,3 +31,20 @@ export function BrandLogo() {
     </Link>
   );
 }
+
+export function BrandName({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-2 whitespace-nowrap align-baseline ${className}`}
+    >
+      <span aria-hidden="true" className="brand-logo-mark brand-logo-mark-inline">
+        <span className="brand-logo-briefcase">
+          <span className="brand-logo-handle" />
+          <span className="brand-logo-latch" />
+        </span>
+        <span className="brand-logo-spark" />
+      </span>
+      <span>Jobbiton</span>
+    </span>
+  );
+}
