@@ -7,7 +7,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 5 — Dashboard
-**Last completed:** Adzuna Available Results Footer
+**Last completed:** Motion Reveal Visibility Recovery
 **Next:** Phase 5 complete
 
 ---
@@ -218,3 +218,10 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-21 — Available results verification: official Adzuna search docs were checked, `npm run lint`, `npm run build`, `git diff --check`, and a raw Tailwind color scan over touched Find Jobs/Adzuna files pass. The build still shows the existing Node `module.register()` deprecation warning.
 - 2026-06-21 — Live Adzuna pagination completed: the Previous/Next controls now fetch additional 10-job Adzuna pages into the same search run, cache pages client-side during the live search, keep the current compare scope stable across page changes, and use 10-row saved-run pagination after refresh.
 - 2026-06-21 — Live pagination verification: `npm run lint` and `npm run build` pass. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-21 — Gemini Find Jobs matching provider completed: `agent/matcher.ts` now tries OpenRouter only when `OPENROUTER_API_KEY` exists, otherwise uses the configured server-side `GEMINI_API_KEY` with `gemini-2.5-flash` / `gemini-2.5-flash-lite` structured JSON matching before falling back to the heuristic scorer.
+- 2026-06-21 — Gemini matching provider verification: `npm run lint`, `git diff --check`, and `npm run build` pass. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-21 — Gemini matcher recovery completed after malformed provider output logs: Find Jobs matching now sends sanitized job/profile JSON to Gemini and logs only one concise warning before using heuristic scoring for affected listings, preventing repeated stack traces when Gemini returns non-JSON content.
+- 2026-06-21 — Gemini quota recovery completed: Find Jobs now batch-scores the current 10 Adzuna listings in one OpenRouter/Gemini request through `matchJobsToProfile()` instead of making one AI request per job, and quota failures fall back immediately to heuristic scoring for the full batch so searches can still save results.
+- 2026-06-21 — Find Jobs row navigation fix completed: mobile job cards and desktop job rows now navigate to `/find-jobs/[id]` when clicked or activated by keyboard, while embedded workflow controls remain independent.
+- 2026-06-21 — Login page helper copy removal completed: removed the bottom-left `New users are routed to profile setup after sign-in.` helper from `components/auth/LoginForm.tsx` while keeping the split auth card layout intact.
+- 2026-06-21 — Motion reveal visibility recovery completed: `components/motion/Reveal.tsx` now animates reveal wrappers and reveal groups to their visible state directly as well as on `whileInView`, preventing page content below the intro from staying invisible until a browser refresh after client-side navigation.

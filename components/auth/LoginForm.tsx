@@ -97,9 +97,6 @@ export function LoginForm() {
             Connect with Google or GitHub to start building your profile, matching jobs, and creating tailored application materials.
           </p>
         </div>
-        <p className="mt-8 text-[12px] leading-5 text-text-secondary">
-          New users are routed to profile setup after sign-in.
-        </p>
       </div>
 
       <div className="flex min-h-[420px] items-center px-8 py-10 md:px-8">

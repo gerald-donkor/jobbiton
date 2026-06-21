@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { FindJobsJobSummary } from "@/agent/types";
 import {
   type JobWorkflowCompareSession,
@@ -212,8 +219,35 @@ function MobileJobCard({
   workflow: WorkflowApi;
   compareScopeKey: string;
 }) {
+  const router = useRouter();
+  const detailsHref = `/find-jobs/${job.id}`;
+  const handleCardClick = (event: MouseEvent<HTMLElement>) => {
+    if (isInteractiveEventTarget(event.target)) {
+      return;
+    }
+
+    router.push(detailsHref);
+  };
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (isInteractiveEventTarget(event.target)) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      router.push(detailsHref);
+    }
+  };
+
   return (
-    <article className="rounded-xl border border-border bg-surface px-4 py-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <article
+      role="link"
+      tabIndex={0}
+      aria-label={`View details for ${job.title} at ${job.company}`}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      className="rounded-xl border border-border bg-surface px-4 py-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] transition-colors hover:border-accent hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+    >
       <div className="flex items-start gap-3">
         <span
           aria-hidden="true"
@@ -224,7 +258,7 @@ function MobileJobCard({
             {job.company}
           </p>
           <Link
-            href={`/find-jobs/${job.id}`}
+            href={detailsHref}
             className="mt-1 block break-words text-[16px] font-semibold leading-6 text-text-primary transition-colors hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {job.title}
@@ -271,8 +305,35 @@ function DesktopJobRow({
   workflow: WorkflowApi;
   compareScopeKey: string;
 }) {
+  const router = useRouter();
+  const detailsHref = `/find-jobs/${job.id}`;
+  const handleRowClick = (event: MouseEvent<HTMLElement>) => {
+    if (isInteractiveEventTarget(event.target)) {
+      return;
+    }
+
+    router.push(detailsHref);
+  };
+  const handleRowKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (isInteractiveEventTarget(event.target)) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      router.push(detailsHref);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-[44px_minmax(108px,0.95fr)_minmax(132px,1fr)_minmax(116px,0.6fr)_minmax(84px,0.5fr)_68px_72px_270px] border-b border-border transition-colors last:border-b-0 hover:bg-surface-secondary">
+    <div
+      role="link"
+      tabIndex={0}
+      aria-label={`View details for ${job.title} at ${job.company}`}
+      onClick={handleRowClick}
+      onKeyDown={handleRowKeyDown}
+      className="grid grid-cols-[44px_minmax(108px,0.95fr)_minmax(132px,1fr)_minmax(116px,0.6fr)_minmax(84px,0.5fr)_68px_72px_270px] border-b border-border transition-colors last:border-b-0 hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-accent"
+    >
       <span className="flex items-start justify-center border-r border-border bg-surface-secondary/35 px-2 py-4">
         <span aria-hidden="true" className="find-jobs-company-icon shrink-0" />
       </span>
@@ -283,7 +344,7 @@ function DesktopJobRow({
       </span>
       <span className="min-w-0 px-3 py-4">
         <Link
-          href={`/find-jobs/${job.id}`}
+          href={detailsHref}
           className="block break-words text-[14px] font-normal leading-5 text-text-primary transition-colors hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           {job.title}
@@ -386,6 +447,18 @@ function WorkflowControls({
         />
       </div>
     </div>
+  );
+}
+
+function isInteractiveEventTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  return Boolean(
+    target.closest(
+      'a, button, input, select, textarea, label, summary, [role="button"], [data-row-action]',
+    ),
   );
 }
 
