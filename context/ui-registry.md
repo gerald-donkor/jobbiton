@@ -40,8 +40,8 @@ All semantic interactive elements should expose the hand cursor without each com
 
 ### Global Theme and Page Motion
 
-File: app/globals.css, app/layout.tsx, components/layout/PageTransition.tsx
-Last updated: 2026-06-15
+File: app/globals.css, app/layout.tsx, components/layout/PageTransition.tsx, components/motion/Reveal.tsx
+Last updated: 2026-06-21
 
 | Property         | Class / Selector                                                               |
 | ---------------- | ------------------------------------------------------------------------------ |
@@ -56,7 +56,7 @@ Last updated: 2026-06-15
 | Accent usage     | theme is selected by `html[data-theme]`; page entry uses Motion opacity/y transition |
 
 **Pattern notes:**
-The root layout runs a small pre-paint theme script before rendering page content, reading `jobbiton-theme` from local storage and falling back to system preference. Theme mode is represented by `html[data-theme="light|dark"]`, and dark mode works by overriding existing design tokens rather than adding raw `dark:` color utilities to components. `PageTransition` is a client-only Motion wrapper that keys by pathname, fades/slides pages in, and respects `useReducedMotion()`. Future app-wide animation should stay in focused client wrappers and preserve token-only colors.
+The root layout runs a small pre-paint theme script before rendering page content, reading `jobbiton-theme` from local storage and falling back to system preference. Theme mode is represented by `html[data-theme="light|dark"]`, and dark mode works by overriding existing design tokens rather than adding raw `dark:` color utilities to components. `PageTransition` is a client-only Motion wrapper that keys by pathname, fades/slides pages in, and respects `useReducedMotion()`. Reveal wrappers must always animate to a visible state through `animate` as well as `whileInView`, so protected page content cannot remain hidden if in-view observation misses during client-side navigation. Future app-wide animation should stay in focused client wrappers and preserve token-only colors.
 
 ### Brand Logo
 
@@ -236,7 +236,7 @@ Last updated: 2026-06-21
 | Accent usage     | active workflow filters, compare CTA, saved/compared state, history labels/open action, prep bullets |
 
 **Pattern notes:**
-Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. Active compare selection is scoped to the current search run: when the Find Jobs search scope changes, any active compare group with at least two jobs is archived into comparison history and the visible Compare count returns to zero for the new result set. The History control opens a compact panel of previous comparison groups with `Open comparison`, `Make active`, and `Remove` actions; old groups must not appear as active compare state on a fresh search unless the user explicitly restores them. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
+Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. Active compare selection is scoped to the current search run: when the Find Jobs search scope changes, any active compare group with at least two jobs is archived into comparison history and the visible Compare count returns to zero for the new result set. The History control opens a compact panel of previous comparison groups with `Open comparison`, `Make active`, and `Remove` actions; old groups must not appear as active compare state on a fresh search unless the user explicitly restores them. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. Job cards and desktop rows act as full-row links to the job details page with `role="link"`, keyboard Enter/Space support, and token focus outlines; embedded controls (`a`, `button`, `select`, inputs, labels) must be excluded from row navigation so workflow actions stay independent. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
 
 ### Company Comparison View
 
@@ -727,7 +727,7 @@ Use shared global button classes for every landing-page CTA instead of repeating
 ### Auth Login Card
 
 File: components/auth/LoginForm.tsx
-Last updated: 2026-06-08
+Last updated: 2026-06-21
 
 | Property         | Class                                                                 |
 | ---------------- | --------------------------------------------------------------------- |
@@ -742,7 +742,7 @@ Last updated: 2026-06-08
 | Accent usage     | `text-accent` for security/provider icons and provider button hover   |
 
 **Pattern notes:**
-Auth entry uses a centered split panel beneath the normal navbar. The left pane carries the large sign-in headline on the shared token gradient; the right pane stays white and focused on provider selection. Provider buttons remain white, bordered, compact, and full width with restrained text sizing.
+Auth entry uses a centered split panel beneath the normal navbar. The left pane carries the security pill, large sign-in headline, and short explanatory copy on the shared token gradient without a bottom helper footer. The right pane stays white and focused on provider selection. Provider buttons remain white, bordered, compact, and full width with restrained text sizing.
 
 ### Auth Sign Out Button
 

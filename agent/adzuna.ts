@@ -8,7 +8,7 @@ import {
 import { logAgentMessage } from "@/lib/agent-logs";
 import { createInsforgeServer } from "@/lib/insforge-server";
 import { MATCH_THRESHOLD } from "@/lib/utils";
-import { matchJobToProfile } from "@/agent/matcher";
+import { matchJobsToProfile } from "@/agent/matcher";
 import type {
   FindJobsJobSummary,
   FindJobsProfile,
@@ -299,13 +299,13 @@ export async function discoverJobsForUser({
       };
     }
 
-    const jobRows: Array<Record<string, unknown>> = [];
+    const matches = await matchJobsToProfile(adzunaJobs, profile);
+    const foundAt = new Date().toISOString();
+    const jobRows: Array<Record<string, unknown>> = adzunaJobs.map(
+      (job, index) => {
+        const match = matches[index];
 
-    for (const job of adzunaJobs) {
-      try {
-        const match = await matchJobToProfile(job, profile);
-
-        jobRows.push({
+        return {
           run_id: runId,
           user_id: userId,
           source: "search",
@@ -322,22 +322,16 @@ export async function discoverJobsForUser({
           nice_to_have: [],
           benefits: [],
           about_company: null,
-          match_score: match.matchScore,
-          match_reason: match.matchReason,
-          matched_skills: match.matchedSkills,
-          missing_skills: match.missingSkills,
-          found_at: new Date().toISOString(),
-        });
-      } catch (error) {
-        console.error("[agent/adzuna] Job scoring failed", describeError(error));
-        await logAgentMessage({
-          level: "warning",
-          message: `Skipped ${job.title} at ${job.company.display_name} because scoring failed.`,
-          runId,
-          userId,
-        });
-      }
-    }
+          match_score: match?.matchScore ?? 50,
+          match_reason:
+            match?.matchReason ??
+            `${job.title} was saved with a neutral match score because AI scoring was unavailable.`,
+          matched_skills: match?.matchedSkills ?? [],
+          missing_skills: match?.missingSkills ?? [],
+          found_at: foundAt,
+        };
+      },
+    );
 
     if (jobRows.length === 0) {
       await insforge.database

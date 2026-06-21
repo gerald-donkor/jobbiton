@@ -503,7 +503,7 @@ const response = await openai.chat.completions.create({
 
 **Check first:** Check official Google AI Gemini docs before changing request or response shapes.
 
-### Resume Extraction Structured JSON
+### Structured JSON Requests
 
 ```typescript
 const response = await fetch(
@@ -544,13 +544,15 @@ const response = await fetch(
 **Rules:**
 
 - Use server-side `GEMINI_API_KEY`; never expose it with a `NEXT_PUBLIC_` prefix
-- Use the REST API from server code for resume extraction; no client-side Gemini calls
+- Use the REST API from server code for resume extraction, resume generation, company research synthesis, and Find Jobs matching; no client-side Gemini calls
 - Try `gemini-2.5-flash` first and fall back to `gemini-2.5-flash-lite` if Gemini returns an error or non-JSON content
 - Do not use `gemini-3.5-flash` for resume extraction; it returned unusable one-letter text responses in local smoke tests
 - Send the API key in the `x-goog-api-key` header
-- Use `generationConfig.responseMimeType = "application/json"` for structured resume extraction
+- Use `generationConfig.responseMimeType = "application/json"` for structured JSON operations
 - Pair JSON mode with `generationConfig.responseJsonSchema` so Gemini is constrained to the expected object shape
 - Always validate parsed JSON with Zod before using it
+- Find Jobs matching should prefer OpenRouter only when `OPENROUTER_API_KEY` is configured; when the app is configured with `GEMINI_API_KEY`, match jobs with Gemini instead of throwing or logging a missing OpenRouter key
+- For Find Jobs matching, batch the current 10 Adzuna listings into one provider request, send job text as sanitized JSON data, and treat quota or malformed provider output as a quiet heuristic fallback for the current batch; do not print a stack trace for every listing when a provider returns unusable content
 - Ask for `yearsExperience` as digits only; normalize values like `5 years` to `5`
 - If Gemini leaves `yearsExperience` blank but work dates are present, estimate it in app code from extracted work dates before filling the form
 - Ask Gemini to put role bullets, achievements, duties, and summaries into `workExperience[].responsibilities`

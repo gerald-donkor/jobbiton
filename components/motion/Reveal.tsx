@@ -15,6 +15,7 @@ export function Reveal({ children, className = "", delay = 0 }: RevealProps) {
   return (
     <motion.div
       initial={shouldReduceMotion ? false : { opacity: 0, y: 24, scale: 0.985 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.18, margin: "0px 0px -8% 0px" }}
       transition={{
@@ -35,6 +36,7 @@ export function RevealGroup({ children, className = "" }: RevealProps) {
   return (
     <motion.div
       initial={shouldReduceMotion ? false : "hidden"}
+      animate="show"
       whileInView="show"
       viewport={{ once: true, amount: 0.14, margin: "0px 0px -10% 0px" }}
       variants={{
