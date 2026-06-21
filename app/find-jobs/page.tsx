@@ -8,10 +8,11 @@ import {
   type SortValue,
 } from "@/components/find-jobs/types";
 import { requireUser } from "@/lib/auth";
+import { buildAdzunaSearchUrl, detectAdzunaCountry } from "@/lib/adzuna";
 import { createInsforgeServer } from "@/lib/insforge-server";
 import { MATCH_THRESHOLD } from "@/lib/utils";
 
-const FIND_JOBS_PAGE_SIZE = 20;
+const FIND_JOBS_PAGE_SIZE = 10;
 
 const JOB_SUMMARY_COLUMNS =
   "id, title, company, location, salary, source, match_score, match_reason, matched_skills, missing_skills, external_apply_url, found_at";
@@ -162,6 +163,10 @@ async function listFindJobsForUser({
   }
 
   const totalResults = typeof count === "number" ? count : 0;
+  const availability = await loadRunAvailability({
+    runId,
+    userId,
+  });
   const totalPages = Math.max(1, Math.ceil(totalResults / FIND_JOBS_PAGE_SIZE));
   const currentPage = Math.min(requestedPage, totalPages);
   const rangeStart = (currentPage - 1) * FIND_JOBS_PAGE_SIZE;
@@ -195,6 +200,8 @@ async function listFindJobsForUser({
       Boolean(job),
     ),
     totalResults,
+    totalAvailable: availability.totalAvailable,
+    externalSearchUrl: availability.externalSearchUrl,
     currentPage,
     totalPages,
     pageSize: FIND_JOBS_PAGE_SIZE,
@@ -210,10 +217,55 @@ function emptyJobsResult(
     activeRunId,
     jobs: [],
     totalResults: 0,
+    totalAvailable: null,
+    externalSearchUrl: null,
     currentPage: page,
     totalPages: 1,
     pageSize: FIND_JOBS_PAGE_SIZE,
     error: null,
+  };
+}
+
+async function loadRunAvailability({
+  runId,
+  userId,
+}: {
+  runId: string;
+  userId: string;
+}): Promise<{
+  totalAvailable: number | null;
+  externalSearchUrl: string | null;
+}> {
+  const insforge = await createInsforgeServer();
+  const { data, error } = await insforge.database
+    .from("agent_runs")
+    .select("jobs_found, job_title_searched, location_searched")
+    .eq("id", runId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[find-jobs/page] Run availability lookup failed", error);
+    return {
+      totalAvailable: null,
+      externalSearchUrl: null,
+    };
+  }
+
+  const record = toRecord(data);
+  const jobTitle = readString(record?.job_title_searched);
+  const location = readString(record?.location_searched) ?? "";
+  const totalAvailable = readNumberOrNull(record?.jobs_found);
+
+  return {
+    totalAvailable,
+    externalSearchUrl: jobTitle
+      ? buildAdzunaSearchUrl(
+          jobTitle,
+          location,
+          detectAdzunaCountry(location),
+        )
+      : null,
   };
 }
 
@@ -350,6 +402,19 @@ function readNumber(value: unknown): number {
   }
 
   return 0;
+}
+
+function readNumberOrNull(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
 }
 
 function readStringArray(value: unknown): string[] {

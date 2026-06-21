@@ -7,6 +7,8 @@ export type FindJobsListResult = {
   activeRunId: string | null;
   jobs: FindJobsJobSummary[];
   totalResults: number;
+  totalAvailable: number | null;
+  externalSearchUrl: string | null;
   currentPage: number;
   totalPages: number;
   pageSize: number;

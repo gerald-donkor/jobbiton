@@ -1,39 +1,62 @@
-# Memory — Dashboard Phase Handoff
+# Memory — Find Jobs Compare Scope and Live Pagination
 
-Last updated: 2026-06-15 16:15:48 GMT
+Last updated: 2026-06-21 13:50 GMT
 
 ## What was built
 
-- Completed Feature 15, Stats Bar Real Data: `app/dashboard/page.tsx` now loads user-scoped dashboard stats through `lib/dashboard-stats.ts` and passes them into `components/dashboard/DashboardPageContent.tsx`.
-- Completed Feature 16, Recent Activity Real Data: added `lib/dashboard-activity.ts`, loads completed `agent_runs` and researched `jobs`, merges/sorts them, formats labels and relative times, and passes the result into `components/dashboard/RecentActivity.tsx`.
-- Recovered dashboard interactivity and positioning across the dashboard: chart hover/focus lanes and `ChartTooltip` placement are in `components/dashboard/ChartTooltip.tsx`, `CompanyResearchChart.tsx`, `JobsFoundChart.tsx`, and `MatchDistributionChart.tsx`; dashboard layout now uses compact 80px navbar, centered `max-w-[824px]` content track, 16px gaps, 128px stat cards, and 340px activity/chart cards.
-- Updated `context/progress-tracker.md` and `context/ui-registry.md`; current tracker marks Features 14, 15, and 16 complete and Feature 17 next.
+- Fixed Find Jobs comparison state leaking across searches:
+  - `components/find-jobs/FindJobsClient.tsx` passes the active search run as a compare scope.
+  - `components/find-jobs/JobsTable.tsx` only shows active compare selections for the current search scope.
+  - `components/job-workflow/useJobWorkflow.ts` archives prior active compare groups and clears the visible Compare count when a new search scope appears.
+  - `components/job-workflow/types.ts` includes comparison history state.
+- Added comparison history on Find Jobs:
+  - The workflow toolbar includes a `History` control.
+  - Previous comparison groups can be opened directly, restored as active, or removed.
+  - History is capped to the latest eight groups in local storage.
+- Updated Adzuna search availability and pagination:
+  - `lib/adzuna.ts` now accepts an Adzuna page number and returns 10 jobs plus `totalAvailable` from Adzuna's response `count`.
+  - `agent/adzuna.ts` can create a fresh search run or load an existing user-scoped run for additional pages.
+  - `app/api/agent/find/route.ts` accepts optional `page` and `runId` and returns the actual page number.
+  - `app/find-jobs/page.tsx` now uses 10-row saved-run pagination.
+  - `components/find-jobs/FindJobsClient.tsx` caches live search pages client-side and makes Previous/Next fetch additional 10-job pages into the same run.
+- Updated documentation:
+  - `context/library-docs.md` records paged Adzuna search behavior.
+  - `context/ui-registry.md` records scoped compare/history and functional live pagination.
+  - `context/progress-tracker.md` records both completed changes and verification.
 
 ## Decisions made
 
-- Dashboard data loading stays server-side in `app/dashboard/page.tsx` and `lib/` helpers. UI components remain props-only and do not query InsForge directly.
-- Dashboard activity uses existing available timestamps: completed job searches use `agent_runs.completed_at` with `started_at` fallback; researched company entries use `jobs.found_at` because company research currently has no dedicated `researched_at` column.
-- Recent Activity is capped at five entries so it fits the compact 340px card height.
-- Dashboard chart UI remains custom SVG/CSS for now; Feature 17 is the planned point where chart data should move to PostHog-backed real analytics.
+- Jobbiton scores/saves 10 jobs at a time to control AI/API work.
+- Next/Previous on a live search now load more Adzuna pages into the same `agent_runs.id` rather than creating a new search.
+- The compare scope remains stable while moving between pages of the same live search.
+- Previous compare groups remain localStorage-backed with the rest of workflow state; no InsForge schema changes were made.
 
 ## Problems solved
 
-- Dashboard tooltip placement was fixed so tooltips stay near the top of active chart lanes instead of dropping below short bars or low line points.
-- Dashboard hit targets were expanded to full-height chart lanes, making all charts hover/focus interactive instead of requiring tiny point/bar targets.
-- The dashboard had drifted into an oversized full-width shell; it was corrected to the latest screenshot positioning with centered compact cards and a compact navbar.
+- Fixed stale `Compare 3` style state appearing after a fresh Find Jobs search.
+- Preserved access to previous compare selections without making them look like they belong to current/latest job results.
+- Fixed the Find Jobs footer/pagination mismatch where Previous/Next looked like controls but were disabled for live searches.
+- Live search pagination now fetches additional Adzuna pages and updates the table.
 
 ## Current state
 
-- `/dashboard` now has real stat cards and a real recent activity feed.
-- Feature 17, Analytics Charts — PostHog Data, is not implemented yet. The three chart components still use mock data but keep the corrected interactive UI and `chartTop` tooltip behavior.
-- Last verification after Feature 16: `npm run lint`, `npm run build`, `git diff --check`, and raw Tailwind color scans passed. Build still shows the existing Next/Turbopack Node `module.register()` deprecation warning, but it does not fail.
-- No known functional blocker remains from Feature 16.
+- A Next dev server was already running for this project on `http://localhost:3000` with PID 7428 during the session.
+- Verification passes:
+  - `npm run lint`
+  - `npm run build`
+  - `git diff --check`
+  - raw Tailwind color scan over touched Find Jobs/Adzuna files
+- Build still reports the existing Node `module.register()` deprecation warning, but compilation succeeds.
 
 ## Next session starts with
 
-Implement Feature 17, Analytics Charts — PostHog Data. Start by reading the required context files and InsForge/PostHog project docs, then inspect `lib/posthog-server.ts`, `lib/posthog-events.ts`, and the three dashboard chart components. Wire Jobs Found Over Time, Match Score Distribution, and Company Research Activity to current-user PostHog events while preserving the existing compact chart layout and hover/focus behavior.
+1. Run `/remember restore`.
+2. Manually test `/find-jobs`: select compare jobs, search a new role, confirm Compare resets to zero and History can reopen the previous group.
+3. Run a live Adzuna search with more than 10 available jobs and confirm Next loads page 2, Previous returns to page 1, and the compare scope remains stable.
+4. If multi-device workflow persistence is requested, plan an InsForge schema path before moving comparison history server-side.
 
 ## Open questions
 
-- Whether to follow the build plan literally and introduce `recharts` for Feature 17, or preserve the current custom SVG/CSS chart implementation and replace only the data layer. Prefer preserving the existing implementation unless the user explicitly wants Recharts, because the current charts already match the screenshot and have custom hover lanes.
-- Company research activity currently has no separate researched timestamp in the jobs table. Feature 17 should use PostHog `company_researched` event timestamps for accurate chart dates.
+- Should comparison history eventually sync across devices through InsForge?
+- Should comparison history appear anywhere besides Find Jobs, such as `/compare` or Job Details?
+- Should Jobbiton eventually prefetch page 2 after a successful search, or keep loading pages only when the user clicks Next?

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FindJobsJobSummary } from "@/agent/types";
 import {
+  type JobWorkflowCompareSession,
   workflowStatuses,
   type JobWorkflowSnapshot,
   type JobWorkflowStatus,
@@ -14,6 +15,8 @@ import { getScoreColor } from "@/lib/adzuna";
 type JobsTableProps = {
   jobs: FindJobsJobSummary[];
   emptyMessage?: string;
+  compareScopeKey: string;
+  compareScopeLabel: string;
 };
 
 type WorkflowView = "active" | "saved" | "tracked" | "hidden";
@@ -21,9 +24,33 @@ type WorkflowView = "active" | "saved" | "tracked" | "hidden";
 export function JobsTable({
   jobs,
   emptyMessage = "Search for jobs to see your saved matches here.",
+  compareScopeKey,
+  compareScopeLabel,
 }: JobsTableProps) {
   const [view, setView] = useState<WorkflowView>("active");
+  const [showCompareHistory, setShowCompareHistory] = useState(false);
   const workflow = useJobWorkflow();
+  const { activateCompareScope, isLoaded } = workflow;
+  const visibleJobIds = useMemo(() => jobs.map((job) => job.id), [jobs]);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    activateCompareScope({
+      scopeKey: compareScopeKey,
+      label: compareScopeLabel,
+      visibleJobIds,
+    });
+  }, [
+    activateCompareScope,
+    compareScopeKey,
+    compareScopeLabel,
+    isLoaded,
+    visibleJobIds,
+  ]);
+
   const visibleJobs = useMemo(
     () =>
       jobs.filter((job) => {
@@ -47,7 +74,10 @@ export function JobsTable({
       }),
     [jobs, view, workflow.state.dismissed, workflow.state.favorites, workflow.state.statuses],
   );
-  const selectedCompareIds = workflow.compareJobs.map((job) => job.id);
+  const isCompareScopeActive =
+    workflow.state.activeCompareScopeKey === compareScopeKey;
+  const activeCompareJobs = isCompareScopeActive ? workflow.compareJobs : [];
+  const selectedCompareIds = activeCompareJobs.map((job) => job.id);
   const compareHref = `/compare?jobs=${selectedCompareIds
     .map(encodeURIComponent)
     .join(",")}`;
@@ -93,19 +123,34 @@ export function JobsTable({
           <p className="text-[12px] font-medium leading-4 text-text-muted">
             Select up to 4 roles for company comparison.
           </p>
+          <button
+            type="button"
+            onClick={() => setShowCompareHistory((current) => !current)}
+            className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-surface-secondary px-3 text-[13px] font-semibold leading-5 text-text-secondary transition hover:border-accent hover:text-accent"
+          >
+            History {workflow.state.compareHistory.length > 0 ? workflow.state.compareHistory.length : ""}
+          </button>
           <Link
-            href={workflow.compareJobs.length >= 2 ? compareHref : "/compare"}
-            aria-disabled={workflow.compareJobs.length < 2}
+            href={activeCompareJobs.length >= 2 ? compareHref : "/compare"}
+            aria-disabled={activeCompareJobs.length < 2}
             className={`inline-flex h-9 items-center justify-center rounded-md border px-3 text-[13px] font-semibold leading-5 transition ${
-              workflow.compareJobs.length >= 2
+              activeCompareJobs.length >= 2
                 ? "border-accent bg-accent text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_20%,transparent)] hover:bg-accent-dark"
                 : "pointer-events-none border-border bg-surface-secondary text-text-muted"
             }`}
           >
-            Compare {workflow.compareJobs.length > 0 ? workflow.compareJobs.length : ""}
+            Compare {activeCompareJobs.length > 0 ? activeCompareJobs.length : ""}
           </Link>
         </div>
       </div>
+
+      {showCompareHistory ? (
+        <CompareHistoryPanel
+          sessions={workflow.state.compareHistory}
+          onRestore={workflow.restoreCompareSession}
+          onRemove={workflow.removeCompareSession}
+        />
+      ) : null}
 
       <div className="grid gap-3 xl:hidden">
         {visibleJobs.length === 0 ? (
@@ -116,6 +161,7 @@ export function JobsTable({
               key={job.id}
               job={job}
               workflow={workflow}
+              compareScopeKey={compareScopeKey}
             />
           ))
         )}
@@ -144,6 +190,7 @@ export function JobsTable({
                     key={job.id}
                     job={job}
                     workflow={workflow}
+                    compareScopeKey={compareScopeKey}
                   />
                 ))
               )}
@@ -159,9 +206,11 @@ type WorkflowApi = ReturnType<typeof useJobWorkflow>;
 function MobileJobCard({
   job,
   workflow,
+  compareScopeKey,
 }: {
   job: FindJobsJobSummary;
   workflow: WorkflowApi;
+  compareScopeKey: string;
 }) {
   return (
     <article className="rounded-xl border border-border bg-surface px-4 py-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
@@ -203,7 +252,12 @@ function MobileJobCard({
         </div>
         <InfoTerm label="Found" value={formatFoundDate(job.foundAt)} />
       </dl>
-      <WorkflowControls job={job} workflow={workflow} layout="mobile" />
+      <WorkflowControls
+        job={job}
+        workflow={workflow}
+        layout="mobile"
+        compareScopeKey={compareScopeKey}
+      />
     </article>
   );
 }
@@ -211,9 +265,11 @@ function MobileJobCard({
 function DesktopJobRow({
   job,
   workflow,
+  compareScopeKey,
 }: {
   job: FindJobsJobSummary;
   workflow: WorkflowApi;
+  compareScopeKey: string;
 }) {
   return (
     <div className="grid grid-cols-[44px_minmax(108px,0.95fr)_minmax(132px,1fr)_minmax(116px,0.6fr)_minmax(84px,0.5fr)_68px_72px_270px] border-b border-border transition-colors last:border-b-0 hover:bg-surface-secondary">
@@ -258,7 +314,12 @@ function DesktopJobRow({
         {formatFoundDate(job.foundAt)}
       </span>
       <span className="min-w-0 px-3 py-3">
-        <WorkflowControls job={job} workflow={workflow} layout="desktop" />
+        <WorkflowControls
+          job={job}
+          workflow={workflow}
+          layout="desktop"
+          compareScopeKey={compareScopeKey}
+        />
       </span>
     </div>
   );
@@ -268,16 +329,21 @@ function WorkflowControls({
   job,
   workflow,
   layout,
+  compareScopeKey,
 }: {
   job: FindJobsJobSummary;
   workflow: WorkflowApi;
   layout: "mobile" | "desktop";
+  compareScopeKey: string;
 }) {
   const isSaved = Boolean(workflow.state.favorites[job.id]);
   const isDismissed = Boolean(workflow.state.dismissed[job.id]);
-  const isCompared = Boolean(workflow.state.compare[job.id]);
+  const isCompareScopeActive =
+    workflow.state.activeCompareScopeKey === compareScopeKey;
+  const activeCompareCount = isCompareScopeActive ? workflow.compareJobs.length : 0;
+  const isCompared = isCompareScopeActive && Boolean(workflow.state.compare[job.id]);
   const status = workflow.state.statuses[job.id] ?? "interested";
-  const compareLimitReached = workflow.compareJobs.length >= 4 && !isCompared;
+  const compareLimitReached = activeCompareCount >= 4 && !isCompared;
 
   return (
     <div
@@ -320,6 +386,117 @@ function WorkflowControls({
         />
       </div>
     </div>
+  );
+}
+
+function CompareHistoryPanel({
+  sessions,
+  onRestore,
+  onRemove,
+}: {
+  sessions: JobWorkflowCompareSession[];
+  onRestore: (sessionId: string) => void;
+  onRemove: (sessionId: string) => void;
+}) {
+  if (sessions.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-surface px-5 py-5 text-[13px] font-medium leading-5 text-text-muted shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+        Previous comparison groups will appear here after you start a new search.
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-surface px-5 py-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-[14px] font-semibold leading-5 text-text-primary">
+            Comparison history
+          </h2>
+          <p className="mt-1 text-[12px] font-medium leading-4 text-text-muted">
+            Reopen previous comparison groups without carrying them into new searches.
+          </p>
+        </div>
+        <span className="text-[12px] font-semibold uppercase leading-4 text-text-muted">
+          Latest {sessions.length}
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        {sessions.map((session) => (
+          <CompareHistoryItem
+            key={session.id}
+            session={session}
+            onRestore={onRestore}
+            onRemove={onRemove}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CompareHistoryItem({
+  session,
+  onRestore,
+  onRemove,
+}: {
+  session: JobWorkflowCompareSession;
+  onRestore: (sessionId: string) => void;
+  onRemove: (sessionId: string) => void;
+}) {
+  const compareHref = `/compare?jobs=${session.jobs
+    .map((job) => encodeURIComponent(job.id))
+    .join(",")}`;
+  const companies = session.jobs.map((job) => job.company).join(" vs ");
+
+  return (
+    <article className="rounded-xl border border-border bg-surface-secondary px-4 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[12px] font-semibold uppercase leading-4 text-accent">
+            {session.label} - {session.jobs.length} roles
+          </p>
+          <h3 className="mt-1 break-words text-[14px] font-semibold leading-5 text-text-primary">
+            {companies}
+          </h3>
+          <p className="mt-1 text-[12px] font-medium leading-4 text-text-muted">
+            Saved {formatHistoryDate(session.createdAt)}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onRemove(session.id)}
+          className="shrink-0 rounded-md border border-border bg-surface px-2 py-1 text-[12px] font-semibold leading-4 text-text-muted transition hover:border-error hover:text-error"
+        >
+          Remove
+        </button>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {session.jobs.map((job) => (
+          <span
+            key={job.id}
+            className="rounded-full border border-border bg-surface px-2 py-1 text-[12px] font-medium leading-4 text-text-secondary"
+          >
+            {job.title}
+          </span>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          href={compareHref}
+          className="inline-flex h-8 items-center justify-center rounded-md border border-accent bg-accent px-3 text-[12px] font-semibold leading-4 text-accent-foreground transition hover:bg-accent-dark"
+        >
+          Open comparison
+        </Link>
+        <button
+          type="button"
+          onClick={() => onRestore(session.id)}
+          className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-surface px-3 text-[12px] font-semibold leading-4 text-text-secondary transition hover:border-accent hover:text-accent"
+        >
+          Make active
+        </button>
+      </div>
+    </article>
   );
 }
 
@@ -497,4 +674,19 @@ function formatFoundDate(value: string): string {
   ];
 
   return `${months[date.getUTCMonth()]} ${date.getUTCDate()}`;
+}
+
+function formatHistoryDate(value: string): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "recently";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
