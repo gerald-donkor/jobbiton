@@ -19,9 +19,7 @@ type DiscoverJobsResult =
       success: true;
       runId: string;
       jobs: FindJobsJobSummary[];
-      page: number;
       totalFound: number;
-      totalAvailable: number;
       strongMatchCount: number;
       searchUrl: string;
     }
@@ -161,73 +159,22 @@ async function createSearchRun({
   };
 }
 
-async function loadExistingRun({
-  runId,
-  userId,
-}: {
-  runId: string;
-  userId: string;
-}): Promise<RunContext> {
-  const insforge = await createInsforgeServer();
-  const { data, error } = await insforge.database
-    .from("agent_runs")
-    .select("id, job_title_searched, location_searched")
-    .eq("id", runId)
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[agent/adzuna] Existing run lookup failed", error);
-    return {
-      success: false,
-      error: "We could not load that job search.",
-      statusCode: 500,
-    };
-  }
-
-  if (!data?.id || typeof data.job_title_searched !== "string") {
-    return {
-      success: false,
-      error: "We could not load that job search.",
-      statusCode: 404,
-    };
-  }
-
-  return {
-    success: true,
-    runId: String(data.id),
-    jobTitle: data.job_title_searched,
-    location:
-      typeof data.location_searched === "string" ? data.location_searched : "",
-  };
-}
-
 export async function discoverJobsForUser({
   jobTitle,
   location,
-  page = 1,
-  runId: requestedRunId = null,
   userId,
 }: {
   jobTitle: string;
   location: string;
-  page?: number;
-  runId?: string | null;
   userId: string;
 }): Promise<DiscoverJobsResult> {
   const insforge = await createInsforgeServer();
-  const requestedPage = Math.max(1, page);
-  const runContext = requestedRunId
-    ? await loadExistingRun({
-        runId: requestedRunId,
-        userId,
-      })
-    : await createSearchRun({
-        insforge,
-        jobTitle,
-        location,
-        userId,
-      });
+  const runContext = await createSearchRun({
+    insforge,
+    jobTitle,
+    location,
+    userId,
+  });
 
   if (!runContext.success) {
     return {
@@ -272,7 +219,6 @@ export async function discoverJobsForUser({
       effectiveJobTitle,
       effectiveLocation,
       country,
-      requestedPage,
     );
     const adzunaJobs = adzunaSearch.jobs;
 
@@ -281,7 +227,7 @@ export async function discoverJobsForUser({
         .from("agent_runs")
         .update({
           status: "completed",
-          jobs_found: adzunaSearch.totalAvailable,
+          jobs_found: 0,
           completed_at: new Date().toISOString(),
         })
         .eq("id", runId)
@@ -291,9 +237,7 @@ export async function discoverJobsForUser({
         success: true,
         runId,
         jobs: [],
-        page: requestedPage,
         totalFound: 0,
-        totalAvailable: adzunaSearch.totalAvailable,
         strongMatchCount: 0,
         searchUrl: adzunaSearch.searchUrl,
       };
@@ -338,7 +282,7 @@ export async function discoverJobsForUser({
         .from("agent_runs")
         .update({
           status: "failed",
-          jobs_found: adzunaSearch.totalAvailable,
+          jobs_found: 0,
           completed_at: new Date().toISOString(),
         })
         .eq("id", runId)
@@ -369,7 +313,7 @@ export async function discoverJobsForUser({
         .from("agent_runs")
         .update({
           status: "failed",
-          jobs_found: adzunaSearch.totalAvailable,
+          jobs_found: 0,
           completed_at: new Date().toISOString(),
         })
         .eq("id", runId)
@@ -427,7 +371,7 @@ export async function discoverJobsForUser({
       .from("agent_runs")
       .update({
         status: "completed",
-        jobs_found: adzunaSearch.totalAvailable,
+        jobs_found: jobs.length,
         completed_at: new Date().toISOString(),
       })
       .eq("id", runId)
@@ -435,7 +379,7 @@ export async function discoverJobsForUser({
 
     await logAgentMessage({
       level: "success",
-      message: `Found ${adzunaSearch.totalAvailable} available jobs and saved ${jobs.length}.`,
+      message: `Saved ${jobs.length} top matched roles for this search.`,
       runId,
       userId,
     });
@@ -444,9 +388,7 @@ export async function discoverJobsForUser({
       success: true,
       runId,
       jobs,
-      page: requestedPage,
-      totalFound: adzunaJobs.length,
-      totalAvailable: adzunaSearch.totalAvailable,
+      totalFound: jobs.length,
       strongMatchCount: jobs.filter((job) => job.matchScore >= MATCH_THRESHOLD)
         .length,
       searchUrl: adzunaSearch.searchUrl,

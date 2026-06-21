@@ -195,13 +195,12 @@ export async function searchJobs(
   const data = await response.json();
   return {
     jobs: data.results || [],
-    totalAvailable: typeof data.count === "number" ? data.count : data.results?.length ?? 0,
     searchUrl: buildAdzunaSearchUrl(jobTitle, location, country),
   };
 }
 ```
 
-`searchAdzunaJobs()` should request one Adzuna page at a time and save/score only the 10 returned listings for the current Jobbiton page, but it must preserve Adzuna's full available count from the response `count` field for search feedback and saved run metadata. The Find Jobs table footer remains Jobbiton-scoped and uses the normal compact pagination control. Live search pagination should request additional Adzuna pages into the same `agent_runs.id`, not create a new search run for every page.
+`searchAdzunaJobs()` should request only one Adzuna page with `results_per_page=10`, then Jobbiton should score that set, sort by match score, and display/save only those top 10 roles. Do not surface Adzuna's total available `count` in the Find Jobs UI or saved run metadata while the product is in top-10-only mode.
 
 ### Response Shape
 

@@ -58,6 +58,66 @@ Last updated: 2026-06-21
 **Pattern notes:**
 The root layout runs a small pre-paint theme script before rendering page content, reading `jobbiton-theme` from local storage and falling back to system preference. Theme mode is represented by `html[data-theme="light|dark"]`, and dark mode works by overriding existing design tokens rather than adding raw `dark:` color utilities to components. `PageTransition` is a client-only Motion wrapper that keys by pathname, fades/slides pages in, and respects `useReducedMotion()`. Reveal wrappers must always animate to a visible state through `animate` as well as `whileInView`, so protected page content cannot remain hidden if in-view observation misses during client-side navigation. Future app-wide animation should stay in focused client wrappers and preserve token-only colors.
 
+### Process Loading Overlay
+
+File: components/loading/ProcessOverlay.tsx
+Last updated: 2026-06-21
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | overlay `bg-surface/95`, inner panel `bg-surface-secondary`, step cards `bg-surface` |
+| Border           | overlay/panel/cards `border border-border`, process accents use token alpha borders |
+| Border radius    | overlay/panel `rounded-xl`, step cards `rounded-lg`, glyphs `rounded-full`     |
+| Text — primary   | title `text-[22px] font-semibold leading-8 text-text-primary`                  |
+| Text — secondary | description `text-[14px] font-normal leading-6 text-text-secondary`, steps `text-[12px] font-semibold leading-4 text-text-secondary` |
+| Spacing          | overlay `absolute inset-0 z-20 px-5 py-6`, panel `max-w-[520px] px-6 py-6`, step grid `mt-6 gap-2` |
+| Hover state      | none while active; overlay blocks underlying interaction                       |
+| Shadow           | overlay and panel token shadows using `var(--color-overlay)`                  |
+| Accent usage     | active process visuals use `bg-accent`, `text-accent`, `border-accent`, or success tokens depending on variant |
+
+**Pattern notes:**
+Use `ProcessOverlay` inside a `relative overflow-hidden` panel whenever a button starts an async operation that should cover stale content until completion. The overlay is intentionally section-contained rather than fixed to the viewport. Current variants are `jobs`, `auth`, `resume-upload`, `resume-extract`, `resume-generate`, and `save`; choose a different visual variant for different background processes instead of reusing one spinner everywhere. Keep copy process-specific and short, with up to three step labels.
+
+### Route Loading Shells
+
+File: components/loading/RouteLoadingShell.tsx, app/*/loading.tsx
+Last updated: 2026-06-21
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | page `bg-background`, intro band/card `bg-surface`, skeleton blocks `bg-surface-secondary` |
+| Border           | intro/card/rows `border-border`                                                |
+| Border radius    | card `rounded-xl`, skeletons `rounded-md`                                      |
+| Text — primary   | route title `text-[52px] md:text-[64px] font-bold leading-[1.05] text-text-primary` |
+| Text — secondary | route copy `text-[19px] font-normal leading-8 text-text-secondary`             |
+| Spacing          | intro `px-6 py-16 md:px-10`, body `px-6 py-10 md:px-10`, content `max-w-[1180px]` |
+| Hover state      | none                                                                           |
+| Shadow           | card token shadow through child containers                                     |
+| Accent usage     | eyebrow `text-accent`, detail radar `bg-accent` / `border-accent`              |
+
+**Pattern notes:**
+Use route-level `loading.tsx` files for protected pages whose server data can stream after navigation. The shell mirrors each page's intro-first layout so route transitions never show a blank or half-painted page. Keep route loading skeletons token-based and page-specific through copy and the `variant` prop; in-page async work should still use `ProcessOverlay`.
+
+### Login Form Skeleton
+
+File: components/auth/LoginFormSkeleton.tsx, app/login/loading.tsx
+Last updated: 2026-06-21
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | card `bg-surface`, left pane `soft-gradient-panel`, skeleton blocks `bg-surface-secondary` |
+| Border           | card/pane/buttons `border border-border` / `border-b border-border`            |
+| Border radius    | card `rounded-xl`, placeholders `rounded-md` / badge `rounded-full`            |
+| Text — primary   | none visible; skeleton uses `aria-label` for loading state                     |
+| Text — secondary | none visible                                                                   |
+| Spacing          | card `max-w-[760px]`, panes `px-8 py-8` / `px-8 py-10`, rows `space-y-3`       |
+| Hover state      | none                                                                           |
+| Shadow           | card `shadow-[0_14px_30px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)]` |
+| Accent usage     | none; skeleton remains neutral while auth options hydrate                      |
+
+**Pattern notes:**
+Use `LoginFormSkeleton` anywhere the split OAuth card is suspended or route-loading. It intentionally matches `LoginForm` dimensions and split-pane structure so `/login` does not flash a blank auth panel while `useSearchParams()` resolves. Keep it server-renderable and token-only; interactive OAuth progress belongs in `ProcessOverlay`.
+
 ### Brand Logo
 
 File: components/layout/BrandLogo.tsx, app/globals.css
@@ -236,7 +296,7 @@ Last updated: 2026-06-21
 | Accent usage     | active workflow filters, compare CTA, saved/compared state, history labels/open action, prep bullets |
 
 **Pattern notes:**
-Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. Active compare selection is scoped to the current search run: when the Find Jobs search scope changes, any active compare group with at least two jobs is archived into comparison history and the visible Compare count returns to zero for the new result set. The History control opens a compact panel of previous comparison groups with `Open comparison`, `Make active`, and `Remove` actions; old groups must not appear as active compare state on a fresh search unless the user explicitly restores them. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. Job cards and desktop rows act as full-row links to the job details page with `role="link"`, keyboard Enter/Space support, and token focus outlines; embedded controls (`a`, `button`, `select`, inputs, labels) must be excluded from row navigation so workflow actions stay independent. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
+Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. Active compare selection is scoped to the current search run: when the Find Jobs search scope changes, any active compare group with at least two jobs is archived into comparison history and the visible Compare count returns to zero for the new result set. The History control opens a compact panel of previous comparison groups with `Open comparison`, `Make active`, and `Remove` actions; old groups must not appear as active compare state on a fresh search unless the user explicitly restores them. Find Jobs now intentionally fetches, scores, saves, and displays only 10 jobs for a search, ordered by match score; do not show Adzuna total-available counts or live-search Previous/Next controls until the product direction changes again. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. Job cards and desktop rows act as full-row links to the job details page with `role="link"`, keyboard Enter/Space support, token focus outlines, and hover/focus `router.prefetch()` so manual row navigation stays warm like native `Link` navigation; embedded controls (`a`, `button`, `select`, inputs, labels) must be excluded from row navigation so workflow actions stay independent. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
 
 ### Company Comparison View
 

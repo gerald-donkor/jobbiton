@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
+import { ProcessOverlay } from "@/components/loading/ProcessOverlay";
 import { Button } from "@/components/ui/button";
 import { RESUME_ACCEPT } from "@/lib/resume-files";
 
@@ -66,9 +67,45 @@ export function ResumeSection({
   const isExtractMessageSuccess =
     extractMessage === "Resume extracted. Review the fields below before saving.";
   const isResumeStatusSuccess = isResumeUploading || isResumeUploadSuccess;
+  const activeOverlay = isExtracting
+    ? {
+        variant: "resume-extract" as const,
+        title: "Extracting resume details",
+        description:
+          "Reading the resume, identifying profile fields, and preparing editable suggestions.",
+        steps: ["Reading document", "Finding profile signals", "Preparing fields"],
+      }
+    : isGenerating
+      ? {
+          variant: "resume-generate" as const,
+          title: "Generating your resume",
+          description:
+            "Using your profile details to build a polished resume document.",
+          steps: ["Structuring sections", "Writing role bullets", "Building file"],
+        }
+      : isResumeUploading
+        ? {
+            variant: "resume-upload" as const,
+            title: "Uploading your resume",
+            description:
+              "Saving the file securely and preparing it for preview and extraction.",
+            steps: ["Checking file", "Saving resume", "Refreshing preview"],
+          }
+        : isRemoving
+          ? {
+              variant: "resume-upload" as const,
+              title: "Removing resume",
+              description:
+                "Clearing the saved file and resetting resume-related profile state.",
+              steps: ["Revoking file", "Updating profile", "Refreshing page"],
+            }
+          : null;
 
   return (
-    <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <section className="relative overflow-hidden rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+      {activeOverlay ? (
+        <ProcessOverlay active={true} {...activeOverlay} />
+      ) : null}
       <div>
         <h2 className="text-[16px] font-semibold leading-6 text-text-primary">
           Resume

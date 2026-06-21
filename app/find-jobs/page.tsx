@@ -3,12 +3,9 @@ import { FindJobsPageContent } from "@/components/find-jobs/FindJobsPageContent"
 import {
   type FindJobsListResult,
   parseMatchFilterValue,
-  parseSortValue,
   type MatchFilterValue,
-  type SortValue,
 } from "@/components/find-jobs/types";
 import { requireUser } from "@/lib/auth";
-import { buildAdzunaSearchUrl, detectAdzunaCountry } from "@/lib/adzuna";
 import { createInsforgeServer } from "@/lib/insforge-server";
 import { MATCH_THRESHOLD } from "@/lib/utils";
 
@@ -20,8 +17,6 @@ const JOB_SUMMARY_COLUMNS =
 type FindJobsSearchParams = {
   q?: string | string[];
   match?: string | string[];
-  sort?: string | string[];
-  page?: string | string[];
   run?: string | string[];
 };
 
@@ -42,8 +37,6 @@ export default async function FindJobsPage({
     runId: activeRunId,
     query: filters.query,
     matchFilter: filters.matchFilter,
-    sortBy: filters.sortBy,
-    page: filters.page,
   });
 
   return (
@@ -55,7 +48,6 @@ export default async function FindJobsPage({
       filters={{
         query: filters.query,
         matchFilter: filters.matchFilter,
-        sortBy: filters.sortBy,
         runId: activeRunId,
       }}
     />
@@ -65,21 +57,15 @@ export default async function FindJobsPage({
 function parseFindJobsSearchParams(params: FindJobsSearchParams): {
   query: string;
   matchFilter: MatchFilterValue;
-  sortBy: SortValue;
-  page: number;
   runId: string | null;
 } {
   const query = firstParam(params.q).slice(0, 120);
   const match = firstParam(params.match);
-  const sort = firstParam(params.sort);
-  const page = Number(firstParam(params.page));
   const runId = normalizeRunId(firstParam(params.run));
 
   return {
     query,
     matchFilter: parseMatchFilterValue(match),
-    sortBy: parseSortValue(sort),
-    page: Number.isInteger(page) && page > 0 ? page : 1,
     runId,
   };
 }
@@ -128,49 +114,18 @@ async function listFindJobsForUser({
   runId,
   query,
   matchFilter,
-  sortBy,
-  page,
 }: {
   userId: string;
   runId: string | null;
   query: string;
   matchFilter: MatchFilterValue;
-  sortBy: SortValue;
-  page: number;
 }): Promise<FindJobsListResult> {
   const insforge = await createInsforgeServer();
   const normalizedQuery = normalizeSearchQuery(query);
-  const requestedPage = Math.max(1, page);
 
   if (!runId) {
-    return emptyJobsResult(null, requestedPage);
+    return emptyJobsResult(null);
   }
-
-  const countQuery = insforge.database
-    .from("jobs")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("run_id", runId);
-
-  applyMatchFilter(countQuery, matchFilter);
-  applyTextSearch(countQuery, normalizedQuery);
-
-  const { count, error: countError } = await countQuery;
-
-  if (countError) {
-    console.error("[find-jobs/page] Count query failed", countError);
-    return failedJobsResult(runId, requestedPage);
-  }
-
-  const totalResults = typeof count === "number" ? count : 0;
-  const availability = await loadRunAvailability({
-    runId,
-    userId,
-  });
-  const totalPages = Math.max(1, Math.ceil(totalResults / FIND_JOBS_PAGE_SIZE));
-  const currentPage = Math.min(requestedPage, totalPages);
-  const rangeStart = (currentPage - 1) * FIND_JOBS_PAGE_SIZE;
-  const rangeEnd = rangeStart + FIND_JOBS_PAGE_SIZE - 1;
 
   const dataQuery = insforge.database
     .from("jobs")
@@ -180,30 +135,27 @@ async function listFindJobsForUser({
 
   applyMatchFilter(dataQuery, matchFilter);
   applyTextSearch(dataQuery, normalizedQuery);
-  applySort(dataQuery, sortBy);
+  dataQuery.order("match_score", { ascending: false, nullsFirst: false });
+  dataQuery.limit(FIND_JOBS_PAGE_SIZE);
 
-  const { data, error: dataError } = await dataQuery.range(
-    rangeStart,
-    rangeEnd,
-  );
+  const { data, error: dataError } = await dataQuery;
 
   if (dataError) {
     console.error("[find-jobs/page] Data query failed", dataError);
-    return failedJobsResult(runId, currentPage);
+    return failedJobsResult(runId);
   }
 
   const rows: unknown[] = Array.isArray(data) ? data : [];
+  const jobs = rows.map(mapJobRow).filter((job): job is FindJobsJobSummary =>
+    Boolean(job),
+  );
 
   return {
     activeRunId: runId,
-    jobs: rows.map(mapJobRow).filter((job): job is FindJobsJobSummary =>
-      Boolean(job),
-    ),
-    totalResults,
-    totalAvailable: availability.totalAvailable,
-    externalSearchUrl: availability.externalSearchUrl,
-    currentPage,
-    totalPages,
+    jobs,
+    totalResults: jobs.length,
+    currentPage: 1,
+    totalPages: 1,
     pageSize: FIND_JOBS_PAGE_SIZE,
     error: null,
   };
@@ -211,70 +163,23 @@ async function listFindJobsForUser({
 
 function emptyJobsResult(
   activeRunId: string | null,
-  page: number,
 ): FindJobsListResult {
   return {
     activeRunId,
     jobs: [],
     totalResults: 0,
-    totalAvailable: null,
-    externalSearchUrl: null,
-    currentPage: page,
+    currentPage: 1,
     totalPages: 1,
     pageSize: FIND_JOBS_PAGE_SIZE,
     error: null,
   };
 }
 
-async function loadRunAvailability({
-  runId,
-  userId,
-}: {
-  runId: string;
-  userId: string;
-}): Promise<{
-  totalAvailable: number | null;
-  externalSearchUrl: string | null;
-}> {
-  const insforge = await createInsforgeServer();
-  const { data, error } = await insforge.database
-    .from("agent_runs")
-    .select("jobs_found, job_title_searched, location_searched")
-    .eq("id", runId)
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[find-jobs/page] Run availability lookup failed", error);
-    return {
-      totalAvailable: null,
-      externalSearchUrl: null,
-    };
-  }
-
-  const record = toRecord(data);
-  const jobTitle = readString(record?.job_title_searched);
-  const location = readString(record?.location_searched) ?? "";
-  const totalAvailable = readNumberOrNull(record?.jobs_found);
-
-  return {
-    totalAvailable,
-    externalSearchUrl: jobTitle
-      ? buildAdzunaSearchUrl(
-          jobTitle,
-          location,
-          detectAdzunaCountry(location),
-        )
-      : null,
-  };
-}
-
 function failedJobsResult(
   activeRunId: string | null,
-  page: number,
 ): FindJobsListResult {
   return {
-    ...emptyJobsResult(activeRunId, page),
+    ...emptyJobsResult(activeRunId),
     error: "We could not load your saved jobs right now.",
   };
 }
@@ -322,28 +227,6 @@ function applyTextSearch(
   });
 
   query.or(filters.join(","));
-}
-
-function applySort(
-  query: {
-    order: (
-      column: string,
-      options: { ascending: boolean; nullsFirst?: boolean },
-    ) => unknown;
-  },
-  sortBy: SortValue,
-): void {
-  if (sortBy === "newest") {
-    query.order("found_at", { ascending: false });
-    return;
-  }
-
-  if (sortBy === "oldest") {
-    query.order("found_at", { ascending: true });
-    return;
-  }
-
-  query.order("match_score", { ascending: false, nullsFirst: false });
 }
 
 function mapJobRow(row: unknown): FindJobsJobSummary | null {
@@ -402,19 +285,6 @@ function readNumber(value: unknown): number {
   }
 
   return 0;
-}
-
-function readNumberOrNull(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  return null;
 }
 
 function readStringArray(value: unknown): string[] {

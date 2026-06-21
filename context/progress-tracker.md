@@ -7,7 +7,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Current Status
 
 **Phase:** Phase 5 — Dashboard
-**Last completed:** Motion Reveal Visibility Recovery
+**Last completed:** Top 10 Find Jobs Results and Process Loading UX
 **Next:** Phase 5 complete
 
 ---
@@ -218,6 +218,9 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-21 — Available results verification: official Adzuna search docs were checked, `npm run lint`, `npm run build`, `git diff --check`, and a raw Tailwind color scan over touched Find Jobs/Adzuna files pass. The build still shows the existing Node `module.register()` deprecation warning.
 - 2026-06-21 — Live Adzuna pagination completed: the Previous/Next controls now fetch additional 10-job Adzuna pages into the same search run, cache pages client-side during the live search, keep the current compare scope stable across page changes, and use 10-row saved-run pagination after refresh.
 - 2026-06-21 — Live pagination verification: `npm run lint` and `npm run build` pass. The build still shows the existing Node `module.register()` deprecation warning.
+- 2026-06-21 — Find Jobs top-10 simplification completed: live search now fetches one 10-result Adzuna page, batch-scores that set, saves only those roles, and the Find Jobs page always orders saved/live results by match score without displaying total available job counts or live pagination.
+- 2026-06-21 — Process loading UX completed across key user actions: added shared Motion-powered `ProcessOverlay` variants for job matching, OAuth handoff, profile save, resume upload/removal, resume extraction, and resume generation, plus route `loading.tsx` skeletons for dashboard, profile, find jobs, job details, and compare.
+- 2026-06-21 — Top-10/loading verification: official Motion and Next loading docs were checked, `npm run lint` passes, and `npm run build` passes. The build still shows the existing Node `module.register()` deprecation warning.
 - 2026-06-21 — Gemini Find Jobs matching provider completed: `agent/matcher.ts` now tries OpenRouter only when `OPENROUTER_API_KEY` exists, otherwise uses the configured server-side `GEMINI_API_KEY` with `gemini-2.5-flash` / `gemini-2.5-flash-lite` structured JSON matching before falling back to the heuristic scorer.
 - 2026-06-21 — Gemini matching provider verification: `npm run lint`, `git diff --check`, and `npm run build` pass. The build still shows the existing Node `module.register()` deprecation warning.
 - 2026-06-21 — Gemini matcher recovery completed after malformed provider output logs: Find Jobs matching now sends sanitized job/profile JSON to Gemini and logs only one concise warning before using heuristic scoring for affected listings, preventing repeated stack traces when Gemini returns non-JSON content.
@@ -225,3 +228,6 @@ Update this file after every completed feature. Any AI agent reading this should
 - 2026-06-21 — Find Jobs row navigation fix completed: mobile job cards and desktop job rows now navigate to `/find-jobs/[id]` when clicked or activated by keyboard, while embedded workflow controls remain independent.
 - 2026-06-21 — Login page helper copy removal completed: removed the bottom-left `New users are routed to profile setup after sign-in.` helper from `components/auth/LoginForm.tsx` while keeping the split auth card layout intact.
 - 2026-06-21 — Motion reveal visibility recovery completed: `components/motion/Reveal.tsx` now animates reveal wrappers and reveal groups to their visible state directly as well as on `whileInView`, preventing page content below the intro from staying invisible until a browser refresh after client-side navigation.
+- 2026-06-21 — Process loading cleanup completed: the shared route loading shell now uses the project `bg-background` token, the process overlay avoids inline width styles, and `npm run lint`, `npm run build`, and `git diff --check` pass.
+- 2026-06-21 — Find Jobs row prefetch polish completed: mobile job cards and desktop rows now prefetch their `/find-jobs/[id]` detail route on hover/focus before manual `router.push()` navigation, reducing frozen-feeling transitions for full-row clicks.
+- 2026-06-21 — Login loading fallback completed: `/login` now has a route `loading.tsx` and the page-level Suspense boundary uses `LoginFormSkeleton` instead of `fallback={null}`, preventing a blank OAuth card while search params hydrate.

@@ -221,6 +221,9 @@ function MobileJobCard({
 }) {
   const router = useRouter();
   const detailsHref = `/find-jobs/${job.id}`;
+  const handleCardIntent = () => {
+    router.prefetch(detailsHref);
+  };
   const handleCardClick = (event: MouseEvent<HTMLElement>) => {
     if (isInteractiveEventTarget(event.target)) {
       return;
@@ -245,7 +248,9 @@ function MobileJobCard({
       tabIndex={0}
       aria-label={`View details for ${job.title} at ${job.company}`}
       onClick={handleCardClick}
+      onFocus={handleCardIntent}
       onKeyDown={handleCardKeyDown}
+      onMouseEnter={handleCardIntent}
       className="rounded-xl border border-border bg-surface px-4 py-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] transition-colors hover:border-accent hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
       <div className="flex items-start gap-3">
@@ -307,6 +312,9 @@ function DesktopJobRow({
 }) {
   const router = useRouter();
   const detailsHref = `/find-jobs/${job.id}`;
+  const handleRowIntent = () => {
+    router.prefetch(detailsHref);
+  };
   const handleRowClick = (event: MouseEvent<HTMLElement>) => {
     if (isInteractiveEventTarget(event.target)) {
       return;
@@ -331,7 +339,9 @@ function DesktopJobRow({
       tabIndex={0}
       aria-label={`View details for ${job.title} at ${job.company}`}
       onClick={handleRowClick}
+      onFocus={handleRowIntent}
       onKeyDown={handleRowKeyDown}
+      onMouseEnter={handleRowIntent}
       className="grid grid-cols-[44px_minmax(108px,0.95fr)_minmax(132px,1fr)_minmax(116px,0.6fr)_minmax(84px,0.5fr)_68px_72px_270px] border-b border-border transition-colors last:border-b-0 hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-accent"
     >
       <span className="flex items-start justify-center border-r border-border bg-surface-secondary/35 px-2 py-4">

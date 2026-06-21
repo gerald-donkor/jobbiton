@@ -1,6 +1,7 @@
 "use client";
 
 import type { SaveProfileState } from "@/actions/profile";
+import { ProcessOverlay } from "@/components/loading/ProcessOverlay";
 import { ScrollFloat } from "@/components/motion/ScrollFlow";
 import { Button } from "@/components/ui/button";
 import type { ProfileValues, WorkExperienceEntry } from "@/lib/profile";
@@ -43,7 +44,14 @@ export function ProfileInformationForm({
   onRemoveWorkExperience,
 }: ProfileInformationFormProps) {
   return (
-    <section className="rounded-xl border border-border bg-surface px-8 py-8 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <section className="relative overflow-hidden rounded-xl border border-border bg-surface px-8 py-8 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+      <ProcessOverlay
+        active={isPending}
+        variant="save"
+        title="Saving your profile"
+        description="Updating your profile details, preferences, skills, and work history."
+        steps={["Validating fields", "Saving changes", "Refreshing matches"]}
+      />
       <input type="hidden" name="skills_json" value={JSON.stringify(skills)} />
       <input
         type="hidden"
