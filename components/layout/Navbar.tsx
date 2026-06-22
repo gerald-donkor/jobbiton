@@ -12,7 +12,6 @@ type NavbarProps = {
   activeHref?: string;
   ctaHref?: string;
   ctaLabel?: string;
-  reserveSpace?: boolean;
   showNavIcons?: boolean;
   showCta?: boolean;
 };
@@ -21,7 +20,6 @@ export function Navbar({
   activeHref,
   ctaHref = "/login",
   ctaLabel = "Start for free",
-  reserveSpace = true,
   showNavIcons = false,
   showCta = true,
 }: NavbarProps) {
@@ -77,9 +75,7 @@ export function Navbar({
           </div>
         </div>
       </header>
-      {reserveSpace ? (
-        <div aria-hidden="true" className="h-[105px] lg:h-16" />
-      ) : null}
+      <div aria-hidden="true" className="h-[105px] lg:h-16" />
     </>
   );
 }
