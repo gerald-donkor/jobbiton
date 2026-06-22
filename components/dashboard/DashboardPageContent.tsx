@@ -36,6 +36,7 @@ export function DashboardPageContent({
         eyebrow="Command center"
         title="Track the search as it compounds."
         copy="See the same proof-led flow from the landing page translated into live analytics: jobs found, match quality, company research, and recent agent activity."
+        density="compact"
       />
       <main className="w-full bg-background/56 px-4 pb-16 pt-6 text-text-primary backdrop-blur-[2px] sm:px-6 lg:pt-8">
         <RevealGroup className="mx-auto grid w-full max-w-[1120px] gap-4 2xl:max-w-[1240px]">
@@ -44,26 +45,26 @@ export function DashboardPageContent({
             className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           >
             {stats.map((stat) => (
-              <RevealItem key={stat.label}>
+              <RevealItem key={stat.label} className="min-w-0">
                 <StatCard {...stat} />
               </RevealItem>
             ))}
           </section>
 
           <section className="grid gap-4 lg:grid-cols-2">
-            <RevealItem>
+            <RevealItem className="min-w-0">
               <RecentActivity activities={activities} />
             </RevealItem>
-            <RevealItem>
+            <RevealItem className="min-w-0">
               <CompanyResearchChart data={analytics.companyResearchActivity} />
             </RevealItem>
           </section>
 
           <section className="grid gap-4 lg:grid-cols-2">
-            <RevealItem>
+            <RevealItem className="min-w-0">
               <JobsFoundChart data={analytics.jobsFoundOverTime} />
             </RevealItem>
-            <RevealItem>
+            <RevealItem className="min-w-0">
               <MatchDistributionChart data={analytics.matchScoreDistribution} />
             </RevealItem>
           </section>

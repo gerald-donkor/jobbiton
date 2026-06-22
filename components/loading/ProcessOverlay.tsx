@@ -104,7 +104,7 @@ function ProcessOverlayContent({
 
   return (
     <motion.div
-      className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden rounded-xl border border-border bg-surface/95 px-5 py-6 shadow-[0_18px_40px_color-mix(in_srgb,var(--color-overlay)_14%,transparent)] backdrop-blur-md"
+      className="absolute inset-0 z-20 flex items-start justify-center overflow-y-auto overflow-x-hidden rounded-xl border border-border bg-surface/95 px-3 py-4 shadow-[0_18px_40px_color-mix(in_srgb,var(--color-overlay)_14%,transparent)] backdrop-blur-md sm:items-center sm:px-5 sm:py-6"
       initial={{ opacity: 0, scale: 0.985 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.985 }}
@@ -118,7 +118,7 @@ function ProcessOverlayContent({
         animate={shouldReduceMotion ? undefined : { x: ["-45%", "45%", "-45%"] }}
         transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
       />
-      <div className="relative w-full max-w-[760px] rounded-xl border border-border bg-surface-secondary px-5 py-5 text-left shadow-[0_10px_24px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)] sm:px-6 sm:py-6">
+      <div className="relative w-full max-w-[760px] rounded-xl border border-border bg-surface-secondary px-4 py-4 text-left shadow-[0_10px_24px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)] sm:px-6 sm:py-6">
         <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-center">
           <ProcessVisual
             activeStep={activeStep}
@@ -129,7 +129,7 @@ function ProcessOverlayContent({
             <p className="text-[12px] font-semibold uppercase leading-4 tracking-[0.08em] text-accent">
               {VARIANT_LABELS[variant]}
             </p>
-            <h3 className="mt-2 text-[24px] font-semibold leading-8 text-text-primary">
+            <h3 className="mt-2 text-[20px] font-semibold leading-7 text-text-primary sm:text-[24px] sm:leading-8">
               {title}
             </h3>
             <p className="mt-2 max-w-[460px] text-[14px] font-normal leading-6 text-text-secondary">
@@ -156,7 +156,7 @@ function ProcessOverlayContent({
             </div>
           </div>
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {normalizedSteps.map((step, index) => {
             const isComplete = index < activeStep;
             const isActive = index === activeStep;

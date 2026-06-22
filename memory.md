@@ -1,61 +1,66 @@
-# Memory — Staged Loading, Animated Backgrounds, and Salary-Listed Top Jobs
+# Memory — Responsive Dashboard and App UI Polish
 
-Last updated: 2026-06-22 00:00 GMT
+Last updated: 2026-06-22 23:50 GMT
 
 ## What was built
 
-- Find Jobs now ranks a salary-listed candidate pool:
-  - `lib/adzuna.ts` requests one small Adzuna candidate page with `results_per_page=30`.
-  - `agent/adzuna.ts` removes jobs without salary estimates before matching.
-  - Only the strongest 10 salary-listed jobs are saved and returned for the active search.
-  - `app/find-jobs/page.tsx` also filters old salary-missing rows, so `/find-jobs` should not show "Not listed" in Salary Est.
-- Loading UX was upgraded:
-  - `components/loading/ProcessOverlay.tsx` now shows a staged task board with current step details, progress, completed/active cards, and variant-specific pipeline labels.
-  - Find Jobs, OAuth handoff, profile save, resume upload/removal, resume extraction, and resume generation all use process-specific steps.
-  - Route-level loading shells remain in place for dashboard, profile, find jobs, job details, compare, and login.
-- App-wide visual motion was expanded:
-  - `components/animate-ui/backgrounds/gradient.tsx`, `stars.tsx`, and `hexagon.tsx` manually install the actual Animate UI registry background components.
-  - `components/loading/AppBackgroundEffects.tsx` composes Animate UI `GradientBackground`, `StarsBackground`, and two `HexagonBackground` layers.
-  - `components/layout/PageTransition.tsx` wraps page transitions in `MotionConfig reducedMotion="user"` and renders the background layer outside the transformed route `motion.div`.
-  - Page shells, navbars, intro bands, footer, hero gradient, and diagonal bands use translucent backgrounds while cards/tables/forms stay readable.
-  - Recovery note: the background effects must stay as a fixed `z-0` viewport layer inside an isolated `PageTransition` stack, but outside the animated route wrapper; do not return them to `-z-10`, put them inside transformed route content, or put opaque `bg-surface` / `bg-background` wrappers over full pages, because that hides the animations behind the page background.
-- Navigation and scroll utility:
-  - Shared, dashboard, and job-details navbars now use sticky glass surfaces with `bg-surface/58`, `backdrop-blur-xl`, and a soft overlay shadow.
-  - `components/layout/ScrollToTopButton.tsx` adds a global fixed glass arrow that appears after scrolling and smooth-scrolls to the top.
-- Compare page was corrected:
-  - Prep-gap notes now render as full-width violet note panels.
-  - Short strongest-overlap skills remain compact pills.
+- Dashboard mobile responsiveness was hardened:
+  - `components/dashboard/DashboardPageContent.tsx` now uses compact page intro density and `min-w-0` reveal wrappers so the dashboard does not force horizontal overflow.
+  - `components/dashboard/ChartFrame.tsx` prevents chart-card overflow and shows a mobile `Swipe chart` hint.
+  - `components/dashboard/DashboardMobileDataList.tsx` was added so chart data is also visible in normal vertical mobile flow.
+  - `CompanyResearchChart.tsx`, `JobsFoundChart.tsx`, and `MatchDistributionChart.tsx` now use tokenized scroll areas plus the mobile data list.
+  - `components/dashboard/RecentActivity.tsx` and `StatCard.tsx` have denser mobile card spacing.
+- Dashboard navbar regression was corrected:
+  - `components/dashboard/DashboardNavbar.tsx` was restored from a grid experiment back to the shared flex/wrap navbar structure so the logo, nav links, theme toggle, profile button, and sign-out positioning match the rest of the app.
+  - The dashboard action group keeps a mobile width guard to avoid overflow.
+- App-wide UI polish from this session remains in place:
+  - Animate UI registry background components are installed locally under `components/animate-ui/backgrounds/` and composed by `components/loading/AppBackgroundEffects.tsx`.
+  - `components/layout/PageTransition.tsx` renders the background layer outside the transformed route wrapper so effects remain visible.
+  - Shared navbars and reserved spacer bands use glass styling from `app/globals.css`.
+  - `components/layout/ScrollToTopButton.tsx` provides the frosted glass scroll-to-top arrow.
+  - Homepage fold behavior in `components/motion/ScrollFlow.tsx` uses the restored backward/upward fold with reduced blur.
+- Workflow functionality from earlier in the session remains in place:
+  - Find Jobs is simplified to a top-10 salary-listed shortlist and preserves submitted role/location fields in the route.
+  - Compare selections are scoped to the current search and previous selections are available through comparison history.
+  - Job rows/cards navigate to `/find-jobs/[id]`.
+  - Process overlays show staged loading for job search, auth, profile save, resume actions, and research.
+- Documentation was updated:
+  - `context/progress-tracker.md`
+  - `context/ui-registry.md`
 
 ## Decisions made
 
-- Current product direction is a fast curated shortlist: do not fetch every available Adzuna job, show total available counts, or expose live Previous/Next Adzuna pagination.
-- "Highest match" means strongest by `match_score` after filtering to salary-listed roles.
-- Animate UI is treated as a copy-first registry. No new Animate UI package dependency was added; selected registry components are installed locally and tokenized for Jobbiton.
-- Loading overlays are section-contained and must stay active until the async process resolves.
+- Dashboard mobile charts should keep their Recharts visualization horizontally swipeable, but must also provide a stacked mobile data list so users can see the whole dashboard without relying only on horizontal scrolling.
+- Dashboard navbar should follow the same flex/wrap pattern as the shared navbar. The attempted two-row grid made button and section positioning drift and should not be reintroduced.
+- App background effects must stay fixed at `z-0` outside transformed route content; opaque full-page wrappers should not cover them.
+- Current Find Jobs product behavior is a curated, fast top-10 salary-listed shortlist, not full Adzuna result pagination.
+- Loading states should stay visible until the async work truly resolves; avoid any blank interval between process animation and result display.
 
 ## Problems solved
 
-- Removed the boring generic Find Jobs waiting state and replaced it with a visible stage-by-stage process.
-- Prevented salary-missing Find Jobs rows from displaying "Not listed" in the Salary Est. column.
-- Fixed uneven Compare prep-gap violet backgrounds behind wrapped text.
-- Replaced the imitation background with real Animate UI registry Gradient, Stars, and Hexagon components.
-- Recovered initially invisible background effects by fixing their stacking context and adding a more visible token ribbon/scan layer.
-- Recovered the second visibility issue by making full-page landing/app shells translucent; the real Animate UI components were mounted, but opaque page wrappers covered them.
-- Recovered the third visibility issue by moving the fixed background outside the transformed route `motion.div` and increasing the gradient/star/hex contrast.
+- Dashboard content previously risked being clipped or only usable via chart scrolling on mobile. It now has mobile data lists and overflow guards.
+- Dashboard navbar button/section positioning regressed after a grid layout experiment. It was restored to the stable flex/wrap navbar structure.
+- Dashboard optional InsForge analytics errors were downgraded to normalized warnings through `lib/dashboard-log.ts`, preventing dev console error overlays for recoverable dashboard data failures.
+- Animate UI backgrounds were previously invisible in light mode or hidden behind opaque wrappers; they are now mounted in the correct stacking context with translucent page shells.
+- Find Jobs no longer displays salary-missing roles as "Not listed" in the search result list.
 
-## Verification
+## Current state
 
-- Run `npm run lint`, `git diff --check`, raw color/style scans, and `npm run build` before final handoff.
-- Build may still report the existing Node `module.register()` deprecation warning; that warning predates this work.
+- `npm run lint`, `git diff --check`, and `npm run build` passed after the latest dashboard navbar correction.
+- The production build still shows the existing Node `module.register()` deprecation warning, but completes successfully.
+- The working tree is intentionally dirty with many UI and feature edits from this session. Important untracked files are:
+  - `components/dashboard/DashboardMobileDataList.tsx`
+  - `lib/dashboard-log.ts`
+- No browser automation tool was available locally in `package.json` or `node_modules/.bin`; mobile responsiveness was verified by code inspection plus lint/build, not screenshot automation.
 
 ## Next session starts with
 
 1. Run `/remember restore`.
-2. Test `/find-jobs`: search a role/location and confirm the overlay stages stay visible until results render, only 10 salary-listed ranked rows appear, and row clicks open `/find-jobs/[id]`.
-3. Test `/compare`: open a comparison with long prep notes and confirm each prep note has a full-width violet background.
-4. Navigate between main pages to confirm the subtle background effects and route loading shells do not hide or clip page content.
+2. Start the dev server and manually inspect `/dashboard` on mobile widths first, especially the navbar positions, compact intro, stat cards, Recent Activity, chart swipe areas, and chart mobile data lists.
+3. If the dashboard navbar still looks off visually, adjust only `components/dashboard/DashboardNavbar.tsx`; do not switch it back to a grid layout.
+4. Re-run `npm run lint`, `git diff --check`, and `npm run build` after any follow-up changes.
 
 ## Open questions
 
-- Should Compare and Job Details also hide old salary-missing jobs, or is the salary requirement only for the Find Jobs search results list?
-- Should comparison history eventually sync across devices through InsForge?
+- Should dashboard chart mobile data lists show all points, only nonzero points, or a fixed latest subset when there are many data points?
+- Should the dashboard use the shared `Navbar` component directly instead of maintaining a separate `DashboardNavbar` now that their layouts are closer again?

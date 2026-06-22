@@ -154,7 +154,7 @@ export function ResumeSection({
           : null;
 
   return (
-    <section className="relative overflow-hidden rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <section className="relative overflow-hidden rounded-xl border border-border bg-surface px-4 py-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] sm:px-6 sm:py-6">
       {activeOverlay ? (
         <ProcessOverlay active={true} {...activeOverlay} />
       ) : null}
@@ -168,7 +168,7 @@ export function ResumeSection({
         </p>
       </div>
 
-      <div className="mt-4 rounded-xl border border-dashed border-border-muted bg-surface-secondary px-6 py-10">
+      <div className="mt-4 rounded-xl border border-dashed border-border-muted bg-surface-secondary px-4 py-8 sm:px-6 sm:py-10">
         <div className="mx-auto flex max-w-[360px] flex-col items-center text-center">
           <input
             key={resumeInputKey}
@@ -271,7 +271,7 @@ export function ResumeSection({
             loadingLabel="Extracting..."
             variant="primary"
             size="sm"
-            className="shrink-0"
+            className="w-full shrink-0 sm:w-auto"
             onClick={onExtractResume}
           >
             Extract from Resume
@@ -291,7 +291,7 @@ export function ResumeSection({
 
       {visibleResumeUrl ? (
         <div className="mt-4 overflow-hidden rounded-xl border border-border bg-surface">
-          <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
+          <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="min-w-0 truncate text-[13px] font-semibold leading-5 text-text-primary">
               {resumeLabel}
             </p>
@@ -299,7 +299,7 @@ export function ResumeSection({
               href={visibleResumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-semibold leading-4 text-text-primary transition-colors hover:border-accent hover:text-accent"
+              className="inline-flex min-h-8 w-full shrink-0 items-center justify-center rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-semibold leading-4 text-text-primary transition-colors hover:border-accent hover:text-accent sm:w-auto"
             >
               View full resume
             </a>

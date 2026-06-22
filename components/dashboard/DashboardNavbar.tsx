@@ -14,11 +14,13 @@ export function DashboardNavbar() {
   return (
     <>
       <header className="navbar-glass fixed inset-x-0 top-0 z-50">
-        <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:px-10">
-          <BrandLogo />
+        <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 sm:px-6 lg:flex-nowrap lg:gap-x-4 lg:gap-y-3 lg:px-10">
+          <div className="min-w-0 shrink-0">
+            <BrandLogo />
+          </div>
           <nav
             aria-label="Main navigation"
-            className="order-3 flex w-full items-center gap-2 overflow-x-auto lg:order-none lg:w-auto lg:justify-center lg:gap-12"
+            className="order-3 flex w-full min-w-0 items-center gap-2 overflow-x-auto overscroll-x-contain pb-1 lg:order-none lg:w-auto lg:justify-center lg:gap-12 lg:overflow-visible lg:pb-0"
           >
             {navItems.map((item) => {
               const isActive = item.href === "/dashboard";
@@ -38,7 +40,7 @@ export function DashboardNavbar() {
               );
             })}
           </nav>
-          <div className="flex items-center gap-3 lg:gap-6">
+          <div className="flex min-w-0 max-w-[58vw] items-center justify-end gap-2 sm:max-w-none sm:gap-3 lg:gap-6">
             <ThemeToggle />
             <Link
               href="/profile"
@@ -47,13 +49,13 @@ export function DashboardNavbar() {
             >
               <span aria-hidden="true" className="job-details-user-icon" />
             </Link>
-            <div className="hidden lg:block">
+            <div className="min-w-0">
               <SignOutButton variant="nav" />
             </div>
           </div>
         </div>
       </header>
-      <div aria-hidden="true" className="h-[105px] lg:h-20" />
+      <div aria-hidden="true" className="navbar-glass-spacer h-[120px] lg:h-20" />
     </>
   );
 }

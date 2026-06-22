@@ -1,4 +1,5 @@
 import { createInsforgeServer } from "@/lib/insforge-server";
+import { warnDashboardDataIssue } from "@/lib/dashboard-log";
 
 export type DashboardActivityTone = "info" | "success";
 
@@ -55,14 +56,14 @@ export async function getRecentActivityForUser(
   ]);
 
   if (runsResult.error) {
-    console.error(
+    warnDashboardDataIssue(
       "[dashboard-activity] Failed to load recent agent runs",
       runsResult.error,
     );
   }
 
   if (jobsResult.error) {
-    console.error(
+    warnDashboardDataIssue(
       "[dashboard-activity] Failed to load recent researched jobs",
       jobsResult.error,
     );

@@ -23,7 +23,7 @@ export function JobSearchCard({
   onSearch,
 }: JobSearchCardProps) {
   return (
-    <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <section className="rounded-xl border border-border bg-surface px-4 py-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] sm:px-6 sm:py-6">
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr_122px] lg:items-end">
         <label className="block">
           <span className="mb-2 block text-[12px] font-semibold leading-4 text-text-secondary">

@@ -14,6 +14,8 @@ type FindJobsPageContentProps = {
   userName?: string | null;
   jobsList: FindJobsListResult;
   filters: {
+    jobTitle: string;
+    location: string;
     query: string;
     matchFilter: MatchFilterValue;
     runId: string | null;
@@ -40,7 +42,7 @@ export function FindJobsPageContent({
         <div className="mx-auto flex w-full max-w-[1192px] flex-col gap-6">
           <Reveal>
             <FindJobsClient
-              key={`${filters.runId ?? "no-run"}:${filters.query}:${filters.matchFilter}:${jobsList.currentPage}`}
+              key={`${filters.runId ?? "no-run"}:${filters.jobTitle}:${filters.location}:${filters.query}:${filters.matchFilter}:${jobsList.currentPage}`}
               jobsList={jobsList}
               filters={filters}
             />

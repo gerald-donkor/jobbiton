@@ -110,7 +110,7 @@ function ComparisonGrid({ jobs }: { jobs: ComparedJob[] }) {
           </div>
           <Link
             href="/find-jobs"
-            className="inline-flex h-10 w-fit items-center justify-center rounded-md border border-border bg-surface px-4 text-[14px] font-semibold leading-5 text-text-primary shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)] transition hover:border-accent hover:text-accent"
+            className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border bg-surface px-4 text-[14px] font-semibold leading-5 text-text-primary shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)] transition hover:border-accent hover:text-accent sm:w-fit"
           >
             Back to jobs
           </Link>
@@ -132,7 +132,7 @@ function ComparisonGrid({ jobs }: { jobs: ComparedJob[] }) {
               Side-by-side decision matrix
             </h2>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overscroll-x-contain">
             <div className="min-w-[880px]">
               <CompareRow label="Company" jobs={jobs} render={(job) => job.company} />
               <CompareRow label="Role" jobs={jobs} render={(job) => job.title} />
@@ -173,12 +173,12 @@ function ComparedJobCard({ job }: { job: ComparedJob }) {
 
   return (
     <article className="flex min-h-full flex-col rounded-xl border border-border bg-surface px-5 py-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
         <div className="min-w-0">
-          <p className="truncate text-[14px] font-semibold leading-5 text-text-primary">
+          <p className="break-words text-[14px] font-semibold leading-5 text-text-primary">
             {job.company}
           </p>
-          <h2 className="mt-1 text-[18px] font-semibold leading-7 text-text-primary">
+          <h2 className="mt-1 break-words text-[18px] font-semibold leading-7 text-text-primary">
             {job.title}
           </h2>
         </div>

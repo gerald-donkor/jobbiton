@@ -49,11 +49,11 @@ export function ProfileAttentionBanner({ completion }: ProfileAttentionBannerPro
         <p className="mt-1 text-[14px] font-normal leading-5 text-text-secondary">
           Complete the following fields to improve your chances of getting quality resumes.
         </p>
-        <div className="mt-3 flex w-full flex-wrap gap-2 lg:flex-nowrap lg:gap-1.5">
+        <div className="mt-3 flex w-full flex-wrap gap-2">
           {fields.map((field) => (
             <span
               key={field}
-              className="inline-flex min-h-5 shrink-0 items-center justify-center whitespace-nowrap rounded-sm bg-warning px-2 py-0.5 text-center text-[12px] font-medium leading-4 text-warning-foreground lg:px-1.5 lg:text-[11px]"
+              className="inline-flex min-h-5 max-w-full items-center justify-center rounded-sm bg-warning px-2 py-0.5 text-center text-[12px] font-medium leading-4 text-warning-foreground"
             >
               {field}
             </span>

@@ -16,8 +16,10 @@ const JOB_SUMMARY_COLUMNS =
   "id, title, company, location, salary, source, match_score, match_reason, matched_skills, missing_skills, external_apply_url, found_at";
 
 type FindJobsSearchParams = {
+  loc?: string | string[];
   q?: string | string[];
   match?: string | string[];
+  role?: string | string[];
   run?: string | string[];
 };
 
@@ -50,21 +52,29 @@ export default async function FindJobsPage({
         query: filters.query,
         matchFilter: filters.matchFilter,
         runId: activeRunId,
+        jobTitle: filters.jobTitle,
+        location: filters.location,
       }}
     />
   );
 }
 
 function parseFindJobsSearchParams(params: FindJobsSearchParams): {
+  jobTitle: string;
+  location: string;
   query: string;
   matchFilter: MatchFilterValue;
   runId: string | null;
 } {
+  const jobTitle = firstParam(params.role).slice(0, 120);
+  const location = firstParam(params.loc).slice(0, 120);
   const query = firstParam(params.q).slice(0, 120);
   const match = firstParam(params.match);
   const runId = normalizeRunId(firstParam(params.run));
 
   return {
+    jobTitle,
+    location,
     query,
     matchFilter: parseMatchFilterValue(match),
     runId,

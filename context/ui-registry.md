@@ -124,17 +124,35 @@ Last updated: 2026-06-22
 
 | Property         | Class / Selector                                                               |
 | ---------------- | ------------------------------------------------------------------------------ |
-| Background       | fixed glass `bg-surface/62 backdrop-blur-xl`                                   |
-| Border           | `border border-border`, hover `border-accent`                                  |
+| Background       | `.scroll-top-glass` layered translucent gradients with blur/saturation         |
+| Border           | token glass border, hover accent-tinted border                                 |
 | Border radius    | `rounded-full`                                                                 |
 | Text/Icon        | CSS arrow `.scroll-top-arrow`, default `text-accent`, hover `text-accent-foreground` |
 | Spacing          | `fixed bottom-5 right-5 sm:bottom-7 sm:right-7`, `size-12 sm:size-13`          |
-| Hover state      | `hover:bg-accent hover:text-accent-foreground`                                 |
-| Shadow           | `shadow-[0_18px_40px_color-mix(in_srgb,var(--color-overlay)_18%,transparent)]` |
+| Hover state      | accent-tinted glass plus `.scroll-top-glass-shine` sweep                       |
+| Shadow           | inset highlights plus soft overlay/accent glass shadow                         |
 | Accent usage     | arrow and hover fill use accent tokens                                         |
 
 **Pattern notes:**
-Mount `ScrollToTopButton` once in `PageTransition` so it is available across landing and protected pages. It should appear only after meaningful scrolling and call `window.scrollTo({ top: 0, behavior: "smooth" })`, falling back to instant scrolling when reduced motion is preferred. Use a CSS arrow rather than visible text so it behaves like a compact utility control.
+Mount `ScrollToTopButton` once in `PageTransition` so it is available across landing and protected pages. It should appear only after meaningful scrolling and call `window.scrollTo({ top: 0, behavior: "smooth" })`, falling back to instant scrolling when reduced motion is preferred. Use a CSS arrow rather than visible text so it behaves like a compact utility control. Keep the button surface on `.scroll-top-glass` instead of inline utility glass classes so the frosted background, inset reflection, and shine sweep stay consistent in light and dark modes.
+
+### Responsive Guardrails
+
+Files: app/globals.css, components/ui/button.tsx, shared page/layout/loading components
+Last updated: 2026-06-22
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Page overflow    | `html`, `body` use `width: 100%` and `overflow-x: clip`                        |
+| Media containment | `img`, `svg`, `video`, `canvas`, `iframe` use `max-width: 100%`               |
+| Buttons          | shared `Button` uses `max-w-full`, `whitespace-normal`, and centered labels    |
+| Forms            | profile fields and inputs use `min-width: 0`; add rows stack before 420px      |
+| Loading states   | `ProcessOverlay` scrolls internally on short/narrow screens                    |
+
+**Pattern notes:**
+Build new page sections mobile-first, then add larger breakpoint layouts. Avoid forcing long labels into one line unless the control has a stable icon-only affordance. Use `break-words` for user/provider data such as roles, companies, locations, and generated research. Dense tables can keep horizontal scroll only when there is also a card layout below desktop widths.
+
+Fixed navbars need explicit mobile rows: brand/actions on the top row, nav links as the full-width third flex item, and `overflow-x-auto overscroll-x-contain` only on the nav link rail. Use a 120px `.navbar-glass-spacer` below fixed navbars on mobile and the compact 64px/80px spacer again at `lg`. Landing pages that set `reserveSpace={false}` must add enough hero top padding on mobile so the overlaid glass navbar does not cover the headline.
 
 ### Homepage Fold Sections
 
@@ -153,7 +171,7 @@ Last updated: 2026-06-22
 | Accent usage     | none at wrapper level; accent remains inside section content                   |
 
 **Pattern notes:**
-Use `FoldSection` from `components/motion/ScrollFlow.tsx` around major homepage bands when the page should feel like vertical stacked sheets folding over one another. `FoldSection` intentionally separates the scroll-measured outer `.homepage-fold-track` from the inner sticky `.homepage-fold-section`; the track owns z-index, perspective, overlap, and runway spacing, while the sheet sticks under the navbar and visually folds. Each next track has a higher z-index, so downward scrolling brings the next section over the previous one. As the outgoing sheet leaves its scroll range, Motion eases `rotateX`, `scale`, `y`, opacity, and only a very light blur; keep exit blur around `1px` and opacity near `0.82` so folded sections remain readable instead of becoming smeared. Keep the transform origin at the top center through `.homepage-fold-section`, preserve `transform-style: preserve-3d`, and respect reduced motion through `useReducedMotion()`. Do not apply this wrapper to dense operational app pages unless the page is explicitly editorial/landing-style; dashboards, tables, forms, and job workflow screens should prioritize scan stability.
+Use `FoldSection` from `components/motion/ScrollFlow.tsx` around major homepage bands when the page should feel like vertical stacked sheets folding over one another. `FoldSection` intentionally separates the scroll-measured outer `.homepage-fold-track` from the inner sticky `.homepage-fold-section`; the track owns z-index, perspective, overlap, and runway spacing, while the sheet sticks under the navbar and visually folds. Each next track has a higher z-index, so downward scrolling brings the next section over the previous one. The polished fold direction is backward/upward: outgoing sheets rotate to about `-12deg`, lift about `48px`, scale only to `0.92`, and keep opacity around `0.88` with a tiny blur/brightness/saturation filter so the motion feels sleek without smearing text. Keep the transform origin at the top center through `.homepage-fold-section`, preserve `transform-style: preserve-3d`, and respect reduced motion through `useReducedMotion()`. Do not apply this wrapper to dense operational app pages unless the page is explicitly editorial/landing-style; dashboards, tables, forms, and job workflow screens should prioritize scan stability.
 
 ### Login Form Skeleton
 
@@ -198,7 +216,7 @@ All actual product-logo placements now go through `BrandLogo` for linked navigat
 ### Theme Toggle
 
 File: components/theme/ThemeToggle.tsx
-Last updated: 2026-06-15
+Last updated: 2026-06-22
 
 | Property         | Class                                                                         |
 | ---------------- | ----------------------------------------------------------------------------- |
@@ -247,13 +265,13 @@ Last updated: 2026-06-22
 | Border radius    | none                                                                  |
 | Text — primary   | active `text-accent`, inactive `text-text-dark text-[14px] font-medium leading-5` |
 | Text — secondary | none                                                                  |
-| Spacing          | fixed header `min-h-16 px-4/px-6 py-3`, nav links `inline-flex h-9 lg:h-16`, spacer `h-[105px] lg:h-16` |
+| Spacing          | fixed header `min-h-16 px-4/px-6 py-3`, nav links `inline-flex h-9 lg:h-16`, optional glass spacer `h-[120px] lg:h-16` |
 | Hover state      | inactive `hover:text-accent`                                          |
 | Shadow           | `.navbar-glass` inset highlight plus soft overlay/accent shadows       |
 | Accent usage     | active link text and bottom rule `absolute inset-x-0 bottom-0 h-0.5 bg-accent` |
 
 **Pattern notes:**
-Protected pages can pass `activeHref` to the shared navbar to render the active nav item with a token-purple text state and a 2px bottom rule. Nav icons are hidden by default; pass `showNavIcons` only for a design that explicitly includes them. Shared protected navbars are fixed to the top of the viewport with the custom `.navbar-glass` surface; it layers translucent surface gradients, subtle accent/info light blooms, an inset top reflection, soft shadow, `backdrop-filter: blur(22px) saturate(1.55)`, and a dark-mode override. Keep the spacer immediately after the header so page content does not slide underneath the fixed bar. Page-level route transitions must remain opacity-only because transforms/filters on the route wrapper break viewport-fixed descendants and make the navbar scroll away with content.
+Protected pages can pass `activeHref` to the shared navbar to render the active nav item with a token-purple text state and a 2px bottom rule. Nav icons are hidden by default; pass `showNavIcons` only for a design that explicitly includes them. Shared protected navbars are fixed to the top of the viewport with the custom `.navbar-glass` surface; it layers translucent surface gradients, subtle accent/info light blooms, an inset top reflection, soft shadow, `backdrop-filter: blur(22px) saturate(1.55)`, and a dark-mode override. Keep the spacer immediately after the header on dense app pages so page content does not slide underneath the fixed bar; that spacer must use `.navbar-glass-spacer` so the reserved band shares the same translucent gradient and blur language as the header. Landing pages can pass `reserveSpace={false}` so the hero/background surface sits directly behind the glass header without a visible clearance strip. Use `ctaSlot` for authenticated page-specific actions in the right CTA position; the profile page uses `SignOutButton variant="profileNav"` with `.profile-nav-signout` for the animated sign-out treatment. Page-level route transitions must remain opacity-only because transforms/filters on the route wrapper break viewport-fixed descendants and make the navbar scroll away with content.
 
 ### Dashboard Page Layout
 
@@ -267,13 +285,13 @@ Last updated: 2026-06-15
 | Border radius    | none at page level                                                  |
 | Text — primary   | main `text-text-primary`, dashboard nav active `text-text-primary text-[14px] font-medium leading-5` |
 | Text — secondary | inactive nav `text-text-dark`                                       |
-| Spacing          | navbar `h-20 px-10`, nav `gap-12`, main `px-6 pt-8 pb-16`, content grid `max-w-[824px] gap-4` |
+| Spacing          | mobile navbar spacer `h-[120px]`, header `min-h-20`, desktop `lg:h-20`, main `px-4 sm:px-6`, content grid `max-w-[1120px] gap-4` |
 | Hover state      | navbar links inherit shared `hover:text-accent`                     |
 | Shadow           | none at page level                                                  |
 | Accent usage     | active Dashboard nav uses `text-accent` and `bg-accent` underline   |
 
 **Pattern notes:**
-Dashboard is a dense operational page with no hero, footer, or nested layout shell. The corrected dashboard reference uses a compact 80px top bar: logo on the left, text-only nav links centered absolutely in the viewport, and a profile icon plus `Sign out` action on the right. The dashboard content sits in a narrow centered `max-w-[824px]` column with 16px gaps so the four stat cards and two-column chart rows align like the screenshot. Feature 15 feeds the stat cards from real user-scoped data; later dashboard data features should replace activity/chart data without changing this compact spatial structure.
+Dashboard is a dense operational page with no hero, footer, or nested layout shell. The desktop dashboard uses a compact 80px top bar with logo, text links, theme toggle, profile icon, and `Sign out`; on mobile it follows the shared flex/wrap navbar pattern so logo/actions keep their expected top-row position and nav links move into the full-width third flex item only when space is tight. Keep the dashboard intro compact with `PageIntro density="compact"` so the stat cards enter the mobile viewport quickly. Dashboard grids and reveal wrappers should use `min-w-0` so chart internals and long text cannot force horizontal page overflow. Dashboard charts use Recharts inside touch-scrollable wrappers on small screens: keep a stable minimum chart width (`520px` for bar charts, `620px` for the 30-day line chart) inside an `overflow-x-auto overscroll-x-contain` viewport so axes, bars, lines, and tooltips remain usable instead of being squeezed. Chart cards should include the compact `Swipe chart` mobile hint and use `.dashboard-chart-scroll` for tokenized thin scrollbars.
 
 ### Dashboard Stat Cards
 
@@ -285,9 +303,9 @@ Last updated: 2026-06-15
 | Background       | `bg-surface`                                                        |
 | Border           | `border border-border`                                              |
 | Border radius    | `rounded-xl`                                                        |
-| Text — primary   | value `text-text-primary text-[30px] font-semibold leading-9`        |
+| Text — primary   | value `text-text-primary text-[26px] sm:text-[30px] font-semibold leading-8 sm:leading-9` |
 | Text — secondary | label `text-text-secondary text-[14px] font-medium leading-5`, helper `text-text-muted text-[12px] font-normal leading-4` |
-| Spacing          | card `min-h-[128px] px-6 py-6`, trend row `mt-2 gap-2`              |
+| Spacing          | card `min-h-[112px] px-4 py-4 sm:min-h-[128px] sm:px-6 sm:py-6`, trend row wraps with `mt-2 gap-2` |
 | Hover state      | `hover:-translate-y-1`                                               |
 | Shadow           | shared card shadow plus hover lift `hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_2px_6px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]` |
 | Accent usage     | trend text uses `text-success-darker`                                |
@@ -317,8 +335,8 @@ Recent Activity uses the same compact white card shell as the dashboard charts. 
 
 ### Dashboard Chart Cards
 
-File: components/dashboard/ChartFrame.tsx, components/dashboard/DashboardChartEmptyState.tsx, components/dashboard/DashboardRechartsTooltip.tsx, components/dashboard/CompanyResearchChart.tsx, components/dashboard/JobsFoundChart.tsx, components/dashboard/MatchDistributionChart.tsx, lib/dashboard-analytics.ts
-Last updated: 2026-06-15
+File: components/dashboard/ChartFrame.tsx, components/dashboard/DashboardChartEmptyState.tsx, components/dashboard/DashboardMobileDataList.tsx, components/dashboard/DashboardRechartsTooltip.tsx, components/dashboard/CompanyResearchChart.tsx, components/dashboard/JobsFoundChart.tsx, components/dashboard/MatchDistributionChart.tsx, lib/dashboard-analytics.ts
+Last updated: 2026-06-22
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
@@ -327,13 +345,13 @@ Last updated: 2026-06-15
 | Border radius    | card `rounded-xl`, bars `rounded-sm`                                |
 | Text — primary   | titles `text-[16px] font-semibold leading-6 text-text-primary`      |
 | Text — secondary | axes and empty state `text-[12px] font-normal leading-4 text-text-muted` |
-| Spacing          | card `px-6 py-6`, charts `min-h-[340px]`, Recharts area/empty state `mt-7 h-[228px]` |
+| Spacing          | card `px-4 py-5 sm:px-6 sm:py-6`, charts `min-h-[340px]`, Recharts area `mt-5 sm:mt-7 h-[228px]`, mobile data list `mt-3 grid grid-cols-2 gap-2` |
 | Hover state      | cards `hover:shadow-[0_14px_32px_color-mix(...)]`, Recharts tooltip hover/focus cursor, empty states non-interactive |
 | Shadow           | shared token card shadow, tooltip `shadow-[0_10px_24px_color-mix(in_srgb,var(--color-overlay)_12%,transparent)]` |
 | Accent usage     | jobs line `stroke="var(--color-accent)"`; research bars use info blue, score bars use success green |
 
 **Pattern notes:**
-Feature 17 replaces mock chart arrays with DB-backed analytics from `lib/dashboard-analytics.ts` and Recharts internals. Keep each chart in the compact 340px `ChartFrame` shell with a 228px plot area. Jobs Found Over Time uses 30-day user-scoped `jobs.found_at` counts, Match Score Distribution uses 30-day user-scoped `jobs.match_score` buckets from 50-100%, and Company Research Activity uses 7-day successful company research `agent_logs.created_at` with researched-job fallback. Recharts colors must use project CSS variables, and charts with all-zero values must show `DashboardChartEmptyState` instead of fake data.
+Feature 17 replaces mock chart arrays with DB-backed analytics from `lib/dashboard-analytics.ts` and Recharts internals. Keep each chart in the compact 340px `ChartFrame` shell with a 228px plot area. Jobs Found Over Time uses 30-day user-scoped `jobs.found_at` counts, Match Score Distribution uses 30-day user-scoped `jobs.match_score` buckets from 50-100%, and Company Research Activity uses 7-day successful company research `agent_logs.created_at` with researched-job fallback. Recharts colors must use project CSS variables, and charts with all-zero values must show `DashboardChartEmptyState` instead of fake data. On mobile, keep charts horizontally scrollable rather than compressing labels; the frame owns `min-w-0 overflow-hidden`, the scroll viewport owns `.dashboard-chart-scroll`, and each chart should expose an `aria-label` describing the scrollable chart. Pair every scrollable chart with `DashboardMobileDataList` under the chart so key values are also visible in normal vertical mobile flow without requiring a sideways swipe.
 
 ### Job Workflow Controls
 
@@ -474,6 +492,8 @@ Last updated: 2026-06-12
 
 **Pattern notes:**
 Find Jobs uses a centered wide work area on the standard app background, with the post-search state opening up to roughly a 1192px content width so the search card, filter row, and jobs table can breathe like the supplied reference image. The shared navbar stays in its homepage-like state with the `Start for free` CTA visible and no active icon/underline treatment. Pagination sits outside the table card, not in the card footer. A non-visual client wrapper now owns live search feedback and URL control state while the saved jobs list itself is loaded server-side from InsForge. Key the client wrapper by query/filter/sort/page so URL-driven changes remount cleanly without effect-based state syncing.
+
+The top search form persists the actual submitted search intent through dedicated `role` and `loc` URL params. Keep these separate from `q`, which belongs to the result-table text filter. After a successful search, write `run`, `role`, and optional `loc` into the route; filter and match updates should preserve the current form values so refreshes, remounts, and route changes keep the job title/location fields filled.
 
 ### Find Jobs Search Card
 

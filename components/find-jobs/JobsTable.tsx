@@ -127,7 +127,7 @@ export function JobsTable({
           />
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <p className="text-[12px] font-medium leading-4 text-text-muted">
+          <p className="max-w-full text-[12px] font-medium leading-4 text-text-muted sm:text-right">
             Select up to 4 roles for company comparison.
           </p>
           <button
@@ -159,7 +159,7 @@ export function JobsTable({
         />
       ) : null}
 
-      <div className="grid gap-3 xl:hidden">
+      <div className="grid min-w-0 gap-3 xl:hidden">
         {visibleJobs.length === 0 ? (
           <EmptyJobsState message={emptyMessageForView(view, emptyMessage)} />
         ) : (
@@ -174,7 +174,7 @@ export function JobsTable({
         )}
       </div>
 
-      <div className="hidden overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] xl:block">
+      <div className="hidden min-w-0 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] xl:block">
           <div className="w-full">
             <div className="grid grid-cols-[44px_minmax(108px,0.95fr)_minmax(132px,1fr)_minmax(116px,0.6fr)_minmax(84px,0.5fr)_68px_72px_270px] border-b border-border bg-surface text-left">
               <span className="border-r border-border px-2 py-4" />
@@ -438,7 +438,7 @@ function WorkflowControls({
           </option>
         ))}
       </select>
-      <div className="flex flex-nowrap gap-2">
+      <div className="flex flex-wrap gap-2">
         <ActionButton
           active={isSaved}
           label={isSaved ? "Saved" : "Save"}
@@ -534,7 +534,7 @@ function CompareHistoryItem({
 
   return (
     <article className="rounded-xl border border-border bg-surface-secondary px-4 py-4">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="text-[12px] font-semibold uppercase leading-4 text-accent">
             {session.label} - {session.jobs.length} roles
@@ -564,7 +564,7 @@ function CompareHistoryItem({
           </span>
         ))}
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-col gap-2 min-[380px]:flex-row min-[380px]:flex-wrap">
         <Link
           href={compareHref}
           className="inline-flex h-8 items-center justify-center rounded-md border border-accent bg-accent px-3 text-[12px] font-semibold leading-4 text-accent-foreground transition hover:bg-accent-dark"

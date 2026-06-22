@@ -19,12 +19,14 @@ export function JobDetailsNavbar({
     <>
       <header className="navbar-glass fixed inset-x-0 top-0 z-50">
         <PostHogIdentify userId={userId} email={userEmail} name={userName} />
-        <div className="mx-auto flex min-h-16 w-full max-w-[1440px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap">
-          <BrandLogo />
-          <div className="contents lg:flex lg:items-center lg:gap-8">
+        <div className="mx-auto flex min-h-16 w-full max-w-[1440px] flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 sm:px-6 lg:flex-nowrap lg:gap-x-4 lg:gap-y-3">
+          <div className="min-w-0 shrink-0">
+            <BrandLogo />
+          </div>
+          <div className="contents lg:flex lg:min-w-0 lg:items-center lg:gap-8">
             <nav
               aria-label="Main navigation"
-              className="order-3 flex w-full items-center gap-2 overflow-x-auto lg:order-none lg:w-auto lg:gap-8"
+              className="order-3 flex w-full min-w-0 items-center gap-2 overflow-x-auto overscroll-x-contain pb-1 lg:order-none lg:w-auto lg:gap-8 lg:overflow-visible lg:pb-0"
             >
               <Link
                 href="/dashboard"
@@ -45,7 +47,7 @@ export function JobDetailsNavbar({
                 Profile
               </Link>
             </nav>
-            <div className="flex items-center gap-3 text-text-secondary sm:gap-5">
+            <div className="flex min-w-0 items-center justify-end gap-2 text-text-secondary sm:gap-3 lg:gap-5">
               <ThemeToggle />
               <span aria-hidden="true" className="job-details-user-control hidden lg:inline-flex">
                 <span className="job-details-user-icon" />
@@ -57,7 +59,7 @@ export function JobDetailsNavbar({
           </div>
         </div>
       </header>
-      <div aria-hidden="true" className="h-[105px] lg:h-16" />
+      <div aria-hidden="true" className="navbar-glass-spacer h-[120px] lg:h-16" />
     </>
   );
 }

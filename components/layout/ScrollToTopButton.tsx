@@ -37,13 +37,14 @@ export function ScrollToTopButton() {
         <motion.button
           type="button"
           aria-label="Scroll to top"
-          className="fixed bottom-5 right-5 z-50 flex size-12 items-center justify-center rounded-full border border-border bg-surface/62 text-accent shadow-[0_18px_40px_color-mix(in_srgb,var(--color-overlay)_18%,transparent)] backdrop-blur-xl transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:bottom-7 sm:right-7 sm:size-13"
+          className="scroll-top-glass fixed bottom-5 right-5 z-50 flex size-12 items-center justify-center rounded-full text-accent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:bottom-7 sm:right-7 sm:size-13"
           initial={shouldReduceMotion ? false : { opacity: 0, y: 12, scale: 0.92 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.92 }}
           transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}
           onClick={scrollToTop}
         >
+          <span className="scroll-top-glass-shine" aria-hidden="true" />
           <span className="scroll-top-arrow" aria-hidden="true" />
         </motion.button>
       ) : null}

@@ -100,15 +100,23 @@ export function FoldSection({
     offset: ["start 18%", "end 18%"],
   });
   const easedProgress = useSpring(scrollYProgress, {
-    stiffness: 92,
-    damping: 24,
-    mass: 0.45,
+    stiffness: 78,
+    damping: 26,
+    mass: 0.55,
   });
-  const rotateX = useTransform(easedProgress, [0, 0.55, 1], [0, 0, -18]);
-  const scale = useTransform(easedProgress, [0, 0.55, 1], [1, 1, 0.88]);
-  const y = useTransform(easedProgress, [0, 0.55, 1], [0, 0, -74]);
-  const opacity = useTransform(easedProgress, [0, 0.72, 1], [1, 1, 0.82]);
-  const blur = useTransform(easedProgress, [0, 0.82, 1], ["blur(0px)", "blur(0px)", "blur(1px)"]);
+  const rotateX = useTransform(easedProgress, [0, 0.48, 1], [0, 0, -12]);
+  const scale = useTransform(easedProgress, [0, 0.55, 1], [1, 1, 0.92]);
+  const y = useTransform(easedProgress, [0, 0.55, 1], [0, 0, -48]);
+  const opacity = useTransform(easedProgress, [0, 0.72, 1], [1, 1, 0.88]);
+  const filter = useTransform(
+    easedProgress,
+    [0, 0.82, 1],
+    [
+      "blur(0px) brightness(1) saturate(1)",
+      "blur(0px) brightness(1) saturate(1)",
+      "blur(0.6px) brightness(0.96) saturate(1.08)",
+    ],
+  );
 
   return (
     <section
@@ -126,7 +134,7 @@ export function FoldSection({
                 rotateX,
                 scale,
                 y,
-                filter: blur,
+                filter,
               }
         }
       >

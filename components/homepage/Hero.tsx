@@ -18,10 +18,10 @@ export function Hero({
 }: HeroProps) {
   return (
     <section className="px-4 pt-8 sm:px-6 sm:pt-12 md:px-16 md:pt-20">
-      <div className="soft-gradient-panel border border-border px-5 pb-0 pt-12 text-center sm:px-6 sm:pt-16 md:px-16 md:pt-20">
-        <RevealGroup className="mx-auto flex max-w-[760px] flex-col items-center">
+      <div className="soft-gradient-panel border border-border px-5 pb-0 pt-32 text-center sm:px-6 md:px-16 lg:pt-20">
+        <RevealGroup className="mx-auto flex max-w-[760px] min-w-0 flex-col items-center">
           <RevealItem>
-          <h1 className="text-[40px] font-bold leading-[1.06] text-text-primary sm:text-[48px] md:text-[64px]">
+          <h1 className="break-words text-[36px] font-bold leading-[1.08] text-text-primary sm:text-[48px] sm:leading-[1.06] md:text-[64px]">
             Job hunting is hard.
             <br />
             Your tools shouldn&apos;t be.
