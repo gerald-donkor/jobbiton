@@ -17,7 +17,7 @@ export function Hero({
   secondaryLabel = "Find Your First Match",
 }: HeroProps) {
   return (
-    <section className="px-4 pt-8 sm:px-6 sm:pt-12 md:px-16 md:pt-20">
+    <section className="px-4 pt-0 sm:px-6 md:px-16">
       <div className="soft-gradient-panel border border-border px-5 pb-0 pt-12 text-center sm:px-6 sm:pt-16 md:px-16 md:pt-20">
         <RevealGroup className="mx-auto flex max-w-[760px] flex-col items-center">
           <RevealItem>
