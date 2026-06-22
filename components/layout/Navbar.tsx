@@ -24,7 +24,7 @@ export function Navbar({
   showCta = true,
 }: NavbarProps) {
   return (
-    <header className="border-b border-border bg-surface">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface/58 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)] backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-[1440px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap">
         <BrandLogo />
         <nav

@@ -70,18 +70,18 @@ Full width layout on all pages. No sidebar.
 - User goes to Find Jobs page
 - Enters job title and location
 - Clicks Find Jobs button
-- Agent calls Adzuna API with user's search criteria
-- GPT-4o scores each job 0-100 against user profile
-- Jobs appear in the job list below
-- After search completes a message shows: "Found 8 jobs and saved 4 strong matches"
+- Agent calls Adzuna API with user's search criteria and keeps a small salary-listed candidate pool
+- GPT-4o/Gemini/OpenRouter or the heuristic fallback scores eligible jobs 0-100 against user profile
+- The strongest 10 salary-listed matches appear in the job list below, ordered by match score
+- The page does not show Adzuna total-available counts or live pagination while Jobbiton is in fast top-10 mode
 
 ### Job Matching
 
 - GPT-4o scores each job 0-100 against user profile
 - Returns: score, match reason, matched skills array, missing skills array
-- All jobs visible in Find Jobs page regardless of score
+- The strongest 10 salary-listed jobs for the current search are visible on the Find Jobs page
 - High scoring jobs visually highlighted
-- Low scoring jobs still accessible — user decides what to do
+- Lower scoring jobs can still appear if they are within the strongest saved 10 — user decides what to do
 
 ### Job Details Page
 
@@ -130,13 +130,12 @@ Full width layout on all pages. No sidebar.
   - Job title input
   - Location input
   - Find Jobs button
-  - Success message after search: "Found 8 jobs and saved 4 strong matches"
-- Full paginated job list below:
+  - Staged process overlay while matching is running
+- Curated job list below:
   - Filter: All Matches / High Match / Low Match dropdown
-  - Sort dropdown: Match Score / Newest / Oldest
-  - Each job row: company, title, match score badge, salary, source badge, date found
+  - Each job row: company, title, match score badge, salary estimate, source badge, date found
   - Click job row → opens job details page
-  - Pagination — 20 jobs per page
+  - Results are capped to the top 10 salary-listed matches for the current search
   - "Jobs by Adzuna" credit displayed on job listings
 
 ---
@@ -171,7 +170,7 @@ Full width layout on all pages. No sidebar.
 - GPT-4o job matching with score, reason, matched skills, missing skills
 - Job details page with full structured description
 - Company Research Agent — single Browserbase session browses company public pages, GPT-4o builds dossier
-- Find Jobs page with search controls, filter, sort dropdown, pagination
+- Find Jobs page with search controls, match filter, workflow controls, and a top-10 salary-listed results shortlist
 - Dashboard with stats bar, recent activity, analytics charts
 - PostHog event tracking throughout
 - PostHog analytics charts on dashboard

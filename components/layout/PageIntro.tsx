@@ -11,7 +11,7 @@ type PageIntroProps = {
 
 export function PageIntro({ eyebrow, title, copy, children }: PageIntroProps) {
   return (
-    <Reveal className="border-b border-border bg-surface px-4 py-8 sm:px-6 md:py-10">
+    <Reveal className="border-b border-border bg-surface/78 px-4 py-8 backdrop-blur-[2px] sm:px-6 md:py-10">
       <div className="mx-auto grid w-full max-w-[1120px] gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
         <ScrollFloat direction="right" intensity={20}>
           <p className="text-[12px] font-semibold uppercase leading-4 text-accent">

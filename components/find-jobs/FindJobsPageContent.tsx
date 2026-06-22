@@ -28,7 +28,7 @@ export function FindJobsPageContent({
   filters,
 }: FindJobsPageContentProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background/68">
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
       <Navbar />
       <PageIntro
@@ -36,7 +36,7 @@ export function FindJobsPageContent({
         title="Search roles, then let fit rise to the top."
         copy="The search page now follows the same editorial flow: intent first, action second, then an organized list of matched opportunities."
       />
-      <main className="mx-auto w-full max-w-[1440px] bg-background px-4 py-6 text-text-primary sm:px-6 sm:py-8">
+      <main className="mx-auto w-full max-w-[1440px] bg-background/56 px-4 py-6 text-text-primary backdrop-blur-[2px] sm:px-6 sm:py-8">
         <div className="mx-auto flex w-full max-w-[1192px] flex-col gap-6">
           <Reveal>
             <FindJobsClient

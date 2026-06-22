@@ -5,6 +5,7 @@ import {
   normalizeAdzunaJobType,
   searchAdzunaJobs,
 } from "@/lib/adzuna";
+import type { AdzunaJob } from "@/lib/adzuna";
 import { logAgentMessage } from "@/lib/agent-logs";
 import { createInsforgeServer } from "@/lib/insforge-server";
 import { MATCH_THRESHOLD } from "@/lib/utils";
@@ -13,6 +14,8 @@ import type {
   FindJobsJobSummary,
   FindJobsProfile,
 } from "@/agent/types";
+
+const MAX_SAVED_JOBS = 10;
 
 type DiscoverJobsResult =
   | {
@@ -220,9 +223,17 @@ export async function discoverJobsForUser({
       effectiveLocation,
       country,
     );
-    const adzunaJobs = adzunaSearch.jobs;
+    const salaryListedCandidates = adzunaSearch.jobs
+      .map((job) => ({
+        job,
+        salary: formatAdzunaSalary(job),
+      }))
+      .filter(
+        (candidate): candidate is { job: AdzunaJob; salary: string } =>
+          typeof candidate.salary === "string" && candidate.salary.trim().length > 0,
+      );
 
-    if (adzunaJobs.length === 0) {
+    if (salaryListedCandidates.length === 0) {
       await insforge.database
         .from("agent_runs")
         .update({
@@ -243,12 +254,23 @@ export async function discoverJobsForUser({
       };
     }
 
-    const matches = await matchJobsToProfile(adzunaJobs, profile);
+    const matches = await matchJobsToProfile(
+      salaryListedCandidates.map((candidate) => candidate.job),
+      profile,
+    );
     const foundAt = new Date().toISOString();
-    const jobRows: Array<Record<string, unknown>> = adzunaJobs.map(
-      (job, index) => {
-        const match = matches[index];
-
+    const rankedCandidates = salaryListedCandidates
+      .map((candidate, index) => ({
+        ...candidate,
+        match: matches[index],
+      }))
+      .sort(
+        (left, right) =>
+          (right.match?.matchScore ?? 50) - (left.match?.matchScore ?? 50),
+      )
+      .slice(0, MAX_SAVED_JOBS);
+    const jobRows: Array<Record<string, unknown>> = rankedCandidates.map(
+      ({ job, match, salary }) => {
         return {
           run_id: runId,
           user_id: userId,
@@ -258,7 +280,7 @@ export async function discoverJobsForUser({
           title: job.title,
           company: job.company.display_name,
           location: job.location.display_name,
-          salary: formatAdzunaSalary(job),
+          salary,
           job_type: normalizeAdzunaJobType(job.contract_type),
           about_role: job.description,
           responsibilities: [],

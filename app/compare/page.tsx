@@ -41,7 +41,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
       : [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background/68">
       <PostHogIdentify
         userId={user.id}
         email={user.email}
@@ -53,7 +53,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         title="Compare the roles worth your energy."
         copy="Line up company signal, role fit, salary context, strengths, gaps, and research notes before deciding where to apply next."
       />
-      <main className="mx-auto w-full max-w-[1440px] bg-background px-4 py-6 text-text-primary sm:px-6 sm:py-8">
+      <main className="mx-auto w-full max-w-[1440px] bg-background/56 px-4 py-6 text-text-primary backdrop-blur-[2px] sm:px-6 sm:py-8">
         <Reveal className="mx-auto w-full max-w-[1192px]">
           {jobs.length === 0 ? (
             <EmptyComparison />
@@ -194,11 +194,13 @@ function ComparedJobCard({ job }: { job: ComparedJob }) {
         label="Strongest overlap"
         items={job.matchedSkills.slice(0, 4)}
         emptyLabel="No matched skills saved."
+        variant="pills"
       />
       <SkillList
         label="Prep gaps"
         items={(research?.gapsToAddress.length ? research.gapsToAddress : job.missingSkills).slice(0, 4)}
         emptyLabel="No prep gaps saved."
+        variant="notes"
       />
       <div className="mt-auto flex flex-col gap-2 pt-5">
         <Link
@@ -266,10 +268,12 @@ function SkillList({
   label,
   items,
   emptyLabel,
+  variant,
 }: {
   label: string;
   items: string[];
   emptyLabel: string;
+  variant: "notes" | "pills";
 }) {
   return (
     <div className="mt-5">
@@ -277,11 +281,21 @@ function SkillList({
         {label}
       </p>
       {items.length > 0 ? (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div
+          className={
+            variant === "notes"
+              ? "mt-2 grid gap-2"
+              : "mt-2 flex flex-wrap gap-2"
+          }
+        >
           {items.map((item) => (
             <span
               key={item}
-              className="rounded-full bg-accent-light px-3 py-1 text-[12px] font-semibold leading-4 text-accent"
+              className={
+                variant === "notes"
+                  ? "block w-full rounded-xl bg-accent-light px-3 py-3 text-[12px] font-semibold leading-5 text-accent"
+                  : "rounded-full bg-accent-light px-3 py-1 text-[12px] font-semibold leading-4 text-accent"
+              }
             >
               {item}
             </span>
@@ -422,4 +436,3 @@ function readStringArray(value: unknown): string[] {
 
   return value.filter((item): item is string => typeof item === "string");
 }
-

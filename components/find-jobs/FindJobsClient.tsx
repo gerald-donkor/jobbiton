@@ -182,12 +182,29 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
       <ProcessOverlay
         active={isSearching}
         variant="jobs"
-        title="Ranking your strongest matches"
-        description="Searching live roles, scoring each one against your profile, and keeping the top 10."
+        title="Building your top 10"
+        description="Searching live roles with salary estimates, scoring each one against your profile, and keeping the strongest matches."
         steps={[
-          "Reading your role intent",
-          "Scoring skill overlap",
-          "Sorting by match strength",
+          {
+            title: "Reading role intent",
+            detail: "Understanding the job title and location you entered.",
+          },
+          {
+            title: "Collecting salary-listed roles",
+            detail: "Keeping roles that include salary estimates before scoring.",
+          },
+          {
+            title: "Scoring profile fit",
+            detail: "Comparing the role against your saved skills and experience.",
+          },
+          {
+            title: "Saving top matches",
+            detail: "Writing the strongest matches to your search run.",
+          },
+          {
+            title: "Preparing results",
+            detail: "Refreshing the table with your highest matched jobs.",
+          },
         ]}
       />
       <JobSearchCard

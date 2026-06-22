@@ -248,7 +248,7 @@ URL saved to profiles table
 | title              | text        |                                                |
 | company            | text        |                                                |
 | location           | text        |                                                |
-| salary             | text        | If available                                   |
+| salary             | text        | Required for visible Find Jobs rows            |
 | job_type           | text        | fulltime / parttime / contract                 |
 | about_role         | text        | 2-3 sentence summary                           |
 | responsibilities   | text[]      | Bullet points                                  |
@@ -350,7 +350,7 @@ const response = await fetch(
     `what=${encodeURIComponent(jobTitle)}&` +
     `where=${encodeURIComponent(location)}&` +
     `category=it-jobs&` +
-    `results_per_page=10&` +
+    `results_per_page=30&` +
     `content-type=application/json`,
 );
 const data = await response.json();
@@ -358,6 +358,8 @@ const data = await response.json();
 // Each job: title, company.display_name, location.display_name,
 //           salary_min, salary_max, description, redirect_url, created
 ```
+
+Jobbiton currently uses the Adzuna response as a small candidate pool: salary-missing rows are filtered out, the remaining roles are scored, and only the top 10 by match score are saved/displayed for the active Find Jobs search.
 
 ---
 

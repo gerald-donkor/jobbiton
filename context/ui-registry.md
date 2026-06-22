@@ -40,8 +40,8 @@ All semantic interactive elements should expose the hand cursor without each com
 
 ### Global Theme and Page Motion
 
-File: app/globals.css, app/layout.tsx, components/layout/PageTransition.tsx, components/motion/Reveal.tsx
-Last updated: 2026-06-21
+File: app/globals.css, app/layout.tsx, components/layout/PageTransition.tsx, components/layout/ScrollToTopButton.tsx, components/motion/Reveal.tsx
+Last updated: 2026-06-22
 
 | Property         | Class / Selector                                                               |
 | ---------------- | ------------------------------------------------------------------------------ |
@@ -56,27 +56,46 @@ Last updated: 2026-06-21
 | Accent usage     | theme is selected by `html[data-theme]`; page entry uses Motion opacity/y transition |
 
 **Pattern notes:**
-The root layout runs a small pre-paint theme script before rendering page content, reading `jobbiton-theme` from local storage and falling back to system preference. Theme mode is represented by `html[data-theme="light|dark"]`, and dark mode works by overriding existing design tokens rather than adding raw `dark:` color utilities to components. `PageTransition` is a client-only Motion wrapper that keys by pathname, fades/slides pages in, and respects `useReducedMotion()`. Reveal wrappers must always animate to a visible state through `animate` as well as `whileInView`, so protected page content cannot remain hidden if in-view observation misses during client-side navigation. Future app-wide animation should stay in focused client wrappers and preserve token-only colors.
+The root layout runs a small pre-paint theme script before rendering page content, reading `jobbiton-theme` from local storage and falling back to system preference. Theme mode is represented by `html[data-theme="light|dark"]`, and dark mode works by overriding existing design tokens rather than adding raw `dark:` color utilities to components. `PageTransition` is a client-only Motion wrapper that keys by pathname, fades/slides route content, wraps app pages in `MotionConfig reducedMotion="user"`, and renders the shared non-interactive background effects layer outside the transformed route `motion.div`. Keep the background outside route transforms/filters; fixed descendants inside transformed route wrappers can become visually trapped and covered. Reveal wrappers must always animate to a visible state through `animate` as well as `whileInView`, so protected page content cannot remain hidden if in-view observation misses during client-side navigation. Future app-wide animation should stay in focused client wrappers and preserve token-only colors.
+
+### App Background Effects
+
+Files: components/loading/AppBackgroundEffects.tsx, components/animate-ui/backgrounds/gradient.tsx, components/animate-ui/backgrounds/stars.tsx, components/animate-ui/backgrounds/hexagon.tsx, components/layout/PageTransition.tsx
+Last updated: 2026-06-22
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | Animate UI `GradientBackground`, `StarsBackground`, `HexagonBackground`, `.app-background-gradient`, `.app-background-stars`, `.app-background-hex-*`, landing `bg-transparent` and `bg-surface/24` |
+| Border           | hex cells use tokenized pseudo-element fills via `.app-background-hex-cell::before/::after` |
+| Border radius    | none for page layer; cells use clipped hexagons                                |
+| Text             | none; effect is decorative and `aria-hidden`                                   |
+| Spacing          | full page layer `fixed inset-0`, right/bottom hex fields use large viewport-sized layers |
+| Hover state      | none; effect uses `pointer-events-none`                                        |
+| Shadow           | none                                                                           |
+| Accent usage     | tokenized light/dark gradient fields, theme-specific star color, accent/info/success radial washes, tokenized hex cell fills |
+
+**Pattern notes:**
+The background layer uses manually installed Animate UI registry components: `GradientBackground`, `StarsBackground`, and two `HexagonBackground` layers. The registry source is adapted only where needed for Jobbiton's token system, local `cn()` helper, and React lint rules. It must be a fixed viewport layer at `z-0` inside the isolated `PageTransition` stack, as a sibling before the route transition `motion.div` with page content at `z-10`; do not use a negative z-index, place it inside the transformed route wrapper, or cover it with opaque page wrappers because that makes the effects invisible. Light mode needs stronger effect contrast than dark mode: `.app-background-stars` uses normal/multiply-style visibility instead of screen blending, `.app-background-gradient` adds tokenized accent/info/success radial fields, and the landing shell stays at `bg-surface/24` so the animated layer remains visible behind the content. Dark mode restores the calmer screen-blended stars and deeper token gradient. Cards/tables/forms stay solid for readability. The layer is decorative, non-interactive, and respects reduced-motion preferences through `useReducedMotion()` / `MotionConfig`.
 
 ### Process Loading Overlay
 
 File: components/loading/ProcessOverlay.tsx
-Last updated: 2026-06-21
+Last updated: 2026-06-22
 
 | Property         | Class / Selector                                                               |
 | ---------------- | ------------------------------------------------------------------------------ |
-| Background       | overlay `bg-surface/95`, inner panel `bg-surface-secondary`, step cards `bg-surface` |
+| Background       | overlay `bg-surface/95`, inner panel `bg-surface-secondary`, step cards/current step `bg-surface`, active cards `bg-accent-muted` |
 | Border           | overlay/panel/cards `border border-border`, process accents use token alpha borders |
 | Border radius    | overlay/panel `rounded-xl`, step cards `rounded-lg`, glyphs `rounded-full`     |
-| Text — primary   | title `text-[22px] font-semibold leading-8 text-text-primary`                  |
-| Text — secondary | description `text-[14px] font-normal leading-6 text-text-secondary`, steps `text-[12px] font-semibold leading-4 text-text-secondary` |
-| Spacing          | overlay `absolute inset-0 z-20 px-5 py-6`, panel `max-w-[520px] px-6 py-6`, step grid `mt-6 gap-2` |
+| Text — primary   | title `text-[24px] font-semibold leading-8 text-text-primary`, current step `text-[16px] font-semibold leading-6` |
+| Text — secondary | description `text-[14px] font-normal leading-6 text-text-secondary`, details `text-[12px]/[13px] font-medium` |
+| Spacing          | overlay `absolute inset-0 z-20 px-5 py-6`, panel `max-w-[760px] px-5/px-6 py-5/py-6`, visual grid `lg:grid-cols-[220px_1fr]`, step grid `mt-5 gap-3` |
 | Hover state      | none while active; overlay blocks underlying interaction                       |
 | Shadow           | overlay and panel token shadows using `var(--color-overlay)`                  |
 | Accent usage     | active process visuals use `bg-accent`, `text-accent`, `border-accent`, or success tokens depending on variant |
 
 **Pattern notes:**
-Use `ProcessOverlay` inside a `relative overflow-hidden` panel whenever a button starts an async operation that should cover stale content until completion. The overlay is intentionally section-contained rather than fixed to the viewport. Current variants are `jobs`, `auth`, `resume-upload`, `resume-extract`, `resume-generate`, and `save`; choose a different visual variant for different background processes instead of reusing one spinner everywhere. Keep copy process-specific and short, with up to three step labels.
+Use `ProcessOverlay` inside a `relative overflow-hidden` panel whenever a button starts an async operation that should cover stale content until completion. The overlay is intentionally section-contained rather than fixed to the viewport and must remain active until the async work resolves. Current variants are `jobs`, `auth`, `resume-upload`, `resume-extract`, `resume-generate`, and `save`; choose a different visual variant for different background processes instead of reusing one spinner everywhere. Prefer object steps with `title` and `detail` so users see the process stage, the current stage card, progress rail, and compact variant pipeline while waiting.
 
 ### Route Loading Shells
 
@@ -97,6 +116,44 @@ Last updated: 2026-06-21
 
 **Pattern notes:**
 Use route-level `loading.tsx` files for protected pages whose server data can stream after navigation. The shell mirrors each page's intro-first layout so route transitions never show a blank or half-painted page. Keep route loading skeletons token-based and page-specific through copy and the `variant` prop; in-page async work should still use `ProcessOverlay`.
+
+### Scroll To Top Control
+
+File: components/layout/ScrollToTopButton.tsx, app/globals.css
+Last updated: 2026-06-22
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | fixed glass `bg-surface/62 backdrop-blur-xl`                                   |
+| Border           | `border border-border`, hover `border-accent`                                  |
+| Border radius    | `rounded-full`                                                                 |
+| Text/Icon        | CSS arrow `.scroll-top-arrow`, default `text-accent`, hover `text-accent-foreground` |
+| Spacing          | `fixed bottom-5 right-5 sm:bottom-7 sm:right-7`, `size-12 sm:size-13`          |
+| Hover state      | `hover:bg-accent hover:text-accent-foreground`                                 |
+| Shadow           | `shadow-[0_18px_40px_color-mix(in_srgb,var(--color-overlay)_18%,transparent)]` |
+| Accent usage     | arrow and hover fill use accent tokens                                         |
+
+**Pattern notes:**
+Mount `ScrollToTopButton` once in `PageTransition` so it is available across landing and protected pages. It should appear only after meaningful scrolling and call `window.scrollTo({ top: 0, behavior: "smooth" })`, falling back to instant scrolling when reduced motion is preferred. Use a CSS arrow rather than visible text so it behaves like a compact utility control.
+
+### Homepage Fold Sections
+
+Files: components/motion/ScrollFlow.tsx, app/page.tsx, app/globals.css
+Last updated: 2026-06-22
+
+| Property         | Class / Selector                                                               |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Background       | inherited from each landing band; parent landing shell remains `bg-surface/24` |
+| Border           | inherited from section content                                                 |
+| Border radius    | inherited from section content                                                 |
+| Text             | inherited from section content                                                 |
+| Spacing          | sticky sheet top `clamp(4.5rem, 9vw, 5.75rem)`, track overlap `margin-top: -4.5rem`, track fold runway `padding-bottom: min(14vh, 7rem)` |
+| Hover state      | none at wrapper level                                                          |
+| Shadow           | token sheet shadow using `var(--color-overlay)`                                |
+| Accent usage     | none at wrapper level; accent remains inside section content                   |
+
+**Pattern notes:**
+Use `FoldSection` from `components/motion/ScrollFlow.tsx` around major homepage bands when the page should feel like vertical stacked sheets folding over one another. `FoldSection` intentionally separates the scroll-measured outer `.homepage-fold-track` from the inner sticky `.homepage-fold-section`; the track owns z-index, perspective, overlap, and runway spacing, while the sheet sticks under the navbar and visually folds. Each next track has a higher z-index, so downward scrolling brings the next section over the previous one. As the outgoing sheet leaves its scroll range, Motion eases `rotateX`, `scale`, `y`, opacity, and only a very light blur; keep exit blur around `1px` and opacity near `0.82` so folded sections remain readable instead of becoming smeared. Keep the transform origin at the top center through `.homepage-fold-section`, preserve `transform-style: preserve-3d`, and respect reduced motion through `useReducedMotion()`. Do not apply this wrapper to dense operational app pages unless the page is explicitly editorial/landing-style; dashboards, tables, forms, and job workflow screens should prioritize scan stability.
 
 ### Login Form Skeleton
 
@@ -296,7 +353,7 @@ Last updated: 2026-06-21
 | Accent usage     | active workflow filters, compare CTA, saved/compared state, history labels/open action, prep bullets |
 
 **Pattern notes:**
-Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. Active compare selection is scoped to the current search run: when the Find Jobs search scope changes, any active compare group with at least two jobs is archived into comparison history and the visible Compare count returns to zero for the new result set. The History control opens a compact panel of previous comparison groups with `Open comparison`, `Make active`, and `Remove` actions; old groups must not appear as active compare state on a fresh search unless the user explicitly restores them. Find Jobs now intentionally fetches, scores, saves, and displays only 10 jobs for a search, ordered by match score; do not show Adzuna total-available counts or live-search Previous/Next controls until the product direction changes again. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. Job cards and desktop rows act as full-row links to the job details page with `role="link"`, keyboard Enter/Space support, token focus outlines, and hover/focus `router.prefetch()` so manual row navigation stays warm like native `Link` navigation; embedded controls (`a`, `button`, `select`, inputs, labels) must be excluded from row navigation so workflow actions stay independent. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
+Job workflow state is persisted client-side under `jobbiton-job-workflow-v1` because the available InsForge MCP tools expose DB reads/docs but no safe schema migration command in this environment. Active compare selection is scoped to the current search run: when the Find Jobs search scope changes, any active compare group with at least two jobs is archived into comparison history and the visible Compare count returns to zero for the new result set. The History control opens a compact panel of previous comparison groups with `Open comparison`, `Make active`, and `Remove` actions; old groups must not appear as active compare state on a fresh search unless the user explicitly restores them. Find Jobs now intentionally searches a small Adzuna candidate pool, filters out salary-missing rows, scores salary-listed candidates, and saves/displays only the strongest 10 jobs ordered by match score; do not show Adzuna total-available counts or live-search Previous/Next controls until the product direction changes again. The Find Jobs list uses cards through `xl` and only switches to the dense desktop table at extra-large widths, so medium and laptop screens do not squeeze eight columns. Desktop workflow tables must fit the parent content track without a forced `min-w-*`; use compact `px-3` cells, flexible `minmax()` columns, wrapping text in company/role/salary cells, top-aligned icon cells (`items-start`) so icons sit on the same row line as company/role text, a dedicated 270px Actions column, full labels (`Save`, `Compare`/`Added`, `Hide`/`Restore`), and a `flex-nowrap gap-2` action row so all three buttons stay on one line. Do not use `truncate`, `text-ellipsis`, or literal `...` in the Find Jobs workflow controls; content should remain readable or move to the card layout rather than disappear. Job cards and desktop rows act as full-row links to the job details page with `role="link"`, keyboard Enter/Space support, token focus outlines, and hover/focus `router.prefetch()` so manual row navigation stays warm like native `Link` navigation; embedded controls (`a`, `button`, `select`, inputs, labels) must be excluded from row navigation so workflow actions stay independent. The workflow toolbar filters Active, Saved, Tracked, and Hidden jobs locally per visible result set. Detail pages use `JobApplicationWorkspace` for status, private notes, save/hide/compare actions, and an interview prep mode that reuses saved company research plus matched/missing skills.
 
 ### Company Comparison View
 
@@ -316,7 +373,7 @@ Last updated: 2026-06-20
 | Accent usage     | match pills, skill pills, apply CTA, empty-state CTA                |
 
 **Pattern notes:**
-`/compare` is a protected server-rendered route. It accepts up to four selected job IDs via `?jobs=...`, scopes the InsForge query to the signed-in user, and renders responsive comparison cards plus a horizontal decision matrix. The cards emphasize company, role, match score, salary, location, strongest overlaps, prep gaps, and apply/detail actions. The matrix stays horizontally scrollable on smaller screens instead of compressing dense text into unreadable columns.
+`/compare` is a protected server-rendered route. It accepts up to four selected job IDs via `?jobs=...`, scopes the InsForge query to the signed-in user, and renders responsive comparison cards plus a horizontal decision matrix. The cards emphasize company, role, match score, salary, location, strongest overlaps, prep gaps, and apply/detail actions. Short strongest-overlap items use compact accent pills; prep gaps and longer advisory notes use full-width `bg-accent-light` note panels so the violet background covers the entire text area instead of forming uneven islands behind wrapped copy. The matrix stays horizontally scrollable on smaller screens instead of compressing dense text into unreadable columns.
 
 ### Profile Attention Banner
 
@@ -476,7 +533,7 @@ Last updated: 2026-06-21
 | Accent usage     | source badges `bg-accent-light text-accent`, score fills/text use `bg-success text-success`, `bg-info text-info`, or `bg-warning text-warning` |
 
 **Pattern notes:**
-The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. Feature 11 renders the server-provided saved jobs page by default, scoped to the active search run when one exists, shows a centered muted empty state when filters return no rows, and keeps pagination/count controls outside the table shell. The pagination uses compact text Previous/Next buttons with chevrons, circular page buttons, and the active page as `bg-accent text-accent-foreground`. Live Adzuna searches use this same pagination treatment and must be functional: Next/Previous fetch additional 10-job Adzuna pages into the current search run while preserving the current compare scope. Avoid broad all-user saved-job queries in this table unless a separate saved-jobs archive mode is explicitly designed.
+The table stays dense and scan-friendly with uppercase headers, 14px row text, bordered white rows, circular company marker chips, inline score bars, a `SOURCE` column with purple `Search` pills, and no internal pagination footer. Post-search state uses a dedicated narrow icon rail as the first grid column so the circular building glyphs stack cleanly down the left edge, with the `COMPANY` header spanning both the icon rail and company-name column. The marker should read like a soft bordered circle with a muted building glyph inside, matching the supplied screenshot rather than a square badge. Individual rows are full-width links to `/find-jobs/[id]` so the whole listing is clickable and keyboard focusable. The `/find-jobs` Server Component renders saved rows scoped to the active `run` when one exists, filters out salary-missing records, orders by match score, and caps the visible list at 10 rows. Avoid total-count footers, live Adzuna Previous/Next controls, and broad all-user saved-job queries unless a separate archive mode is explicitly designed.
 
 ### Job Details Page Layout
 
@@ -579,41 +636,41 @@ PostHog is initialized through the root `instrumentation-client.ts` file and kep
 ### Adzuna Job Discovery
 
 Files: app/api/agent/find/route.ts, agent/adzuna.ts, agent/matcher.ts, lib/adzuna.ts, lib/utils.ts, proxy.ts
-Last updated: 2026-06-12
+Last updated: 2026-06-22
 
 **Pattern notes:**
-Feature 10 keeps the Adzuna and matching flow entirely server-side. The client submits JSON to `POST /api/agent/find`; the route validates input, captures `job_search_started`, and calls the agent orchestration module. The agent creates an `agent_runs` row, searches Adzuna with `category=it-jobs`, scores each result against the saved profile, inserts saved `jobs` rows, records warnings/errors in `agent_logs`, and emits one `job_found` event per saved job. Matching prefers OpenRouter `openai/gpt-4o` when `OPENROUTER_API_KEY` exists, but falls back to a deterministic heuristic scorer so local development still returns usable results. The fallback matcher must use skill aliases, word/phrase boundaries, title-token overlap, and skill coverage rather than raw substring matching so relevant jobs can cross the 70-point High Match threshold while weak matches remain low. `proxy.ts` includes `/api/agent/:path*` so stale InsForge sessions refresh before authenticated search requests run.
+Feature 10 keeps the Adzuna and matching flow entirely server-side. The client submits JSON to `POST /api/agent/find`; the route validates input, captures `job_search_started`, and calls the agent orchestration module. The agent creates an `agent_runs` row, searches Adzuna with `category=it-jobs`, filters out salary-missing candidates, scores the remaining candidate pool against the saved profile, inserts only the strongest 10 saved `jobs` rows, records warnings/errors in `agent_logs`, and emits one `job_found` event per saved job. Matching prefers OpenRouter when `OPENROUTER_API_KEY` exists, otherwise uses server-side Gemini when `GEMINI_API_KEY` exists, then falls back to a deterministic heuristic scorer so local development still returns usable results. The fallback matcher must use skill aliases, word/phrase boundaries, title-token overlap, and skill coverage rather than raw substring matching so relevant jobs can cross the 70-point High Match threshold while weak matches remain low. `proxy.ts` includes `/api/agent/:path*` so stale InsForge sessions refresh before authenticated search requests run.
 
 ### Saved Jobs Filtering and Pagination
 
 Files: app/find-jobs/page.tsx, components/find-jobs/FindJobsClient.tsx, components/find-jobs/JobFilterBar.tsx, components/find-jobs/types.ts
-Last updated: 2026-06-12
+Last updated: 2026-06-22
 
 **Pattern notes:**
-Feature 11 loads saved jobs from InsForge in the `/find-jobs` Server Component, not in the client component. The route module owns the single-use user-scoped query shape: exact count plus paginated rows, active `run` scoping by `agent_runs.id`, `q` search across `company` or `title`, `match_score >= 70` for High Match, `match_score < 70` for Low Match, score/newest/oldest ordering, and 20 rows per page. Text search is tokenized before building the InsForge OR filter so punctuation-heavy user input does not produce malformed query syntax. Query failures return a safe `We could not load your saved jobs right now.` message and the client renders it as a bordered token error banner above the table. The client wrapper uses `router.replace(..., { scroll: false })` to update URL params and resets to page 1 for filter/sort changes while preserving the active `run` param. A successful Adzuna search still renders the returned jobs immediately as a temporary latest-search view, navigates to `/find-jobs?run={runId}`, and that temporary view applies the active filter query, match filter, and sort selection before rendering; changing filter, sort, or page clears that temporary view and returns to the DB-backed saved jobs list for the same run.
+Feature 11 loads saved jobs from InsForge in the `/find-jobs` Server Component, not in the client component. The route module owns the current user-scoped top-10 query shape: active `run` scoping by `agent_runs.id`, `q` search across `company` or `title`, `match_score >= 70` for High Match, `match_score < 70` for Low Match, salary-required row mapping, and score-desc ordering. Text search is tokenized before building the InsForge OR filter so punctuation-heavy user input does not produce malformed query syntax. Query failures return a safe `We could not load your saved jobs right now.` message and the client renders it as a bordered token error banner above the table. The client wrapper uses `router.replace(..., { scroll: false })` to update URL params while preserving the active `run` param. A successful Adzuna search renders the returned jobs immediately as a temporary latest-search view, navigates to `/find-jobs?run={runId}`, and that temporary view applies the active filter query and match filter before rendering.
 
 ### Homepage Navbar
 
 File: components/layout/Navbar.tsx
-Last updated: 2026-06-09
+Last updated: 2026-06-22
 
 | Property         | Class                                                                                          |
 | ---------------- | ---------------------------------------------------------------------------------------------- |
-| Background       | `bg-surface`                                                                                   |
+| Background       | sticky glass `bg-surface/58 backdrop-blur-xl`                                                   |
 | Border           | `border-b border-border`                                                                       |
 | Border radius    | none                                                                                           |
 | Text — primary   | `text-text-dark text-[14px] font-medium leading-5`                                             |
 | Text — secondary | none                                                                                           |
 | Spacing          | `h-16 px-6 gap-12`, brand link `inline-flex items-center`                                      |
 | Hover state      | `hover:text-accent`, primary CTA via `.button-primary:hover` with a darker bluish-charcoal lift |
-| Shadow           | primary CTA uses `.button-primary` layered shadow                                              |
+| Shadow           | navbar glass shadow `shadow-[0_10px_30px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)]`, primary CTA uses `.button-primary` layered shadow |
 | Accent usage     | `text-accent` for link hover; focus ring uses `outline: 2px solid var(--color-accent)`        |
 
 **Button pattern (Primary CTA):**
 `.button-primary .button-primary-sm`
 
 **Pattern notes:**
-Top navigation uses a full-width token surface with a constrained 1440px inner row. The reusable `BrandLogo` wordmark link points to `/`, and `proxy.ts` allows `/` through even when authenticated so it lands on the homescreen URL (`localhost:3000` in local dev) from every page that renders the shared navbar. The right side includes the compact `ThemeToggle` before the optional CTA. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a darker bluish-charcoal hover. On the homepage, `app/page.tsx` passes auth-aware CTA props: logged-out users see `Start for free` to `/login`, logged-in users see `Go to Profile` to `/profile`.
+Top navigation uses a sticky full-width glass token surface with a constrained 1440px inner row. The reusable `BrandLogo` wordmark link points to `/`, and `proxy.ts` allows `/` through even when authenticated so it lands on the homescreen URL (`localhost:3000` in local dev) from every page that renders the shared navbar. The right side includes the compact `ThemeToggle` before the optional CTA. Primary header CTAs use the shared compact charcoal button system defined in `app/globals.css` with 38px height, white text, a soft elevated shadow, and a darker bluish-charcoal hover. On the homepage, `app/page.tsx` passes auth-aware CTA props: logged-out users see `Start for free` to `/login`, logged-in users see `Go to Profile` to `/profile`. Keep shared, dashboard, and job-details navbars visually aligned as sticky glass surfaces so the Animate UI background remains visible behind them.
 
 ### Homepage Footer
 

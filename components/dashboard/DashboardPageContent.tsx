@@ -29,7 +29,7 @@ export function DashboardPageContent({
   userName,
 }: DashboardPageContentProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background/68">
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
       <DashboardNavbar />
       <PageIntro
@@ -37,7 +37,7 @@ export function DashboardPageContent({
         title="Track the search as it compounds."
         copy="See the same proof-led flow from the landing page translated into live analytics: jobs found, match quality, company research, and recent agent activity."
       />
-      <main className="w-full bg-background px-4 pb-16 pt-6 text-text-primary sm:px-6 lg:pt-8">
+      <main className="w-full bg-background/56 px-4 pb-16 pt-6 text-text-primary backdrop-blur-[2px] sm:px-6 lg:pt-8">
         <RevealGroup className="mx-auto grid w-full max-w-[1120px] gap-4 2xl:max-w-[1240px]">
           <section
             aria-label="Dashboard statistics"

@@ -22,6 +22,8 @@ export type AdzunaSearchResult = {
   searchUrl: string;
 };
 
+const ADZUNA_CANDIDATE_LIMIT = 30;
+
 const COUNTRY_PATTERNS: Array<{ country: AdzunaCountry; patterns: RegExp[] }> = [
   {
     country: "gb",
@@ -121,7 +123,7 @@ export async function searchAdzunaJobs(
     app_key: appKey,
     what: jobTitle,
     category: "it-jobs",
-    results_per_page: "10",
+    results_per_page: String(ADZUNA_CANDIDATE_LIMIT),
     "content-type": "application/json",
   });
 
@@ -143,7 +145,9 @@ export async function searchAdzunaJobs(
   const json = (await response.json()) as {
     results?: AdzunaJob[];
   };
-  const jobs = Array.isArray(json.results) ? json.results.slice(0, 10) : [];
+  const jobs = Array.isArray(json.results)
+    ? json.results.slice(0, ADZUNA_CANDIDATE_LIMIT)
+    : [];
 
   return {
     jobs,

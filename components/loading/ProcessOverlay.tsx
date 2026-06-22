@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 export type ProcessOverlayVariant =
   | "auth"
@@ -10,20 +11,49 @@ export type ProcessOverlayVariant =
   | "resume-upload"
   | "save";
 
+type ProcessStep =
+  | string
+  | {
+      title: string;
+      detail: string;
+    };
+
 type ProcessOverlayProps = {
   active: boolean;
   variant: ProcessOverlayVariant;
   title: string;
   description: string;
-  steps?: string[];
+  steps?: ProcessStep[];
 };
 
-const DEFAULT_STEPS = ["Preparing", "Processing", "Finalizing"];
-const BAR_KEYS = ["first", "second", "third", "fourth"];
-const DOT_KEYS = ["north", "east", "south", "west"];
-const LINE_KEYS = ["name", "role", "skills", "history"];
-const LINE_WIDTH_CLASSES = ["w-11/12", "w-3/4", "w-2/3", "w-1/2"];
-const CHECK_KEYS = ["profile", "resume", "preferences"];
+type NormalizedStep = {
+  title: string;
+  detail: string;
+};
+
+const DEFAULT_STEPS: NormalizedStep[] = [
+  { title: "Preparing", detail: "Setting up the request" },
+  { title: "Processing", detail: "Running the background task" },
+  { title: "Finalizing", detail: "Refreshing the interface" },
+];
+
+const VARIANT_LABELS: Record<ProcessOverlayVariant, string> = {
+  auth: "Secure handoff",
+  jobs: "Match pipeline",
+  "resume-extract": "Resume parser",
+  "resume-generate": "Document studio",
+  "resume-upload": "File sync",
+  save: "Profile sync",
+};
+
+const VARIANT_DETAILS: Record<ProcessOverlayVariant, string[]> = {
+  auth: ["Token", "Provider", "Session"],
+  jobs: ["Intent", "Adzuna", "AI score", "Salary", "Save"],
+  "resume-extract": ["Text", "Fields", "Draft"],
+  "resume-generate": ["Profile", "Content", "PDF"],
+  "resume-upload": ["File", "Storage", "Preview"],
+  save: ["Validate", "Write", "Refresh"],
+};
 
 export function ProcessOverlay({
   active,
@@ -35,171 +65,221 @@ export function ProcessOverlay({
   return (
     <AnimatePresence>
       {active ? (
-        <motion.div
-          className="absolute inset-0 z-20 flex items-center justify-center rounded-xl border border-border bg-surface/95 px-5 py-6 shadow-[0_18px_40px_color-mix(in_srgb,var(--color-overlay)_14%,transparent)] backdrop-blur-md"
-          initial={{ opacity: 0, scale: 0.985 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.985 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-          aria-live="polite"
-          aria-busy="true"
-        >
-          <div className="w-full max-w-[520px] rounded-xl border border-border bg-surface-secondary px-6 py-6 text-center shadow-[0_10px_24px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)]">
-            <ProcessVisual variant={variant} />
-            <p className="mt-5 text-[12px] font-semibold uppercase leading-4 tracking-[0.08em] text-accent">
-              Working
-            </p>
-            <h3 className="mt-2 text-[22px] font-semibold leading-8 text-text-primary">
-              {title}
-            </h3>
-            <p className="mx-auto mt-2 max-w-[400px] text-[14px] font-normal leading-6 text-text-secondary">
-              {description}
-            </p>
-            <div className="mt-6 grid gap-2 sm:grid-cols-3">
-              {steps.slice(0, 3).map((step, index) => (
-                <motion.div
-                  key={step}
-                  className="rounded-lg border border-border bg-surface px-3 py-3 text-[12px] font-semibold leading-4 text-text-secondary"
-                  initial={{ opacity: 0.45, y: 4 }}
-                  animate={{ opacity: [0.45, 1, 0.45], y: [4, 0, 4] }}
-                  transition={{
-                    duration: 1.8,
-                    repeat: Infinity,
-                    delay: index * 0.22,
-                    ease: "easeInOut",
-                  }}
-                >
-                  {step}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
+        <ProcessOverlayContent
+          description={description}
+          steps={steps}
+          title={title}
+          variant={variant}
+        />
       ) : null}
     </AnimatePresence>
   );
 }
 
-function ProcessVisual({ variant }: { variant: ProcessOverlayVariant }) {
-  if (variant === "jobs") {
-    return (
-      <div className="mx-auto flex h-24 w-36 items-end justify-center gap-2 rounded-xl border border-border bg-surface px-5 py-5">
-        {BAR_KEYS.map((key, index) => (
-          <motion.span
-            key={key}
-            className="w-5 rounded-full bg-accent"
-            initial={{ height: 18 }}
-            animate={{ height: [18, 58 - index * 8, 24 + index * 6, 18] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              delay: index * 0.14,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-    );
-  }
+function ProcessOverlayContent({
+  variant,
+  title,
+  description,
+  steps = DEFAULT_STEPS,
+}: Omit<ProcessOverlayProps, "active">) {
+  const shouldReduceMotion = useReducedMotion();
+  const normalizedSteps = useMemo(() => normalizeSteps(steps), [steps]);
+  const [activeStep, setActiveStep] = useState(0);
 
-  if (variant === "resume-extract") {
-    return (
-      <div className="relative mx-auto h-28 w-24 rounded-lg border border-border bg-surface px-3 py-4">
-        {LINE_KEYS.map((key, index) => (
-          <span
-            key={key}
-            className={`mb-3 block h-2 rounded-full bg-border-muted ${LINE_WIDTH_CLASSES[index]}`}
-          />
-        ))}
-        <motion.span
-          className="absolute left-2 right-2 top-4 h-8 rounded-md border border-accent/40 bg-accent/10"
-          animate={{ y: [0, 58, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-    );
-  }
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveStep((currentStep) =>
+        Math.min(currentStep + 1, normalizedSteps.length - 1),
+      );
+    }, 1700);
 
-  if (variant === "resume-generate") {
-    return (
-      <div className="mx-auto flex h-28 w-28 items-center justify-center">
-        <motion.div
-          className="h-24 w-20 rounded-lg border border-border bg-surface shadow-[0_8px_18px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)]"
-          animate={{ rotate: [-4, 4, -4], y: [0, -5, 0] }}
-          transition={{ duration: 1.7, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <div className="mx-3 mt-4 h-2 rounded-full bg-accent" />
-          <div className="mx-3 mt-3 h-2 rounded-full bg-border-muted" />
-          <div className="mx-3 mt-3 h-2 rounded-full bg-border-muted" />
-          <div className="mx-3 mt-3 h-2 w-8 rounded-full bg-border-muted" />
-        </motion.div>
-      </div>
-    );
-  }
+    return () => window.clearInterval(interval);
+  }, [normalizedSteps.length]);
 
-  if (variant === "resume-upload") {
-    return (
-      <div className="relative mx-auto h-28 w-28">
-        <motion.span
-          className="absolute inset-3 rounded-full border border-accent"
-          animate={{ scale: [0.8, 1.12, 0.8], opacity: [0.4, 0.9, 0.4] }}
-          transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.span
-          className="absolute inset-8 rounded-full bg-accent"
-          animate={{ y: [8, -8, 8] }}
-          transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-    );
-  }
-
-  if (variant === "save") {
-    return (
-      <div className="mx-auto flex h-24 w-40 items-center justify-center gap-3 rounded-xl border border-border bg-surface px-5">
-        {CHECK_KEYS.map((key, index) => (
-          <motion.span
-            key={key}
-            className="flex size-8 items-center justify-center rounded-full border border-success/40 bg-success/10 text-[14px] font-bold text-success"
-            animate={{ scale: [0.86, 1, 0.86], opacity: [0.45, 1, 0.45] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              delay: index * 0.18,
-              ease: "easeInOut",
-            }}
-          >
-            OK
-          </motion.span>
-        ))}
-      </div>
-    );
-  }
+  const progress =
+    normalizedSteps.length <= 1
+      ? 100
+      : ((activeStep + 1) / normalizedSteps.length) * 100;
+  const current = normalizedSteps[activeStep] ?? normalizedSteps[0];
 
   return (
-    <div className="relative mx-auto h-28 w-28">
+    <motion.div
+      className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden rounded-xl border border-border bg-surface/95 px-5 py-6 shadow-[0_18px_40px_color-mix(in_srgb,var(--color-overlay)_14%,transparent)] backdrop-blur-md"
+      initial={{ opacity: 0, scale: 0.985 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.985 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
+      aria-live="polite"
+      aria-busy="true"
+    >
       <motion.span
-        className="absolute inset-5 rounded-full border border-accent/40"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+        aria-hidden="true"
+        className="process-overlay-scan absolute inset-x-0 top-0 h-24 opacity-45"
+        animate={shouldReduceMotion ? undefined : { x: ["-45%", "45%", "-45%"] }}
+        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
       />
-      {DOT_KEYS.map((key, index) => (
-        <motion.span
-          key={key}
-          className="absolute left-1/2 top-1/2 size-3 rounded-full bg-accent"
-          animate={{
-            x: Math.cos((index / DOT_KEYS.length) * Math.PI * 2) * 38 - 6,
-            y: Math.sin((index / DOT_KEYS.length) * Math.PI * 2) * 38 - 6,
-            scale: [0.7, 1.2, 0.7],
-          }}
-          transition={{
-            duration: 1.4,
-            repeat: Infinity,
-            delay: index * 0.12,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
+      <div className="relative w-full max-w-[760px] rounded-xl border border-border bg-surface-secondary px-5 py-5 text-left shadow-[0_10px_24px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)] sm:px-6 sm:py-6">
+        <div className="grid gap-5 lg:grid-cols-[220px_1fr] lg:items-center">
+          <ProcessVisual
+            activeStep={activeStep}
+            reducedMotion={Boolean(shouldReduceMotion)}
+            variant={variant}
+          />
+          <div>
+            <p className="text-[12px] font-semibold uppercase leading-4 tracking-[0.08em] text-accent">
+              {VARIANT_LABELS[variant]}
+            </p>
+            <h3 className="mt-2 text-[24px] font-semibold leading-8 text-text-primary">
+              {title}
+            </h3>
+            <p className="mt-2 max-w-[460px] text-[14px] font-normal leading-6 text-text-secondary">
+              {description}
+            </p>
+            <div className="mt-5 overflow-hidden rounded-full border border-border bg-surface">
+              <motion.div
+                className="h-2 rounded-full bg-accent"
+                initial={{ width: "0%" }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.45 }}
+              />
+            </div>
+            <div className="mt-4 rounded-lg border border-border bg-surface px-4 py-4">
+              <p className="text-[12px] font-semibold uppercase leading-4 text-text-muted">
+                Current step
+              </p>
+              <p className="mt-1 text-[16px] font-semibold leading-6 text-text-primary">
+                {current.title}
+              </p>
+              <p className="mt-1 text-[13px] font-medium leading-5 text-text-secondary">
+                {current.detail}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {normalizedSteps.map((step, index) => {
+            const isComplete = index < activeStep;
+            const isActive = index === activeStep;
+
+            return (
+              <motion.div
+                key={`${step.title}-${index}`}
+                className={
+                  isActive
+                    ? "rounded-lg border border-accent bg-accent-muted px-4 py-4 text-accent shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_16%,transparent)]"
+                    : "rounded-lg border border-border bg-surface px-4 py-4 text-text-secondary"
+                }
+                animate={
+                  isActive && !shouldReduceMotion
+                    ? { y: [0, -4, 0], opacity: [0.88, 1, 0.88] }
+                    : undefined
+                }
+                transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={
+                      isComplete
+                        ? "flex size-6 items-center justify-center rounded-full bg-success text-[10px] font-bold text-accent-foreground"
+                        : isActive
+                          ? "flex size-6 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground"
+                          : "flex size-6 items-center justify-center rounded-full border border-border text-[10px] font-bold text-text-muted"
+                    }
+                  >
+                    {isComplete ? "OK" : index + 1}
+                  </span>
+                  <p className="min-w-0 text-[13px] font-semibold leading-5">
+                    {step.title}
+                  </p>
+                </div>
+                <p className="mt-2 text-[12px] font-medium leading-5 text-text-secondary">
+                  {step.detail}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function ProcessVisual({
+  activeStep,
+  reducedMotion,
+  variant,
+}: {
+  activeStep: number;
+  reducedMotion: boolean;
+  variant: ProcessOverlayVariant;
+}) {
+  const labels = VARIANT_DETAILS[variant];
+
+  return (
+    <div className="relative mx-auto flex min-h-[220px] w-full max-w-[240px] items-center justify-center rounded-xl border border-border bg-surface px-5 py-5">
+      <motion.div
+        className="absolute inset-4 rounded-xl border border-accent/30"
+        animate={
+          reducedMotion
+            ? undefined
+            : {
+                opacity: [0.24, 0.7, 0.24],
+                scale: [0.96, 1.02, 0.96],
+              }
+        }
+        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <div className="relative grid w-full gap-3">
+        {labels.map((label, index) => {
+          const isActive = index === activeStep % labels.length;
+          const isPast = index < activeStep % labels.length;
+
+          return (
+            <motion.div
+              key={label}
+              className={
+                isActive
+                  ? "flex items-center justify-between rounded-lg border border-accent bg-accent-muted px-3 py-2 text-accent"
+                  : "flex items-center justify-between rounded-lg border border-border bg-surface-secondary px-3 py-2 text-text-secondary"
+              }
+              animate={
+                isActive && !reducedMotion
+                  ? { x: [0, 4, 0], opacity: [0.82, 1, 0.82] }
+                  : undefined
+              }
+              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <span className="text-[12px] font-semibold leading-4">{label}</span>
+              <span
+                className={
+                  isPast
+                    ? "size-2 rounded-full bg-success"
+                    : isActive
+                      ? "size-2 rounded-full bg-accent"
+                      : "size-2 rounded-full bg-border-muted"
+                }
+              />
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
+}
+
+function normalizeSteps(steps: ProcessStep[]): NormalizedStep[] {
+  const normalized = steps
+    .map((step) => {
+      if (typeof step === "string") {
+        return {
+          title: step,
+          detail: "Working through this stage",
+        };
+      }
+
+      return step;
+    })
+    .filter((step) => step.title.trim().length > 0);
+
+  return normalized.length > 0 ? normalized : DEFAULT_STEPS;
 }

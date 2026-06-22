@@ -12,7 +12,7 @@ const navItems = [
 
 export function DashboardNavbar() {
   return (
-    <header className="border-b border-border bg-surface">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface/58 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)] backdrop-blur-xl">
       <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:px-10">
         <BrandLogo />
         <nav
