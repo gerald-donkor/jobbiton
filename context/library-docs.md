@@ -175,7 +175,7 @@ export async function searchJobs(
     app_key: process.env.ADZUNA_APP_KEY!,
     what: jobTitle,
     category: "it-jobs", // always filter to IT jobs
-    results_per_page: "10",
+    results_per_page: "30",
     "content-type": "application/json",
   });
 
@@ -200,7 +200,7 @@ export async function searchJobs(
 }
 ```
 
-`searchAdzunaJobs()` should request only one Adzuna page with `results_per_page=10`, then Jobbiton should score that set, sort by match score, and display/save only those top 10 roles. Do not surface Adzuna's total available `count` in the Find Jobs UI or saved run metadata while the product is in top-10-only mode.
+`searchAdzunaJobs()` should request a small one-page candidate pool, currently `results_per_page=30`, so Jobbiton can remove salary-missing listings before matching. The agent scores only salary-listed candidates, sorts by match score, and displays/saves the strongest 10 roles. Do not surface Adzuna's total available `count` in the Find Jobs UI or saved run metadata while the product is in fast top-10 mode.
 
 ### Response Shape
 
@@ -253,7 +253,8 @@ const jobRecord = {
 
 - Always include `category=it-jobs` — never search Adzuna without this filter
 - Never pass `where` if location is empty — omit the parameter entirely
-- Preserve Adzuna's full response `count` as the available-results total; do not derive the total from the 10 saved/scored rows
+- Keep the Find Jobs UI focused on the saved top 10; do not show Adzuna total counts or live pagination until the product direction changes
+- Visible Find Jobs rows must have a salary estimate; filter salary-missing listings before scoring/saving and do not render "Not listed" salary rows in `/find-jobs`
 - `source` is always `'search'` for Adzuna jobs — never any other value
 - `salary_is_predicted: "1"` means Adzuna estimated the salary — this is normal
 - Adzuna description is a snippet — GPT-4o scores from it, not a full description
@@ -551,7 +552,7 @@ const response = await fetch(
 - Pair JSON mode with `generationConfig.responseJsonSchema` so Gemini is constrained to the expected object shape
 - Always validate parsed JSON with Zod before using it
 - Find Jobs matching should prefer OpenRouter only when `OPENROUTER_API_KEY` is configured; when the app is configured with `GEMINI_API_KEY`, match jobs with Gemini instead of throwing or logging a missing OpenRouter key
-- For Find Jobs matching, batch the current 10 Adzuna listings into one provider request, send job text as sanitized JSON data, and treat quota or malformed provider output as a quiet heuristic fallback for the current batch; do not print a stack trace for every listing when a provider returns unusable content
+- For Find Jobs matching, batch the current salary-listed Adzuna candidate pool into one provider request, send job text as sanitized JSON data, and treat quota or malformed provider output as a quiet heuristic fallback for the current batch; do not print a stack trace for every listing when a provider returns unusable content
 - Ask for `yearsExperience` as digits only; normalize values like `5 years` to `5`
 - If Gemini leaves `yearsExperience` blank but work dates are present, estimate it in app code from extracted work dates before filling the form
 - Ask Gemini to put role bullets, achievements, duties, and summaries into `workExperience[].responsibilities`
@@ -771,6 +772,25 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 - Keep all colors in Tailwind token classes or CSS variables; do not animate raw hex colors.
 - Use Motion to clarify state, not as decoration. Long-running actions should show concrete step labels and progress cues.
 - Loading buttons should use the shared `components/ui/button.tsx` primitive with `loading` and `loadingLabel`; it provides click/tap feedback, a subtle loading pulse, spinner, and moving sheen while preserving the original submit/link behavior around it.
+
+---
+
+## Animate UI
+
+**Official docs:** https://animate-ui.com/docs
+**Install docs:** https://animate-ui.com/docs/installation
+**Background components:** https://animate-ui.com/docs/components
+
+Animate UI is a copy-first animated React component distribution built around Tailwind CSS and Motion. Jobbiton manually installs selected registry components when the shadcn registry flow is not available or aliases are missing.
+
+**Rules:**
+
+- Keep copied/adapted registry components inside Jobbiton's token system; use CSS variables, token Tailwind classes, and project radius/spacing values instead of vendor colors.
+- The app shell currently uses manually installed Animate UI `GradientBackground`, `StarsBackground`, and `HexagonBackground` components under `components/animate-ui/backgrounds/`.
+- Prefer subtle combinations of Animate UI background components for app shells; avoid visual noise behind data-heavy pages.
+- Respect reduced-motion preferences with Motion's `useReducedMotion()` or `MotionConfig reducedMotion="user"`.
+- Background effects must be non-interactive, `aria-hidden`, and `pointer-events-none` unless the specific page is designed around direct interaction.
+- Do not add a broad Animate UI package dependency for one-off effects; keep local registry copies in `components/animate-ui/` and compose them from feature-specific wrappers such as `components/loading/AppBackgroundEffects.tsx`.
 
 ---
 

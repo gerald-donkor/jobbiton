@@ -50,7 +50,20 @@ export function ProfileInformationForm({
         variant="save"
         title="Saving your profile"
         description="Updating your profile details, preferences, skills, and work history."
-        steps={["Validating fields", "Saving changes", "Refreshing matches"]}
+        steps={[
+          {
+            title: "Validating fields",
+            detail: "Checking the profile payload before it leaves the page.",
+          },
+          {
+            title: "Saving changes",
+            detail: "Writing profile, skills, industries, and work history.",
+          },
+          {
+            title: "Refreshing matches",
+            detail: "Preparing future searches to use the latest profile.",
+          },
+        ]}
       />
       <input type="hidden" name="skills_json" value={JSON.stringify(skills)} />
       <input

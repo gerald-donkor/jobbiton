@@ -10,6 +10,7 @@ import { createInsforgeServer } from "@/lib/insforge-server";
 import { MATCH_THRESHOLD } from "@/lib/utils";
 
 const FIND_JOBS_PAGE_SIZE = 10;
+const FIND_JOBS_QUERY_LIMIT = 50;
 
 const JOB_SUMMARY_COLUMNS =
   "id, title, company, location, salary, source, match_score, match_reason, matched_skills, missing_skills, external_apply_url, found_at";
@@ -136,7 +137,7 @@ async function listFindJobsForUser({
   applyMatchFilter(dataQuery, matchFilter);
   applyTextSearch(dataQuery, normalizedQuery);
   dataQuery.order("match_score", { ascending: false, nullsFirst: false });
-  dataQuery.limit(FIND_JOBS_PAGE_SIZE);
+  dataQuery.limit(FIND_JOBS_QUERY_LIMIT);
 
   const { data, error: dataError } = await dataQuery;
 
@@ -146,9 +147,10 @@ async function listFindJobsForUser({
   }
 
   const rows: unknown[] = Array.isArray(data) ? data : [];
-  const jobs = rows.map(mapJobRow).filter((job): job is FindJobsJobSummary =>
-    Boolean(job),
-  );
+  const jobs = rows
+    .map(mapJobRow)
+    .filter((job): job is FindJobsJobSummary => Boolean(job))
+    .slice(0, FIND_JOBS_PAGE_SIZE);
 
   return {
     activeRunId: runId,
@@ -240,8 +242,9 @@ function mapJobRow(row: unknown): FindJobsJobSummary | null {
   const title = readString(record.title);
   const company = readString(record.company);
   const foundAt = readString(record.found_at);
+  const salary = readString(record.salary);
 
-  if (!id || !title || !company || !foundAt) {
+  if (!id || !title || !company || !foundAt || !salary) {
     return null;
   }
 
@@ -250,7 +253,7 @@ function mapJobRow(row: unknown): FindJobsJobSummary | null {
     title,
     company,
     location: readString(record.location) || "Not listed",
-    salary: readString(record.salary),
+    salary,
     source: "Search",
     foundAt,
     matchScore: readNumber(record.match_score),

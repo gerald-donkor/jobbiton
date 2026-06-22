@@ -73,7 +73,20 @@ export function ResumeSection({
         title: "Extracting resume details",
         description:
           "Reading the resume, identifying profile fields, and preparing editable suggestions.",
-        steps: ["Reading document", "Finding profile signals", "Preparing fields"],
+        steps: [
+          {
+            title: "Reading document",
+            detail: "Extracting readable text from the selected resume.",
+          },
+          {
+            title: "Finding profile signals",
+            detail: "Locating skills, education, work history, and contact data.",
+          },
+          {
+            title: "Preparing fields",
+            detail: "Filling the draft form while preserving your edits.",
+          },
+        ],
       }
     : isGenerating
       ? {
@@ -81,7 +94,20 @@ export function ResumeSection({
           title: "Generating your resume",
           description:
             "Using your profile details to build a polished resume document.",
-          steps: ["Structuring sections", "Writing role bullets", "Building file"],
+          steps: [
+            {
+              title: "Structuring sections",
+              detail: "Arranging your profile into a clean resume outline.",
+            },
+            {
+              title: "Writing role bullets",
+              detail: "Polishing responsibilities and measurable impact.",
+            },
+            {
+              title: "Building file",
+              detail: "Rendering the PDF and saving it as your active resume.",
+            },
+          ],
         }
       : isResumeUploading
         ? {
@@ -89,7 +115,20 @@ export function ResumeSection({
             title: "Uploading your resume",
             description:
               "Saving the file securely and preparing it for preview and extraction.",
-            steps: ["Checking file", "Saving resume", "Refreshing preview"],
+            steps: [
+              {
+                title: "Checking file",
+                detail: "Validating file type and size before upload.",
+              },
+              {
+                title: "Saving resume",
+                detail: "Uploading the document to secure storage.",
+              },
+              {
+                title: "Refreshing preview",
+                detail: "Updating the profile page with the saved resume.",
+              },
+            ],
           }
         : isRemoving
           ? {
@@ -97,7 +136,20 @@ export function ResumeSection({
               title: "Removing resume",
               description:
                 "Clearing the saved file and resetting resume-related profile state.",
-              steps: ["Revoking file", "Updating profile", "Refreshing page"],
+              steps: [
+                {
+                  title: "Revoking file",
+                  detail: "Removing the active resume from storage.",
+                },
+                {
+                  title: "Updating profile",
+                  detail: "Clearing the saved resume link from your profile.",
+                },
+                {
+                  title: "Refreshing page",
+                  detail: "Returning the resume panel to a ready state.",
+                },
+              ],
             }
           : null;
 

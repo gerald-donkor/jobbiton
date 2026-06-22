@@ -14,6 +14,12 @@ type ScrollFloatProps = {
   scale?: boolean;
 };
 
+type FoldSectionProps = {
+  children: ReactNode;
+  className?: string;
+  index?: number;
+};
+
 export function ScrollFloat({
   children,
   className = "",
@@ -79,5 +85,53 @@ export function ScrollProgressBand() {
         style={{ scaleX }}
       />
     </div>
+  );
+}
+
+export function FoldSection({
+  children,
+  className = "",
+  index = 0,
+}: FoldSectionProps) {
+  const ref = useRef<HTMLElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 18%", "end 18%"],
+  });
+  const easedProgress = useSpring(scrollYProgress, {
+    stiffness: 92,
+    damping: 24,
+    mass: 0.45,
+  });
+  const rotateX = useTransform(easedProgress, [0, 0.55, 1], [0, 0, -18]);
+  const scale = useTransform(easedProgress, [0, 0.55, 1], [1, 1, 0.88]);
+  const y = useTransform(easedProgress, [0, 0.55, 1], [0, 0, -74]);
+  const opacity = useTransform(easedProgress, [0, 0.72, 1], [1, 1, 0.82]);
+  const blur = useTransform(easedProgress, [0, 0.82, 1], ["blur(0px)", "blur(0px)", "blur(1px)"]);
+
+  return (
+    <section
+      ref={ref}
+      className={`homepage-fold-track ${className}`}
+      style={{ zIndex: index + 1 }}
+    >
+      <motion.div
+        className="homepage-fold-section"
+        style={
+          shouldReduceMotion
+            ? undefined
+            : {
+                opacity,
+                rotateX,
+                scale,
+                y,
+                filter: blur,
+              }
+        }
+      >
+        {children}
+      </motion.div>
+    </section>
   );
 }

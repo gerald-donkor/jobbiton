@@ -184,10 +184,11 @@ Agent calls Adzuna API to find jobs matching user's search criteria, scores them
 - POST /api/agent/find receives jobTitle and location from client
 - Call Adzuna API:
   - GET https://api.adzuna.com/v1/api/jobs/{country}/search/1
-  - params: what={jobTitle}, where={location}, results_per_page=10, app_id, app_key
+  - params: what={jobTitle}, where={location}, results_per_page=30, app_id, app_key
   - Detect country from location input — default to 'us'
 - For each job returned:
   - Extract title, company, location, salary, description snippet, redirect_url
+  - Filter out jobs without a salary estimate before matching visible Find Jobs results
   - GPT-4o scores job against user profile:
     - matchScore — integer 0-100
     - matchReason — one paragraph explanation
@@ -198,7 +199,7 @@ Agent calls Adzuna API to find jobs matching user's search criteria, scores them
     - run_id from agent_runs record
     - All structured fields saved
 - Create agent_run record in DB
-- After all jobs saved — update agent_run with total count, return success message to frontend
+- After the strongest 10 salary-listed jobs are saved — update agent_run, return the saved jobs to frontend
 
 **PostHog events:** `job_search_started`, `job_found`
 
@@ -217,7 +218,7 @@ Wire filter tabs, sort dropdown, text search, and pagination to real InsForge DB
 - Sort by Newest — order by found_at descending
 - Sort by Oldest — order by found_at ascending
 - Text search — filter by company name or job title (case insensitive)
-- Pagination — 20 jobs per page, total count shown
+- Current product direction: keep Find Jobs as a fast top-10 salary-listed shortlist for the active search; do not show total available counts or live Adzuna pagination unless this direction changes.
 
 ---
 

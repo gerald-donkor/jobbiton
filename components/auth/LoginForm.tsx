@@ -89,7 +89,20 @@ export function LoginForm() {
         description={`Connecting to ${
           pendingProvider === "github" ? "GitHub" : "Google"
         } and preparing your session.`}
-        steps={["Starting OAuth", "Opening provider", "Securing session"]}
+        steps={[
+          {
+            title: "Starting OAuth",
+            detail: "Creating the secure provider request.",
+          },
+          {
+            title: "Opening provider",
+            detail: "Handing you off to the selected sign-in provider.",
+          },
+          {
+            title: "Securing session",
+            detail: "Preparing the callback that stores your app session.",
+          },
+        ]}
       />
       <div className="soft-gradient-panel flex min-h-[420px] flex-col justify-between border-b border-border px-8 py-8 md:border-r md:border-b-0 md:px-10">
         <div>

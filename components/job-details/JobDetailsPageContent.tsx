@@ -13,7 +13,7 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
   const jobUrl = job.externalApplyUrl || job.sourceUrl || "/find-jobs";
 
   return (
-    <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-background text-text-primary">
+    <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-background/56 text-text-primary backdrop-blur-[2px]">
       <PageIntro
         eyebrow="Opportunity brief"
         title={job.title}

@@ -5,7 +5,7 @@ import { ProductFeatures } from "@/components/homepage/ProductFeatures";
 import { Testimonial } from "@/components/homepage/Testimonial";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
-import { ScrollProgressBand } from "@/components/motion/ScrollFlow";
+import { FoldSection, ScrollProgressBand } from "@/components/motion/ScrollFlow";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function Home() {
@@ -16,25 +16,35 @@ export default async function Home() {
   const navCtaLabel = isSignedIn ? "Go to Profile" : "Start for free";
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-transparent">
       <Navbar ctaHref={primaryHref} ctaLabel={navCtaLabel} />
       <ScrollProgressBand />
-      <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-surface text-text-primary">
-        <Hero
-          primaryHref={primaryHref}
-          primaryLabel={primaryLabel}
-          secondaryHref="/find-jobs"
-          secondaryLabel={isSignedIn ? "Find Jobs" : "Find Your First Match"}
-        />
-        <JobbitonFlowSections />
-        <ProductFeatures />
-        <Testimonial />
-        <FinalCta
-          primaryHref={primaryHref}
-          primaryLabel={primaryLabel}
-          secondaryHref="/find-jobs"
-          secondaryLabel={isSignedIn ? "Find Jobs" : "Find Your First Match"}
-        />
+      <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-surface/24 text-text-primary backdrop-blur-[0.5px]">
+        <FoldSection index={0}>
+          <Hero
+            primaryHref={primaryHref}
+            primaryLabel={primaryLabel}
+            secondaryHref="/find-jobs"
+            secondaryLabel={isSignedIn ? "Find Jobs" : "Find Your First Match"}
+          />
+        </FoldSection>
+        <FoldSection index={1}>
+          <JobbitonFlowSections />
+        </FoldSection>
+        <FoldSection index={2}>
+          <ProductFeatures />
+        </FoldSection>
+        <FoldSection index={3}>
+          <Testimonial />
+        </FoldSection>
+        <FoldSection index={4}>
+          <FinalCta
+            primaryHref={primaryHref}
+            primaryLabel={primaryLabel}
+            secondaryHref="/find-jobs"
+            secondaryLabel={isSignedIn ? "Find Jobs" : "Find Your First Match"}
+          />
+        </FoldSection>
       </main>
       <Footer />
     </div>

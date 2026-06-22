@@ -25,7 +25,7 @@ export default async function JobDetailsPage({ params }: JobDetailsPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background/68">
       <JobDetailsNavbar
         userId={user.id}
         userEmail={user.email}
