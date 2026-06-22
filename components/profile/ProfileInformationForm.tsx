@@ -44,7 +44,7 @@ export function ProfileInformationForm({
   onRemoveWorkExperience,
 }: ProfileInformationFormProps) {
   return (
-    <section className="relative overflow-hidden rounded-xl border border-border bg-surface px-8 py-8 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <section className="relative overflow-hidden rounded-xl border border-border bg-surface px-4 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] sm:px-8 sm:py-8">
       <ProcessOverlay
         active={isPending}
         variant="save"
@@ -178,7 +178,7 @@ export function ProfileInformationForm({
             </label>
             <div className="profile-field md:col-span-2">
               <span>Skills</span>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 min-[420px]:flex-row">
                 <input
                   type="text"
                   value={skillInput}
@@ -209,7 +209,7 @@ export function ProfileInformationForm({
             </div>
             <div className="profile-field md:col-span-2">
               <span>Industries Worked In (Optional)</span>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 min-[420px]:flex-row">
                 <input
                   type="text"
                   value={industryInput}
@@ -244,7 +244,7 @@ export function ProfileInformationForm({
 
         <ScrollFloat direction="left" intensity={20}>
         <section className="space-y-6 border-t border-border pt-10">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-[16px] font-semibold leading-6 text-text-primary">
               Work Experience
             </h3>
@@ -299,9 +299,9 @@ export function ProfileInformationForm({
                     />
                   </label>
                   <div className="profile-field">
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                       <span>End Date</span>
-                      <label className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-[12px] font-medium normal-case leading-4 text-text-secondary">
+                      <label className="inline-flex shrink-0 items-center gap-2 text-[12px] font-medium normal-case leading-4 text-text-secondary">
                         <input
                           type="checkbox"
                           name={`work_current_${index}`}

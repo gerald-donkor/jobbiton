@@ -17,7 +17,7 @@ export function JobFilterBar({
   onMatchFilterChange,
 }: JobFilterBarProps) {
   return (
-    <section className="grid gap-3 lg:grid-cols-[1fr_136px]">
+    <section className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_136px]">
       <label className="flex h-10 items-center gap-3 rounded-md border border-border bg-surface px-3 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)]">
         <span
           aria-hidden="true"

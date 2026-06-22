@@ -14,14 +14,14 @@ const dotClasses: Record<DashboardActivityTone, string> = {
 
 export function RecentActivity({ activities }: RecentActivityProps) {
   return (
-    <section className="min-h-[340px] rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <section className="min-h-[300px] rounded-xl border border-border bg-surface px-4 py-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] sm:min-h-[340px] sm:px-6 sm:py-6">
       <header>
         <h2 className="text-[16px] font-semibold leading-6 text-text-primary">
           Recent Activity
         </h2>
       </header>
       {activities.length === 0 ? (
-        <div className="mt-5 flex min-h-[236px] items-center justify-center rounded-md border border-dashed border-border bg-surface-secondary px-6 text-center text-[12px] font-normal leading-4 text-text-muted">
+        <div className="mt-5 flex min-h-[204px] items-center justify-center rounded-md border border-dashed border-border bg-surface-secondary px-4 text-center text-[12px] font-normal leading-4 text-text-muted sm:min-h-[236px] sm:px-6">
           Activity will appear after you find jobs or research companies.
         </div>
       ) : (
@@ -34,7 +34,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                 key={activity.id}
                 tabIndex={0}
                 aria-label={`${activity.label}, ${activity.time}`}
-                className="group flex cursor-pointer gap-4 rounded-md px-1 py-1 outline-none transition-colors duration-150 hover:bg-surface-secondary focus-visible:bg-surface-secondary focus-visible:ring-2 focus-visible:ring-accent"
+                className="group flex cursor-pointer gap-3 rounded-md px-1 py-2 outline-none transition-colors duration-150 hover:bg-surface-secondary focus-visible:bg-surface-secondary focus-visible:ring-2 focus-visible:ring-accent sm:gap-4 sm:py-1"
               >
                 <div className="flex w-4 flex-col items-center">
                   <span
@@ -49,7 +49,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                   )}
                 </div>
                 <div className={isLast ? "pb-0" : "pb-3"}>
-                  <p className="text-[14px] font-medium leading-5 text-text-primary transition-colors duration-150 group-hover:text-accent group-focus-visible:text-accent">
+                  <p className="break-words text-[14px] font-medium leading-5 text-text-primary transition-colors duration-150 group-hover:text-accent group-focus-visible:text-accent">
                     {activity.label}
                   </p>
                   <p className="mt-1 text-[12px] font-normal leading-4 text-text-muted">

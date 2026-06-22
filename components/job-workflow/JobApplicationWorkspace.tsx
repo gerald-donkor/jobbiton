@@ -32,7 +32,7 @@ export function JobApplicationWorkspace({ job }: JobApplicationWorkspaceProps) {
 
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
-      <div className="flex flex-col gap-4 border-b border-border px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 border-b border-border px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-[12px] font-semibold uppercase leading-4 text-text-muted">
             Application workspace
@@ -41,7 +41,7 @@ export function JobApplicationWorkspace({ job }: JobApplicationWorkspaceProps) {
             Track, save, compare, and prepare
           </h2>
         </div>
-        <div className="flex rounded-full border border-border bg-surface-secondary p-1">
+        <div className="flex w-full rounded-full border border-border bg-surface-secondary p-1 min-[420px]:w-fit">
           <PanelTab
             active={activePanel === "tracker"}
             label="Tracker"
@@ -63,7 +63,7 @@ export function JobApplicationWorkspace({ job }: JobApplicationWorkspaceProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="grid gap-5 px-6 py-6 lg:grid-cols-[0.9fr_1.1fr]"
+            className="grid gap-5 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[0.9fr_1.1fr]"
           >
             <div className="space-y-4">
               <label className="block">
@@ -117,7 +117,7 @@ export function JobApplicationWorkspace({ job }: JobApplicationWorkspaceProps) {
               {compareJobs.length >= 2 ? (
                 <Link
                   href={compareHref}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-accent bg-accent px-4 text-[14px] font-semibold leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_20%,transparent)] transition hover:bg-accent-dark"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-accent bg-accent px-4 py-2 text-center text-[14px] font-semibold leading-5 text-accent-foreground shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent)_20%,transparent)] transition hover:bg-accent-dark sm:w-auto"
                 >
                   View company comparison
                 </Link>
@@ -147,7 +147,7 @@ export function JobApplicationWorkspace({ job }: JobApplicationWorkspaceProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="grid gap-4 px-6 py-6 md:grid-cols-2"
+            className="grid gap-4 px-4 py-5 sm:px-6 sm:py-6 md:grid-cols-2"
           >
             {prepItems.map((section) => (
               <div
@@ -197,7 +197,7 @@ function PanelTab({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`h-8 rounded-full px-3 text-[13px] font-semibold leading-5 transition ${
+      className={`min-h-8 flex-1 rounded-full px-3 py-1 text-[13px] font-semibold leading-5 transition min-[420px]:flex-none ${
         active
           ? "bg-accent text-accent-foreground shadow-[0_6px_14px_color-mix(in_srgb,var(--color-accent)_20%,transparent)]"
           : "text-text-secondary hover:text-accent"
@@ -258,4 +258,3 @@ function toWorkflowSnapshot(job: JobDetailsRecord): JobWorkflowSnapshot {
     externalApplyUrl: job.externalApplyUrl,
   };
 }
-

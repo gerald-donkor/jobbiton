@@ -1,4 +1,5 @@
 import { createInsforgeServer } from "@/lib/insforge-server";
+import { warnDashboardDataIssue } from "@/lib/dashboard-log";
 
 export type DashboardStat = {
   label: string;
@@ -23,7 +24,10 @@ export async function getDashboardStatsForUser(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("[dashboard-stats] Failed to load dashboard stats", error);
+    warnDashboardDataIssue(
+      "[dashboard-stats] Failed to load dashboard stats",
+      error,
+    );
     return buildDashboardStats([]);
   }
 

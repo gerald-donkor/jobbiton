@@ -20,22 +20,22 @@ export function RouteLoadingShell({
 }: RouteLoadingShellProps) {
   return (
     <main className="bg-background/90 text-text-primary">
-      <section className="border-b border-border bg-surface px-6 py-16 md:px-10">
+      <section className="border-b border-border bg-surface px-4 py-10 sm:px-6 sm:py-14 md:px-10 md:py-16">
         <div className="mx-auto grid max-w-[1180px] gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
             <p className="text-[12px] font-semibold uppercase leading-4 tracking-[0.1em] text-accent">
               {eyebrow}
             </p>
-            <h1 className="mt-6 max-w-[520px] text-[52px] font-bold leading-[1.05] text-text-primary md:text-[64px]">
+            <h1 className="mt-6 max-w-[520px] break-words text-[36px] font-bold leading-[1.08] text-text-primary sm:text-[48px] md:text-[64px] md:leading-[1.05]">
               {title}
             </h1>
           </div>
-          <p className="max-w-[640px] text-[19px] font-normal leading-8 text-text-secondary">
+          <p className="max-w-[640px] text-[16px] font-normal leading-7 text-text-secondary sm:text-[19px] sm:leading-8">
             {description}
           </p>
         </div>
       </section>
-      <section className="px-6 py-10 md:px-10">
+      <section className="px-4 py-8 sm:px-6 sm:py-10 md:px-10">
         <div className="mx-auto max-w-[1180px]">
           <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)]">
             <LoadingVisual variant={variant} />
@@ -54,7 +54,7 @@ function LoadingVisual({
   if (variant === "details") {
     return (
       <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-5 border-b border-border p-6 lg:border-r lg:border-b-0">
+        <div className="space-y-5 border-b border-border p-4 sm:p-6 lg:border-r lg:border-b-0">
           <PulseBlock className="h-8 w-3/5" />
           <PulseBlock className="h-4 w-4/5" />
           <PulseBlock className="h-4 w-2/3" />
@@ -64,7 +64,7 @@ function LoadingVisual({
             ))}
           </div>
         </div>
-        <div className="space-y-4 p-6">
+        <div className="space-y-4 p-4 sm:p-6">
           <RadarPulse />
           <PulseBlock className="h-4 w-5/6" />
           <PulseBlock className="h-4 w-3/4" />

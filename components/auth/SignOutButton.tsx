@@ -7,7 +7,7 @@ import { insforge } from "@/lib/insforge-client";
 import { posthog } from "@/lib/posthog-client";
 
 type SignOutButtonProps = {
-  variant?: "button" | "nav";
+  variant?: "button" | "nav" | "profileNav";
 };
 
 export function SignOutButton({ variant = "button" }: SignOutButtonProps) {
@@ -46,7 +46,24 @@ export function SignOutButton({ variant = "button" }: SignOutButtonProps) {
         loadingLabel="Signing out..."
         variant="nav"
         size="sm"
-        className="px-0"
+        className="px-2 lg:px-0"
+      >
+        <span aria-hidden="true" className="job-details-signout-icon" />
+        <span className="max-[379px]:sr-only">Sign out</span>
+      </Button>
+    );
+  }
+
+  if (variant === "profileNav") {
+    return (
+      <Button
+        onClick={handleSignOut}
+        disabled={isPending}
+        loading={isPending}
+        loadingLabel="Signing out..."
+        variant="secondary"
+        size="sm"
+        className="profile-nav-signout min-w-0 max-w-[46vw] px-3 sm:max-w-none sm:px-4"
       >
         <span aria-hidden="true" className="job-details-signout-icon" />
         Sign out

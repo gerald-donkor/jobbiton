@@ -104,7 +104,7 @@ export function LoginForm() {
           },
         ]}
       />
-      <div className="soft-gradient-panel flex min-h-[420px] flex-col justify-between border-b border-border px-8 py-8 md:border-r md:border-b-0 md:px-10">
+      <div className="soft-gradient-panel flex min-h-[340px] flex-col justify-between border-b border-border px-5 py-7 sm:px-8 sm:py-8 md:min-h-[420px] md:border-r md:border-b-0 md:px-10">
         <div>
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium leading-4 text-text-secondary shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)]">
             <svg aria-hidden="true" className="size-3.5 text-accent" viewBox="0 0 16 16" fill="none">
@@ -113,7 +113,7 @@ export function LoginForm() {
             </svg>
             OAuth secured by InsForge
           </div>
-          <h1 className="max-w-[350px] text-[44px] font-bold leading-[0.98] text-text-slate md:text-[48px]">
+          <h1 className="max-w-[350px] text-[36px] font-bold leading-[1.02] text-text-slate sm:text-[44px] md:text-[48px] md:leading-[0.98]">
             Sign in and let the agent prep your next application.
           </h1>
           <p className="mt-6 max-w-[350px] text-[15px] leading-6 text-text-secondary">
@@ -122,7 +122,7 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="flex min-h-[420px] items-center px-8 py-10 md:px-8">
+      <div className="flex min-h-[320px] items-center px-5 py-8 sm:px-8 sm:py-10 md:min-h-[420px] md:px-8">
         <div className="w-full">
           <p className="text-[12px] font-medium leading-5 text-text-secondary">Welcome to</p>
           <h2 className="mt-1 text-[24px] font-semibold leading-8 text-text-primary">

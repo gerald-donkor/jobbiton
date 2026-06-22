@@ -17,7 +17,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <Navbar ctaHref={primaryHref} ctaLabel={navCtaLabel} />
+      <Navbar ctaHref={primaryHref} ctaLabel={navCtaLabel} reserveSpace={false} />
       <ScrollProgressBand />
       <main className="mx-auto w-full max-w-[1440px] border-x border-border bg-surface/24 text-text-primary backdrop-blur-[0.5px]">
         <FoldSection index={0}>

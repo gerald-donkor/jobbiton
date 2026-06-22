@@ -19,6 +19,8 @@ import { MATCH_THRESHOLD } from "@/lib/utils";
 type FindJobsClientProps = {
   jobsList: FindJobsListResult;
   filters: {
+    jobTitle: string;
+    location: string;
     query: string;
     matchFilter: MatchFilterValue;
     runId: string | null;
@@ -27,8 +29,8 @@ type FindJobsClientProps = {
 
 export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
   const router = useRouter();
-  const [jobTitle, setJobTitle] = useState("");
-  const [location, setLocation] = useState("");
+  const [jobTitle, setJobTitle] = useState(filters.jobTitle);
+  const [location, setLocation] = useState(filters.location);
   const [filterQuery, setFilterQuery] = useState(filters.query);
   const [latestSearchJobs, setLatestSearchJobs] = useState<
     FindJobsJobSummary[] | null
@@ -112,7 +114,7 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
             ? "No jobs matched that search right now."
             : `Showing the top ${result.data.totalFound} matched roles for this search.`,
       });
-      navigateToRun(result.data.runId);
+      navigateToRun(result.data.runId, trimmedJobTitle, location.trim());
     } catch (error) {
       console.error("[FindJobsClient] Search request failed", error);
       resetLatestSearchState();
@@ -131,7 +133,17 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
   }): void {
     const nextQuery = next.query ?? filterQuery;
     const nextMatchFilter = next.matchFilter ?? filters.matchFilter;
+    const currentJobTitle = jobTitle.trim();
+    const currentLocation = location.trim();
     const params = new URLSearchParams();
+
+    if (currentJobTitle) {
+      params.set("role", currentJobTitle);
+    }
+
+    if (currentLocation) {
+      params.set("loc", currentLocation);
+    }
 
     if (nextQuery.trim()) {
       params.set("q", nextQuery.trim());
@@ -151,10 +163,19 @@ export function FindJobsClient({ jobsList, filters }: FindJobsClientProps) {
     });
   }
 
-  function navigateToRun(runId: string): void {
+  function navigateToRun(
+    runId: string,
+    searchedJobTitle: string,
+    searchedLocation: string,
+  ): void {
     const params = new URLSearchParams();
 
     params.set("run", runId);
+    params.set("role", searchedJobTitle);
+
+    if (searchedLocation) {
+      params.set("loc", searchedLocation);
+    }
 
     if (filters.matchFilter !== "all") {
       params.set("match", filters.matchFilter);

@@ -65,7 +65,7 @@ export function Button({
           ? { duration: 1.15, repeat: Infinity, ease: "easeInOut" }
           : { duration: 0.16 }
       }
-      className={`relative overflow-hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium leading-5 transition disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`relative inline-flex max-w-full items-center justify-center gap-2 overflow-hidden whitespace-normal rounded-md text-center font-medium leading-5 transition disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {loading && !shouldReduceMotion ? (
@@ -76,7 +76,7 @@ export function Button({
           transition={{ duration: 1.05, repeat: Infinity, ease: "easeInOut" }}
         />
       ) : null}
-      <span className="relative inline-flex items-center gap-2">
+      <span className="relative inline-flex min-w-0 items-center justify-center gap-2">
         {loading ? <span aria-hidden="true" className="loading-spinner" /> : null}
         {loading ? loadingLabel ?? children : children}
       </span>

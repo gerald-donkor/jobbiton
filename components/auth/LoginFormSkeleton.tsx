@@ -5,7 +5,7 @@ export function LoginFormSkeleton() {
       aria-label="Loading sign in options"
       className="grid w-full max-w-[760px] overflow-hidden rounded-xl border border-border bg-surface shadow-[0_14px_30px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)] md:grid-cols-[1.08fr_0.92fr]"
     >
-      <div className="soft-gradient-panel flex min-h-[420px] flex-col justify-between border-b border-border px-8 py-8 md:border-r md:border-b-0 md:px-10">
+      <div className="soft-gradient-panel flex min-h-[340px] flex-col justify-between border-b border-border px-5 py-7 sm:px-8 sm:py-8 md:min-h-[420px] md:border-r md:border-b-0 md:px-10">
         <div>
           <div className="mb-8 h-7 w-44 animate-pulse rounded-full border border-border bg-surface" />
           <div className="space-y-3">
@@ -20,7 +20,7 @@ export function LoginFormSkeleton() {
         </div>
       </div>
 
-      <div className="flex min-h-[420px] items-center px-8 py-10 md:px-8">
+      <div className="flex min-h-[320px] items-center px-5 py-8 sm:px-8 sm:py-10 md:min-h-[420px] md:px-8">
         <div className="w-full">
           <div className="h-4 w-20 animate-pulse rounded-md bg-surface-secondary" />
           <div className="mt-3 h-8 w-36 animate-pulse rounded-md bg-surface-secondary" />

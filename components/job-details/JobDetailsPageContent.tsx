@@ -31,15 +31,15 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
         </RevealItem>
 
         <RevealItem>
-        <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+        <section className="rounded-xl border border-border bg-surface px-4 py-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)] sm:px-6 sm:py-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
+            <div className="flex min-w-0 flex-col gap-4 min-[420px]:flex-row min-[420px]:items-center">
               <span
                 aria-hidden="true"
                 className="job-details-building-icon h-[58px] w-[58px] shrink-0"
               />
               <div className="min-w-0">
-                <h1 className="truncate text-[26px] font-semibold leading-8 text-text-primary">
+                <h1 className="break-words text-[24px] font-semibold leading-8 text-text-primary sm:text-[26px]">
                   {job.title}
                 </h1>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[14px] font-semibold leading-5 text-text-secondary">
@@ -55,7 +55,7 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
               href={jobUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-[42px] shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 text-[14px] font-semibold leading-5 text-text-primary shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)] transition-colors hover:border-accent hover:text-accent"
+              className="inline-flex h-[42px] w-full shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 text-[14px] font-semibold leading-5 text-text-primary shadow-[0_1px_2px_color-mix(in_srgb,var(--color-overlay)_5%,transparent)] transition-colors hover:border-accent hover:text-accent sm:w-auto"
             >
               <span aria-hidden="true" className="job-details-external-icon" />
               View Job Post
@@ -138,7 +138,7 @@ export function JobDetailsPageContent({ job }: JobDetailsPageContentProps) {
           href={jobUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-12 items-center justify-center rounded-md bg-accent px-5 text-[15px] font-semibold leading-5 text-accent-foreground transition-colors hover:bg-accent-dark"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-accent px-5 py-3 text-center text-[15px] font-semibold leading-5 text-accent-foreground transition-colors hover:bg-accent-dark sm:w-auto"
         >
           Apply Now at {job.company}
         </a>

@@ -1,4 +1,5 @@
 import { createInsforgeServer } from "@/lib/insforge-server";
+import { warnDashboardDataIssue } from "@/lib/dashboard-log";
 
 export type DashboardSeriesPoint = {
   date: string;
@@ -77,14 +78,14 @@ export async function getDashboardAnalyticsForUser(
   ]);
 
   if (jobsResult.error) {
-    console.error(
+    warnDashboardDataIssue(
       "[dashboard-analytics] Failed to load dashboard jobs analytics",
       jobsResult.error,
     );
   }
 
   if (researchLogsResult.error) {
-    console.error(
+    warnDashboardDataIssue(
       "[dashboard-analytics] Failed to load company research analytics",
       researchLogsResult.error,
     );
@@ -134,7 +135,7 @@ async function loadResearchFallbackRows(
     .order("found_at", { ascending: true });
 
   if (error) {
-    console.error(
+    warnDashboardDataIssue(
       "[dashboard-analytics] Failed to load company research fallback",
       error,
     );

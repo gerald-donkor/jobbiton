@@ -71,9 +71,9 @@ export function ConnectedAccountsSection({
   onUseSavedProfile,
 }: ConnectedAccountsSectionProps) {
   const primaryButtonClass =
-    "inline-flex h-[38px] items-center justify-center rounded-md px-4 text-[14px] font-medium leading-5 transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex min-h-[38px] w-full items-center justify-center rounded-md px-4 py-2 text-center text-[14px] font-medium leading-5 transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
   const secondaryButtonClass =
-    "inline-flex h-[38px] items-center justify-center rounded-md border border-border bg-surface px-4 text-[14px] font-medium leading-5 text-text-primary transition-colors hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex min-h-[38px] w-full items-center justify-center rounded-md border border-border bg-surface px-4 py-2 text-center text-[14px] font-medium leading-5 text-text-primary transition-colors hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
 
   return (
     <section className="rounded-xl border border-border bg-surface px-6 py-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
@@ -106,7 +106,7 @@ export function ConnectedAccountsSection({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             {status === "oauth_connected" ? (
               <button
                 type="button"

@@ -1,4 +1,5 @@
 import { PostHogIdentify } from "@/components/auth/PostHogIdentify";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { Reveal } from "@/components/motion/Reveal";
@@ -21,7 +22,10 @@ export function ProfilePageContent({
   return (
     <div className="min-h-screen bg-background/68">
       <PostHogIdentify userId={userId} email={userEmail} name={userName} />
-      <Navbar />
+      <Navbar
+        activeHref="/profile"
+        ctaSlot={<SignOutButton variant="profileNav" />}
+      />
       <PageIntro
         eyebrow="Profile launchpad"
         title="One profile powers the whole search."
