@@ -29,13 +29,13 @@ export function PageTransition({ children }: PageTransitionProps) {
             initial={
               shouldReduceMotion
                 ? false
-                : { opacity: 0, y: 18, scale: 0.992, filter: "blur(8px)" }
+                : { opacity: 0 }
             }
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            animate={{ opacity: 1 }}
             exit={
               shouldReduceMotion
                 ? { opacity: 1 }
-                : { opacity: 0, y: -10, scale: 0.996, filter: "blur(4px)" }
+                : { opacity: 0 }
             }
             transition={{
               duration: shouldReduceMotion ? 0 : 0.38,

@@ -12,45 +12,48 @@ const navItems = [
 
 export function DashboardNavbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface/58 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-overlay)_10%,transparent)] backdrop-blur-xl">
-      <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:px-10">
-        <BrandLogo />
-        <nav
-          aria-label="Main navigation"
-          className="order-3 flex w-full items-center gap-2 overflow-x-auto lg:order-none lg:w-auto lg:justify-center lg:gap-12"
-        >
-          {navItems.map((item) => {
-            const isActive = item.href === "/dashboard";
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`inline-flex h-9 shrink-0 items-center rounded-full px-3 text-[14px] font-medium leading-5 transition-colors lg:h-20 lg:rounded-none lg:px-0 ${
-                  isActive
-                    ? "bg-accent-muted text-accent lg:bg-transparent lg:text-text-primary"
-                    : "text-text-dark hover:bg-surface-secondary hover:text-accent lg:hover:bg-transparent"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="flex items-center gap-3 lg:gap-6">
-          <ThemeToggle />
-          <Link
-            href="/profile"
-            aria-label="Open profile"
-            className="job-details-user-button hidden lg:inline-flex"
+    <>
+      <header className="navbar-glass fixed inset-x-0 top-0 z-50">
+        <div className="mx-auto flex min-h-20 w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:px-10">
+          <BrandLogo />
+          <nav
+            aria-label="Main navigation"
+            className="order-3 flex w-full items-center gap-2 overflow-x-auto lg:order-none lg:w-auto lg:justify-center lg:gap-12"
           >
-            <span aria-hidden="true" className="job-details-user-icon" />
-          </Link>
-          <div className="hidden lg:block">
-            <SignOutButton variant="nav" />
+            {navItems.map((item) => {
+              const isActive = item.href === "/dashboard";
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`inline-flex h-9 shrink-0 items-center rounded-full px-3 text-[14px] font-medium leading-5 transition-colors lg:h-20 lg:rounded-none lg:px-0 ${
+                    isActive
+                      ? "bg-accent-muted text-accent lg:bg-transparent lg:text-text-primary"
+                      : "text-text-dark hover:bg-surface-secondary hover:text-accent lg:hover:bg-transparent"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="flex items-center gap-3 lg:gap-6">
+            <ThemeToggle />
+            <Link
+              href="/profile"
+              aria-label="Open profile"
+              className="job-details-user-button hidden lg:inline-flex"
+            >
+              <span aria-hidden="true" className="job-details-user-icon" />
+            </Link>
+            <div className="hidden lg:block">
+              <SignOutButton variant="nav" />
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <div aria-hidden="true" className="h-[105px] lg:h-20" />
+    </>
   );
 }

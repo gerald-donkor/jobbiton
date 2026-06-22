@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import type { CompanyResearchDossier } from "@/components/job-details/types";
@@ -89,6 +89,9 @@ export function CompanyResearchPanel({
   const [isPending, startTransition] = useTransition();
   const [isResearching, setIsResearching] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [visibleDossier, setVisibleDossier] = useState(dossier);
+  const panelRef = useRef<HTMLElement>(null);
+  const restoreScrollYRef = useRef<number | null>(null);
   const isBusy = isResearching || isPending;
 
   useEffect(() => {
@@ -103,10 +106,30 @@ export function CompanyResearchPanel({
     return () => window.clearInterval(interval);
   }, [isResearching]);
 
+  useEffect(() => {
+    if (isPending || restoreScrollYRef.current === null) {
+      return;
+    }
+
+    const savedScrollY = restoreScrollYRef.current;
+    restoreScrollYRef.current = null;
+    const firstFrame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" });
+      const secondFrame = window.requestAnimationFrame(() => {
+        window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" });
+      });
+
+      return () => window.cancelAnimationFrame(secondFrame);
+    });
+
+    return () => window.cancelAnimationFrame(firstFrame);
+  }, [isPending]);
+
   async function handleResearch(): Promise<void> {
     setError(null);
     setIsResearching(true);
     setCurrentStep(0);
+    restoreScrollYRef.current = window.scrollY;
 
     try {
       const response = await fetch("/api/agent/research", {
@@ -120,27 +143,44 @@ export function CompanyResearchPanel({
 
       if (!isResearchResponse(responseBody)) {
         setError("We could not read the company research response. Please try again.");
+        setIsResearching(false);
+        restoreScrollYRef.current = null;
         return;
       }
 
       if (!responseBody.success) {
         setError(responseBody.error);
+        setIsResearching(false);
+        restoreScrollYRef.current = null;
         return;
       }
+
+      setCurrentStep(researchSteps.length - 1);
+      setVisibleDossier(responseBody.data.dossier);
+
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => resolve());
+        });
+      });
 
       startTransition(() => {
         router.refresh();
       });
+      setIsResearching(false);
     } catch (error) {
       console.error("[CompanyResearchPanel] Research request failed", error);
       setError("We could not start company research. Please try again.");
-    } finally {
       setIsResearching(false);
+      restoreScrollYRef.current = null;
     }
   }
 
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]">
+    <section
+      ref={panelRef}
+      className="overflow-hidden rounded-xl border border-border bg-surface shadow-[0_1px_3px_color-mix(in_srgb,var(--color-overlay)_8%,transparent),0_1px_2px_color-mix(in_srgb,var(--color-overlay)_6%,transparent)]"
+    >
       <div className="flex flex-col gap-4 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span
@@ -174,11 +214,11 @@ export function CompanyResearchPanel({
       <AnimatePresence mode="wait">
         {isResearching ? (
           <ResearchLoadingCard key="research-loading" currentStep={currentStep} />
-        ) : dossier ? (
+        ) : visibleDossier ? (
           <ResearchDossier
             key="research-dossier"
             companyWebsiteUrl={companyWebsiteUrl}
-            dossier={dossier}
+            dossier={visibleDossier}
           />
         ) : (
           <ResearchEmptyState key="research-empty" company={company} />

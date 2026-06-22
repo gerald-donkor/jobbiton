@@ -238,22 +238,22 @@ Screenshot-matched profile pages keep the full shared navbar visible, use the ap
 ### Protected Navbar Active State
 
 File: components/layout/Navbar.tsx
-Last updated: 2026-06-09
+Last updated: 2026-06-22
 
 | Property         | Class                                                                 |
 | ---------------- | --------------------------------------------------------------------- |
-| Background       | `bg-surface`                                                          |
-| Border           | `border-b border-border`                                              |
+| Background       | fixed custom `.navbar-glass` gradient glass with backdrop blur/saturation |
+| Border           | `.navbar-glass` tokenized translucent bottom border                    |
 | Border radius    | none                                                                  |
 | Text — primary   | active `text-accent`, inactive `text-text-dark text-[14px] font-medium leading-5` |
 | Text — secondary | none                                                                  |
-| Spacing          | `h-16 px-6 gap-12`, nav links `inline-flex h-16 items-center gap-2`   |
+| Spacing          | fixed header `min-h-16 px-4/px-6 py-3`, nav links `inline-flex h-9 lg:h-16`, spacer `h-[105px] lg:h-16` |
 | Hover state      | inactive `hover:text-accent`                                          |
-| Shadow           | none                                                                  |
+| Shadow           | `.navbar-glass` inset highlight plus soft overlay/accent shadows       |
 | Accent usage     | active link text and bottom rule `absolute inset-x-0 bottom-0 h-0.5 bg-accent` |
 
 **Pattern notes:**
-Protected pages can pass `activeHref` to the shared navbar to render the active nav item with a token-purple text state and a 2px bottom rule. Nav icons are hidden by default; pass `showNavIcons` only for a design that explicitly includes them. The screenshot-matched profile page uses the plain navbar with the visible `Start for free` CTA.
+Protected pages can pass `activeHref` to the shared navbar to render the active nav item with a token-purple text state and a 2px bottom rule. Nav icons are hidden by default; pass `showNavIcons` only for a design that explicitly includes them. Shared protected navbars are fixed to the top of the viewport with the custom `.navbar-glass` surface; it layers translucent surface gradients, subtle accent/info light blooms, an inset top reflection, soft shadow, `backdrop-filter: blur(22px) saturate(1.55)`, and a dark-mode override. Keep the spacer immediately after the header so page content does not slide underneath the fixed bar. Page-level route transitions must remain opacity-only because transforms/filters on the route wrapper break viewport-fixed descendants and make the navbar scroll away with content.
 
 ### Dashboard Page Layout
 
@@ -578,7 +578,7 @@ The circled elements from the job details screenshot are CSS glyphs, not image a
 ### Job Details Company Research Card
 
 File: components/job-details/CompanyResearchPanel.tsx, components/job-details/JobDetailsPageContent.tsx
-Last updated: 2026-06-13
+Last updated: 2026-06-22
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
@@ -593,27 +593,27 @@ Last updated: 2026-06-13
 | Accent usage     | research CTA/progress fill/active steps `bg-accent text-accent-foreground`, loading pulse and tags `bg-accent-muted text-accent`, section icons rotate through `bg-info-lightest text-info-medium`, `bg-success-lightest text-success`, and `bg-accent-muted text-accent` |
 
 **Pattern notes:**
-The company research surface is now a client panel because the header button, loading body, error state, and route refresh share interaction state. While `POST /api/agent/research` is running, render the animated multistep loading card with Motion (`motion/react`), an accent progress bar, a soft moving scan band, a breathing search glyph, a step counter pill, active-step pulse rings, and subtle animated status dots. The four status rows are resolving site, browsing pages, reading signals, and building the dossier. The card should reassure users that long research is still active without introducing queue/polling infrastructure. Respect `useReducedMotion()` for looping/decorative animation. Completed dossiers render as polished token cards with section-specific CSS icon chips. Source entries intentionally match the compact reference treatment: a flat top-bordered strip with the literal `SOURCES` label and simple live absolute `http(s)` URL links underneath. Sources must be verified employer-site URLs; Adzuna, ATS, and job-board domains are filtered, and the UI must not invent a company-domain fallback. Existing dossiers can be overwritten by the same control, which changes to `Research Again`.
+The company research surface is now a client panel because the header button, loading body, error state, and route refresh share interaction state. While `POST /api/agent/research` is running, render the animated multistep loading card with Motion (`motion/react`), an accent progress bar, a soft moving scan band, a breathing search glyph, a step counter pill, active-step pulse rings, and subtle animated status dots. The four status rows are resolving site, browsing pages, reading signals, and building the dossier. Keep the loading card mounted until the returned dossier is placed in local optimistic state; then call `router.refresh()` in a transition so the route updates in the background without flashing the empty/static state. Preserve `window.scrollY` before the request and restore it after the refresh settles so the user stays at the research panel rather than jumping to the top of the page. Respect `useReducedMotion()` for looping/decorative animation. Completed dossiers render as polished token cards with section-specific CSS icon chips. Source entries intentionally match the compact reference treatment: a flat top-bordered strip with the literal `SOURCES` label and simple live absolute `http(s)` URL links underneath. Sources must be verified employer-site URLs; Adzuna, ATS, and job-board domains are filtered, and the UI must not invent a company-domain fallback. Existing dossiers can be overwritten by the same control, which changes to `Research Again`.
 
 ### Job Details Navbar
 
 File: components/job-details/JobDetailsNavbar.tsx
-Last updated: 2026-06-13
+Last updated: 2026-06-22
 
 | Property         | Class                                                               |
 | ---------------- | ------------------------------------------------------------------- |
-| Background       | `bg-surface`                                                        |
-| Border           | `border-b border-border`                                            |
+| Background       | fixed custom `.navbar-glass` gradient glass with backdrop blur/saturation |
+| Border           | `.navbar-glass` tokenized translucent bottom border                  |
 | Border radius    | none                                                                |
 | Text — primary   | active find-jobs link `text-accent text-[14px] font-medium leading-5` |
 | Text — secondary | inactive links/sign-out `text-text-dark` / `text-text-secondary`    |
-| Spacing          | header `h-16 px-6`, nav `gap-8`, auth actions `gap-5`, profile shell `.job-details-user-control` |
+| Spacing          | fixed header `min-h-16 px-4/px-6 py-3`, spacer `h-[105px] lg:h-16`, nav `gap-8`, auth actions `gap-5`, profile shell `.job-details-user-control` |
 | Hover state      | inactive nav/sign-out `hover:text-accent`                           |
-| Shadow           | none                                                                |
+| Shadow           | `.navbar-glass` inset highlight plus soft overlay/accent shadows     |
 | Accent usage     | active Find Jobs text only                                          |
 
 **Pattern notes:**
-The job-details reference uses a protected top bar with the logo, compact nav links, a profile glyph in a soft circular shell, and a text sign-out control instead of the homepage CTA. Keep this treatment local to job-details until other protected pages are redesigned to match it. The sign-out control uses `SignOutButton variant="nav"` for the compact token text treatment.
+The job-details reference uses a protected top bar with the logo, compact nav links, a profile glyph in a soft circular shell, and a text sign-out control instead of the homepage CTA. The bar is fixed to the top with the shared `.navbar-glass` surface and a matching spacer immediately after it so content remains visible below the locked navbar. The sign-out control uses `SignOutButton variant="nav"` for the compact token text treatment.
 
 ## Non-Visual Integrations
 
