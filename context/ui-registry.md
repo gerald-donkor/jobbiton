@@ -864,7 +864,7 @@ Use shared global button classes for every landing-page CTA instead of repeating
 ### Auth Login Card
 
 File: components/auth/LoginForm.tsx
-Last updated: 2026-06-21
+Last updated: 2026-08-12
 
 | Property         | Class                                                                 |
 | ---------------- | --------------------------------------------------------------------- |
@@ -876,10 +876,12 @@ Last updated: 2026-06-21
 | Spacing          | shell `max-w-[760px]`, left `px-8 py-8 md:px-10`, right `px-8 py-10`, alert `px-4 py-3`, button stack `space-y-3` |
 | Hover state      | `hover:border-accent hover:text-text-primary`                         |
 | Shadow           | `shadow-[0_14px_30px_color-mix(in_srgb,var(--color-overlay)_8%,transparent)]` |
-| Accent usage     | `text-accent` for security/provider icons and provider button hover   |
+| Accent usage     | `text-accent` for the security pill icon and provider button hover    |
 
 **Pattern notes:**
 Auth entry uses a centered split panel beneath the normal navbar. The left pane carries the security pill, large sign-in headline, and short explanatory copy on the shared token gradient without a bottom helper footer. The right pane stays white and focused on provider selection. Provider buttons remain white, bordered, compact, and full width with restrained text sizing.
+
+`ProviderIcon` renders the official Google and GitHub marks rather than generic glyphs. These are the one sanctioned exception to the no-raw-color rule: the Google "G" is trademarked and must keep its fixed four-color palette (`#4285F4`, `#34A853`, `#FBBC05`, `#EA4335`), so it carries no token classes. The GitHub Octocat is monochrome and stays on `text-text-primary` via `fill="currentColor"` so it tracks the theme. Do not recolor, restyle, or token-ize the Google mark.
 
 ### Auth Sign Out Button
 
